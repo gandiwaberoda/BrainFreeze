@@ -1,7 +1,11 @@
-package freeze_error
+package frerror
 
-import "errors"
+import "fmt"
 
-func CameraError() error {
-	return errors.New("Camera failed to start")
+type CameraError struct {
+	Detail string
+}
+
+func (e *CameraError) Error() string {
+	return fmt.Sprint("General camera error", e.Detail)
 }

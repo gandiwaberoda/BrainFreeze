@@ -5,3 +5,8 @@ robot:
 camera:
   src: 0
   useDshow: true
+
+# Satuannya nanosecond guys
+expiration:
+  ball: 1500000000
+  my: 1500000000

@@ -1,4 +1,4 @@
-package models
+package configuration
 
 type RobotType string
 

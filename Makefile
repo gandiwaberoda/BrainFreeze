@@ -11,3 +11,6 @@ xcamprev:
 	@env GOOS=windows GOARCH=amd64 go build -o ./output/xcamprev/win ./experiments/camera/camera_preview/camera_preview.go
 	@env GOOS=linux GOARCH=amd64 go build -o ./output/xcamprev/lin ./experiments/camera/camera_preview/camera_preview.go
 	@echo "Finish building"
+
+run:
+	go run ./cmd/brainfreeze/main.go
