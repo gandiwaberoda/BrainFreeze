@@ -7,8 +7,10 @@ import (
 	_ "time"
 
 	"harianugrah.com/brainfreeze/internal/diagnostic"
+	"harianugrah.com/brainfreeze/internal/gut"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
+	"harianugrah.com/brainfreeze/pkg/models/gutmodel"
 	"harianugrah.com/brainfreeze/pkg/models/state"
 	"harianugrah.com/brainfreeze/pkg/telepathy"
 )
@@ -26,24 +28,43 @@ func main() {
 	state.StartWatcher(&config)
 	defer state.StopWatcher()
 
+	// Gut
+
+	gut := gut.CreateGutSerial()
+	globalWaitGroup.Add(1)
+	gut.RegisterHandler(func(s string) {
+		gtb, err := gutmodel.ParseGutToBrain(s)
+		if err != nil {
+			log.Println("wrong gtb", err)
+			return
+		}
+		state.UpdateGutToBrain(gtb)
+	})
+	gut.Start()
+	defer gut.Stop()
+
 	// Telepathy
 	globalWaitGroup.Add(1)
 	telepathyChannel := telepathy.CreateWebsocketTelepathy(&config)
 	// telepathyChannel := telepathy.CreateConsoleTelepathy()
+	telepathyChannel.RegisterHandler(func(s string) {
+		// fmt.Println("handle", s)
+		intercom, err := models.ParseIntercom(s)
+		if err != nil {
+			fmt.Println("Bukan intercom", err)
+			return
+		}
+
+		if intercom.Kind == models.COMMAND {
+			// Bawa ke migraine
+			fmt.Println("Command")
+		}
+	})
 	_, errTelepathy := telepathyChannel.Start()
 	if errTelepathy != nil {
 		log.Fatalln(errTelepathy.Error())
 	}
 	defer telepathyChannel.Stop()
-	telepathyChannel.RegisterHandler(func(s string) {
-		fmt.Println("handle", s)
-		intercom, err := models.ParseIntercom(s)
-		if err != nil {
-			fmt.Println("Bukan intercom", err)
-		} else {
-			fmt.Println("INTERCOM", intercom)
-		}
-	})
 
 	// Telemetry
 	globalWaitGroup.Add(1)

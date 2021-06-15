@@ -19,6 +19,7 @@ serial:
   ports:
     - "/dev/cu.usbmodem14401"
     - "COM10"
+  commandHz: 60
 
 diagnostic:
   telemetryHz: 60

@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"harianugrah.com/brainfreeze/pkg/models"
-	"harianugrah.com/brainfreeze/pkg/models/gut"
+	"harianugrah.com/brainfreeze/pkg/models/gutmodel"
 )
 
 type RobotState struct {
@@ -19,9 +19,9 @@ type RobotState struct {
 	BallTransformLastUpdate time.Time
 	BallTransformExpired    bool
 
-	GutToBrain                    gut.GutToBrain
-	GutToBrainTransformLastUpdate time.Time
-	GutToBrainTransformExpired    bool
+	GutToBrain           gutmodel.GutToBrain
+	GutToBrainLastUpdate time.Time
+	GutToBrainExpired    bool
 
 	FriendTransform           []models.Transform
 	FriendTransformLastUpdate time.Time
