@@ -15,8 +15,8 @@ type RobotConfig struct {
 }
 
 type CameraConfig struct {
-	Src      int  `yaml:"src"`
-	UseDshow bool `yaml:"useDshow"`
+	Src      []int `yaml:"src"`
+	UseDshow bool  `yaml:"useDshow"`
 }
 
 type ExpirationConfig struct {
@@ -24,10 +24,15 @@ type ExpirationConfig struct {
 	MyExpiration   time.Duration `yaml:"my"`
 }
 
+type DiagnosticConfig struct {
+	TelemetryHz time.Duration `yaml:"telemetryHz"`
+}
+
 type FreezeConfig struct {
 	Robot      RobotConfig      `yaml:"robot"`
 	Camera     CameraConfig     `yaml:"camera"`
 	Expiration ExpirationConfig `yaml:"expiration"`
+	Diagnostic DiagnosticConfig `yaml:"diagnostic"`
 }
 
 func LoadStartupConfig() (FreezeConfig, error) {

@@ -1,62 +1,89 @@
 package state
 
 import (
+	"encoding/json"
+	"errors"
 	"sync"
 	"time"
 
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 )
 
-var (
+type StateAccess struct {
+	config       *configuration.FreezeConfig
 	lock         sync.Mutex
 	myState      RobotState
 	stateChecker *time.Ticker
-)
+}
+
+func CreateStateAccess(conf *configuration.FreezeConfig) *StateAccess {
+	state := &StateAccess{config: conf}
+	state.UpdateMyName(conf.Robot.Name)
+	return state
+}
 
 // SetMyState digunakan untuk mengubah state diri concurrent safe
 // Gunakan fungsi ini untuk menset myState
-func SetState(s RobotState) {
-	lock.Lock()
-	defer lock.Unlock()
+func (s *StateAccess) SetState(r RobotState) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
 
-	myState = s
+	s.myState = r
 }
 
 // Fungsi ini berfungsi untuk membaca state diri concurrent safe
-func GetState() RobotState {
+func (s *StateAccess) GetState() RobotState {
 	// TODO: Do I need to lock for reading?
-	lock.Lock()
-	defer lock.Unlock()
+	s.lock.Lock()
+	defer s.lock.Unlock()
 
-	return myState
+	return s.myState
 }
 
-func StopWatcher() {
-	stateChecker.Stop()
+func (s *StateAccess) GetStateBytes() ([]byte, error) {
+	state := s.GetState()
+	b, err := json.Marshal(state)
+	if err != nil {
+		return nil, errors.New("gagal get state json")
+	}
+	return b, nil
 }
 
-func StartWatcher(config *configuration.FreezeConfig) {
-	stateChecker = time.NewTicker(100 * time.Millisecond)
+func (s *StateAccess) GetStateJson() (string, error) {
+	b, err := s.GetStateBytes()
+	if err != nil {
+		return "", err
+	}
+	jsonMsg := string(b)
+	return jsonMsg, nil
+}
+
+func (s *StateAccess) StopWatcher() {
+	s.stateChecker.Stop()
+}
+
+func (s *StateAccess) StartWatcher(config *configuration.FreezeConfig) {
+	s.stateChecker = time.NewTicker(100 * time.Millisecond)
 
 	go func() {
 		for {
-			<-stateChecker.C
+			<-s.stateChecker.C
 
-			lock.Lock()
+			s.lock.Lock()
 
 			// Ball Transform Expiration
-			if time.Since(myState.BallTransformLastUpdate) > config.Expiration.BallExpiration {
-				myState.BallTransformExpired = true
+			if time.Since(s.myState.BallTransformLastUpdate) > config.Expiration.BallExpiration {
+				s.myState.BallTransformExpired = true
 			}
 
 			// My Transform Expiration
-			if time.Since(myState.MyTransformLastUpdate) > config.Expiration.MyExpiration {
-				myState.MyTransformExpired = true
+			if time.Since(s.myState.MyTransformLastUpdate) > config.Expiration.MyExpiration {
+				s.myState.MyTransformExpired = true
 			}
 
 			// TODO: Friend, EGP, FGP, Enemy
 
-			lock.Unlock()
+			s.lock.Unlock()
 		}
 	}()
 }

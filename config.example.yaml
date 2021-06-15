@@ -3,8 +3,7 @@ robot:
   role: ATTACKER
 
 camera:
-  src:
-    - 0
+  src: 0
   useDshow: true
 
 # Satuannya nanosecond guys
@@ -14,11 +13,3 @@ expiration:
 
 telepathy:
   server: localhost:6901
-
-serial:
-  ports:
-    - /dev/usb
-    - COM10
-
-diagnostic:
-  telemetryHz: 60

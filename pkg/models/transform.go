@@ -5,32 +5,32 @@ type Degree float64
 
 type Transform struct {
 	// cm
-	encXcm Centimeter
+	EncXcm Centimeter
 	// cm
-	encYcm Centimeter
+	EncYcm Centimeter
 	// derajat
-	encROT Degree
+	EncROT Degree
 
 	// relative ke origin point
-	worldXcm Centimeter
+	WorldXcm Centimeter
 	// relative ke origin point
-	worldYcm Centimeter
+	WorldYcm Centimeter
 	// relative ke origin point
-	worldRcm Centimeter
+	WorldRcm Centimeter
 	// relative ke origin point
-	worldROT Degree
+	WorldROT Degree
 
-	robXcm Centimeter // cm
-	robYcm Centimeter // cm
-	robRcm Centimeter // cm
-	robROT Degree     // cm
+	RobXcm Centimeter // cm
+	RobYcm Centimeter // cm
+	RobRcm Centimeter // cm
+	RobROT Degree     // cm
 
 	// Piksel relative ke omni center
-	topXpx Centimeter
+	TopXpx Centimeter
 	// Piksel relative ke omni center
-	topYpx Centimeter
+	TopYpx Centimeter
 	// Radius dalam px (euclidean dist dari camX dan camY in respect dari midpoint omni)
-	topRpx Centimeter
+	TopRpx Centimeter
 	// Rotasi relative ke midpoint omni, relative ke arah depan robot
-	topROT Degree
+	TopROT Degree
 }

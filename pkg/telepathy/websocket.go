@@ -1,6 +1,7 @@
 package telepathy
 
 import (
+	"errors"
 	"log"
 	"net/url"
 
@@ -28,7 +29,10 @@ func listenMsg(tele *WebsocketTelepathy) {
 			log.Println("read:", err)
 			return
 		}
-		log.Printf("recv: %s", message)
+
+		for _, handler := range tele.handlers {
+			handler(string(message))
+		}
 	}
 }
 
@@ -38,7 +42,7 @@ func (tele *WebsocketTelepathy) Start() (bool, error) {
 
 	ws, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
-		return false, err
+		return false, errors.New("failed connecting to websocket: " + err.Error())
 	}
 
 	tele.ws = ws
@@ -61,6 +65,10 @@ func (c *WebsocketTelepathy) Stop() (bool, error) {
 }
 
 func (c *WebsocketTelepathy) Send(s string) (bool, error) {
+	if !c.isRunning {
+		return false, errors.New("websocket is not running")
+	}
+
 	err := c.ws.WriteMessage(websocket.TextMessage, []byte(s))
 	if err != nil {
 		return false, err
