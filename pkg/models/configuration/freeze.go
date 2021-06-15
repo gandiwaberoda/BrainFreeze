@@ -28,11 +28,16 @@ type DiagnosticConfig struct {
 	TelemetryHz time.Duration `yaml:"telemetryHz"`
 }
 
+type MigraineConfig struct {
+	MigraineHz int `yaml:"migraineHz"`
+}
+
 type FreezeConfig struct {
 	Robot      RobotConfig      `yaml:"robot"`
 	Camera     CameraConfig     `yaml:"camera"`
 	Expiration ExpirationConfig `yaml:"expiration"`
 	Diagnostic DiagnosticConfig `yaml:"diagnostic"`
+	Migraine   MigraineConfig   `yaml:"migraine"`
 }
 
 func LoadStartupConfig() (FreezeConfig, error) {

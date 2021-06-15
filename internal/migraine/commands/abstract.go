@@ -1,4 +1,6 @@
 package commands
 
-type Command struct {
+type CommandInterface interface {
+	GetName() string
+	Tick()
 }

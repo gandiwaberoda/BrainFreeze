@@ -23,3 +23,6 @@ serial:
 
 diagnostic:
   telemetryHz: 60
+
+migraine:
+  migraineHz: 60

@@ -8,6 +8,7 @@ import (
 
 	"harianugrah.com/brainfreeze/internal/diagnostic"
 	"harianugrah.com/brainfreeze/internal/gut"
+	"harianugrah.com/brainfreeze/internal/migraine"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/gutmodel"
@@ -29,7 +30,6 @@ func main() {
 	defer state.StopWatcher()
 
 	// Gut
-
 	gut := gut.CreateGutSerial()
 	globalWaitGroup.Add(1)
 	gut.RegisterHandler(func(s string) {
@@ -42,6 +42,11 @@ func main() {
 	})
 	gut.Start()
 	defer gut.Stop()
+
+	// Artificial Intellegence
+	migraine := migraine.CreateMigraine(&config, gut)
+	migraine.Start()
+	defer migraine.Stop()
 
 	// Telepathy
 	globalWaitGroup.Add(1)
@@ -58,6 +63,7 @@ func main() {
 		if intercom.Kind == models.COMMAND {
 			// Bawa ke migraine
 			fmt.Println("Command")
+			migraine.AddCommand(intercom)
 		}
 	})
 	_, errTelepathy := telepathyChannel.Start()

@@ -22,6 +22,11 @@ func worker(gut *GutSerial) {
 	for scanner.Scan() {
 		str := scanner.Text()
 
+		if len(str) < 2 {
+			// Kurang dari dua huruf, salah format
+			fmt.Println("Really bad format", str)
+		}
+
 		if str[0] != '*' || str[len(str)-1] != '#' {
 			fmt.Println("Bad format", str)
 		} else {
@@ -68,7 +73,6 @@ func (g *GutSerial) Send(msg string) (bool, error) {
 	}
 }
 
-func (g *GutSerial) RegisterHandler(handler func(string)) (bool, error) {
+func (g *GutSerial) RegisterHandler(handler func(string)) {
 	g.handlers = append(g.handlers, handler)
-	return true, nil
 }
