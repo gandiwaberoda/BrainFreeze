@@ -28,8 +28,8 @@ func main() {
 
 	// Telepathy
 	globalWaitGroup.Add(1)
-	// telepathyChannel := telepathy.CreateWebsocketTelepathy(&config)
-	telepathyChannel := telepathy.CreateConsoleTelepathy()
+	telepathyChannel := telepathy.CreateWebsocketTelepathy(&config)
+	// telepathyChannel := telepathy.CreateConsoleTelepathy()
 	_, errTelepathy := telepathyChannel.Start()
 	if errTelepathy != nil {
 		log.Fatalln(errTelepathy.Error())

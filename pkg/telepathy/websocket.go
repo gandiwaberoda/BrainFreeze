@@ -45,6 +45,7 @@ func (tele *WebsocketTelepathy) Start() (bool, error) {
 		return false, errors.New("failed connecting to websocket: " + err.Error())
 	}
 
+	tele.isRunning = true
 	tele.ws = ws
 
 	go listenMsg(tele)

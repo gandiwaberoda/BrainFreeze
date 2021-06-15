@@ -1,6 +1,7 @@
 package diagnostic
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -37,7 +38,12 @@ func worker(t *Telemetry) {
 		if err != nil {
 			log.Fatalln("Idk what's happening")
 		}
-		tele.Send(json)
+
+		_, errTele := tele.Send(json)
+		if errTele != nil {
+			fmt.Println("Failed sending", errTele)
+		}
+
 	}
 }
 
