@@ -1,9 +1,10 @@
 robot:
-  name: Gandiwazzz
+  name: Gandiwa
   role: ATTACKER
 
 camera:
-  src: 0
+  src:
+    - 0
   useDshow: true
 
 # Satuannya nanosecond guys
@@ -13,3 +14,11 @@ expiration:
 
 telepathy:
   server: localhost:6901
+
+serial:
+  ports:
+    - "/dev/cu.usbmodem14401"
+    - "COM10"
+
+diagnostic:
+  telemetryHz: 60

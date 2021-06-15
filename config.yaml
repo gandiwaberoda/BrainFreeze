@@ -1,5 +1,5 @@
 robot:
-  name: Gandiwazzz
+  name: Gandiwa
   role: ATTACKER
 
 camera:
@@ -17,8 +17,8 @@ telepathy:
 
 serial:
   ports:
-    - /dev/usb
-    - COM10
+    - "/dev/cu.usbmodem14401"
+    - "COM10"
 
 diagnostic:
   telemetryHz: 60
