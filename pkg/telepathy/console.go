@@ -11,12 +11,12 @@ import (
 type ConsoleTelepathy struct {
 	handlers  []func(string)
 	isRunning bool
-	stopChan  chan bool
+	stopChan  *chan bool
 }
 
 func CreateConsoleTelepathy() *ConsoleTelepathy {
 	_qChan := make(chan bool)
-	return &ConsoleTelepathy{isRunning: false, stopChan: _qChan}
+	return &ConsoleTelepathy{isRunning: false, stopChan: &_qChan}
 }
 
 func (c *ConsoleTelepathy) Start() (bool, error) {
@@ -27,13 +27,13 @@ func (c *ConsoleTelepathy) Start() (bool, error) {
 
 		for {
 			select {
-			case doStop := <-c.stopChan:
+			case doStop := <-*c.stopChan:
 				fmt.Println("doStop", doStop)
 
 				if doStop {
 					c.isRunning = false
 					fmt.Println("Stopped")
-					close(c.stopChan)
+					close(*c.stopChan)
 					return
 				}
 			default:
@@ -52,7 +52,7 @@ func (c *ConsoleTelepathy) Start() (bool, error) {
 
 func (c *ConsoleTelepathy) Stop() (bool, error) {
 	fmt.Println("Panggil stop")
-	c.stopChan <- true
+	*c.stopChan <- true
 	return true, nil
 }
 
