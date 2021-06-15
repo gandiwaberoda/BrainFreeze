@@ -1,0 +1,7 @@
+robot:
+  name: Gandiwazzz
+  role: ATTACKER
+
+camera:
+  src: 0
+  useDshow: true
