@@ -70,3 +70,20 @@ func ParseIntercom(raw string) (Intercom, error) {
 	parsed.Content = contentTrimmed
 	return parsed, nil
 }
+
+func (s Intercom) AsBytes() ([]byte, error) {
+	b, err := json.Marshal(s)
+	if err != nil {
+		return nil, errors.New("gagal get bytes")
+	}
+	return b, nil
+}
+
+func (s Intercom) AsJson() (string, error) {
+	b, err := s.AsBytes()
+	if err != nil {
+		return "", err
+	}
+	jsonMsg := string(b)
+	return jsonMsg, nil
+}

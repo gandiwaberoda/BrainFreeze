@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
 	"harianugrah.com/brainfreeze/pkg/telepathy"
@@ -39,7 +40,17 @@ func worker(t *Telemetry) {
 			log.Fatalln("Idk what's happening")
 		}
 
-		_, errTele := tele.Send(json)
+		intercom := models.Intercom{
+			Kind:     models.TELEMETRY,
+			Receiver: models.ANY,
+			Content:  json,
+		}
+		intercomMsg, intercomErr := intercom.AsJson()
+		if intercomErr != nil {
+			fmt.Println("Gagal jsonify intercomErr", intercomErr.Error())
+		}
+
+		_, errTele := tele.Send(intercomMsg)
 		if errTele != nil {
 			fmt.Println("Failed sending", errTele)
 		}
