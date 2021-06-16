@@ -42,7 +42,7 @@ func worker(t *Telemetry) {
 
 		intercom := models.Intercom{
 			Kind:     models.TELEMETRY,
-			Receiver: models.ANY,
+			Receiver: models.ALL,
 			Content:  json,
 		}
 		intercomMsg, intercomErr := intercom.AsJson()

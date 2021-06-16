@@ -2,6 +2,7 @@ package migraine
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"harianugrah.com/brainfreeze/internal/gut"
@@ -49,8 +50,29 @@ func (m *Migraine) Idle() {
 	m.CurrentObjective = commands.IdleCommand{}
 }
 
+func amIReceiver(intercom models.Intercom, m *Migraine) bool {
+	_amIReceiver := false
+
+	myReceiverTag := []string{string(models.ALL), string(m.config.Robot.Name), string(m.config.Robot.Role)}
+
+	for _, v := range myReceiverTag {
+		// Case insensitive
+		if strings.EqualFold(string(intercom.Receiver), v) {
+			_amIReceiver = true
+		}
+	}
+	return _amIReceiver
+}
+
 func (m *Migraine) AddCommand(intercom models.Intercom) {
+	shouldListen := amIReceiver(intercom, m)
+	if !shouldListen {
+		fmt.Println("I am not a receiver for the command")
+		return
+	}
+
 	cmd := ParseCommand(intercom)
+
 	if cmd != nil {
 		m.CurrentObjective = cmd
 	} else {

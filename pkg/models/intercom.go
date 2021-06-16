@@ -20,8 +20,10 @@ const (
 type MessageReceiver string
 
 const (
-	ALL MessageReceiver = "ALL"
-	ANY MessageReceiver = "ANY"
+	ALL      MessageReceiver = "ALL"
+	ROBOT    MessageReceiver = "ROBOT"
+	ATTACKER MessageReceiver = "ATTACKER"
+	DEFENDER MessageReceiver = "DEFENDER"
 )
 
 type Intercom struct {
