@@ -71,7 +71,7 @@ func ParseIntercom(raw string) (Intercom, error) {
 
 	// Parse content (Content adalah sisa setelah 2 tadi)
 	contentSubs := sanitized[len(receiverUpper):]
-	contentNoDelim := strings.ReplaceAll(contentSubs, "/", "")
+	contentNoDelim := contentSubs[1:]
 	contentTrimmed := strings.TrimSpace(contentNoDelim)
 	parsed.Content = contentTrimmed
 	return parsed, nil

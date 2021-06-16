@@ -19,15 +19,18 @@ type DurationFuilfillment struct {
 
 func DefaultDurationFulfillment() DurationFuilfillment {
 	return DurationFuilfillment{
-		Milis: 1000, // 1s
+		StartTime: time.Now(),
+		Milis:     1000, // 1s
 	}
 }
 
-func ParseDurationFulfillment(msg string, conf *configuration.FreezeConfig) (bool, FulfillmentInterface) {
-	trimmed := strings.ToUpper(strings.TrimSpace(msg))
+func ParseDurationFulfillment(intercom models.Intercom, fil string, conf *configuration.FreezeConfig) (bool, FulfillmentInterface) {
+	if !strings.EqualFold(fil[:3], "DUR") {
+		return false, nil
+	}
 
 	re, _ := regexp.Compile("([0-9]+)")
-	foundParam := re.FindString(trimmed)
+	foundParam := re.FindString(fil)
 
 	var milis models.Miliseconds
 	if foundParam != "" {
@@ -48,12 +51,11 @@ func ParseDurationFulfillment(msg string, conf *configuration.FreezeConfig) (boo
 	}
 }
 
-func (f DurationFuilfillment) GetName() string {
+func (f DurationFuilfillment) AsString() string {
 	return "DUR(" + strconv.Itoa(int(f.Milis)) + ")"
 }
 
 func (f DurationFuilfillment) Tick(state *state.StateAccess) bool {
 	elapsed := time.Since(f.StartTime)
-	fmt.Println(elapsed.Milliseconds(), f.Milis)
 	return elapsed.Milliseconds() > int64(f.Milis)
 }

@@ -36,7 +36,7 @@ func worker(m *Migraine) {
 		force := models.Force{}
 		m.CurrentObjective.Tick(&force, m.state)
 
-		m.gut.Send(force.AsGutCommandString())
+		// m.gut.Send(force.AsGutCommandString())
 
 		if m.CurrentObjective.ShouldClear() {
 			fmt.Println("Fulfilled")
@@ -62,7 +62,7 @@ func (m *Migraine) Stop() {
 func (m *Migraine) ReplaceObjective(cmd commands.CommandInterface) {
 	m.CurrentObjective = cmd
 
-	str_obj := m.CurrentObjective.GetName()
+	str_obj := m.CurrentObjective.GetName() + " -> " + m.CurrentObjective.GetFulfillment().AsString()
 	m.state.UpdateCurrentObjective(str_obj)
 }
 
@@ -99,5 +99,5 @@ func amIReceiver(intercom models.Intercom, m *Migraine) bool {
 
 // =========== Basic Command Shorthand ==========
 func (m *Migraine) Idle() {
-	m.ReplaceObjective(commands.IdleCommand{})
+	m.ReplaceObjective(commands.DefaultIdleCommand())
 }

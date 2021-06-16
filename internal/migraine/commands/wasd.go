@@ -59,8 +59,7 @@ var (
 )
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParseWasdCommand(intercom models.Intercom, conf *configuration.FreezeConfig) (bool, CommandInterface) {
-	cmd := intercom.Content
+func ParseWasdCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig) (bool, CommandInterface) {
 	dir := strings.ToUpper(strings.TrimSpace(cmd))
 
 	for _, v := range acceptedDir {
@@ -127,4 +126,8 @@ func (i *WasdCommand) Tick(force *models.Force, state *state.StateAccess) {
 
 func (i *WasdCommand) ShouldClear() bool {
 	return i.shouldClear
+}
+
+func (i WasdCommand) GetFulfillment() fulfillments.FulfillmentInterface {
+	return i.fulfillment
 }
