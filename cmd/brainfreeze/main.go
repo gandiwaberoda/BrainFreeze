@@ -6,9 +6,11 @@ import (
 	"sync"
 	_ "time"
 
+	"gocv.io/x/gocv"
 	"harianugrah.com/brainfreeze/internal/diagnostic"
 	"harianugrah.com/brainfreeze/internal/gut"
 	"harianugrah.com/brainfreeze/internal/migraine"
+	"harianugrah.com/brainfreeze/internal/wanda/acquisition"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/gutmodel"
@@ -30,8 +32,8 @@ func main() {
 	defer state.StopWatcher()
 
 	// Gut
-	gut := gut.CreateGutSerial()
-	// gut := gut.CreateGutConsole()
+	// gut := gut.CreateGutSerial()
+	gut := gut.CreateGutConsole()
 	globalWaitGroup.Add(1)
 	gut.RegisterHandler(func(s string) {
 		gtb, err := gutmodel.ParseGutToBrain(s)
@@ -80,6 +82,28 @@ func main() {
 	telemetry := diagnostic.CreateNewTelemetry(telepathyChannel, &config, state)
 	telemetry.Start()
 	defer telemetry.Stop()
+
+	// Wanda Vision
+	globalWaitGroup.Add(1)
+	topCamera := acquisition.CreateTopCameraAcquisition(&config)
+	topCamera.Start()
+	defer topCamera.Stop()
+
+	prevWindow := gocv.NewWindow("Preview Window")
+	vc, _ := gocv.VideoCaptureDevice(0)
+	defer prevWindow.Close()
+	mat := gocv.NewMat()
+	for {
+		// prevWindow.IMShow(topCamera.Read())
+		vc.Read(&mat)
+		prevWindow.IMShow(mat)
+
+		keyPressed := prevWindow.WaitKey(1)
+		if keyPressed == 'q' {
+			break
+		}
+
+	}
 
 	// for i := 0; true; i++ {
 	// 	x := models.Transform{WorldXcm: models.Centimeter(i)}

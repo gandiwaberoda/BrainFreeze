@@ -15,8 +15,8 @@ type RobotConfig struct {
 }
 
 type CameraConfig struct {
-	Src      []int `yaml:"src"`
-	UseDshow bool  `yaml:"useDshow"`
+	Src      []string `yaml:"src"`
+	UseDshow bool     `yaml:"useDshow"`
 }
 
 type ExpirationConfig struct {
