@@ -11,17 +11,53 @@ const (
 	ADirection WasdDirection = "A"
 	SDirection WasdDirection = "S"
 	DDirection WasdDirection = "D"
+
+	WADirection WasdDirection = "WA"
+	AWDirection WasdDirection = "AW"
+
+	WDDirection WasdDirection = "WD"
+	DWDirection WasdDirection = "DW"
+
+	SDDirection WasdDirection = "SD"
+	DSDirection WasdDirection = "DS"
+
+	ASDirection WasdDirection = "AS"
+	SADirection WasdDirection = "SA"
 )
 
 type WasdCommand struct {
 	Direction WasdDirection
 }
 
+var (
+	acceptedDir []WasdDirection = []WasdDirection{
+		WDirection,
+		ADirection,
+		SDirection,
+		DDirection,
+
+		WADirection,
+		AWDirection,
+
+		WDDirection,
+		DWDirection,
+
+		SDDirection,
+		DSDirection,
+
+		ASDirection,
+		SADirection,
+	}
+)
+
 func ParseWasdCommand(cmd string) (bool, CommandInterface) {
-	fLetter := strings.ToUpper(cmd[:1])
-	if fLetter == "W" || fLetter == "A" || fLetter == "S" || fLetter == "D" {
-		return true, WasdCommand{
-			Direction: WasdDirection(fLetter),
+	dir := strings.ToUpper(strings.TrimSpace(cmd))
+
+	for _, v := range acceptedDir {
+		if dir == string(v) {
+			return true, WasdCommand{
+				Direction: WasdDirection(dir),
+			}
 		}
 	}
 

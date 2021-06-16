@@ -10,7 +10,7 @@ var handlers []func(string) (bool, commands.CommandInterface) = []func(string) (
 	commands.ParseWasdCommand,
 }
 
-func ParseCommand(intercom models.Intercom) commands.CommandInterface {
+func WhichCommand(intercom models.Intercom) commands.CommandInterface {
 	for _, isThis := range handlers {
 		thisIs, cmd := isThis(intercom.Content)
 		if thisIs {

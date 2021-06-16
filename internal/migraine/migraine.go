@@ -9,6 +9,7 @@ import (
 	"harianugrah.com/brainfreeze/internal/migraine/commands"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
+	"harianugrah.com/brainfreeze/pkg/models/state"
 )
 
 type Migraine struct {
@@ -17,6 +18,7 @@ type Migraine struct {
 	ticker           *time.Ticker
 	IsRunning        bool
 	CurrentObjective commands.CommandInterface
+	state            *state.StateAccess
 }
 
 func worker(m *Migraine) {
@@ -24,6 +26,7 @@ func worker(m *Migraine) {
 
 	for {
 		<-m.ticker.C
+
 		if m.CurrentObjective == nil {
 			continue
 		}
@@ -33,8 +36,8 @@ func worker(m *Migraine) {
 	}
 }
 
-func CreateMigraine(conf *configuration.FreezeConfig, _gut gut.GutInterface) *Migraine {
-	return &Migraine{config: conf, gut: _gut}
+func CreateMigraine(conf *configuration.FreezeConfig, _gut gut.GutInterface, state *state.StateAccess) *Migraine {
+	return &Migraine{config: conf, gut: _gut, state: state}
 }
 
 func (m *Migraine) Start() {
@@ -46,10 +49,30 @@ func (m *Migraine) Stop() {
 
 }
 
-func (m *Migraine) Idle() {
-	m.CurrentObjective = commands.IdleCommand{}
+func (m *Migraine) ReplaceObjective(cmd commands.CommandInterface) {
+	m.CurrentObjective = cmd
+
+	str_obj := m.CurrentObjective.GetName()
+	m.state.UpdateCurrentObjective(str_obj)
 }
 
+func (m *Migraine) AddCommand(intercom models.Intercom) {
+	shouldListen := amIReceiver(intercom, m)
+	if !shouldListen {
+		fmt.Println("I am not a receiver for the command")
+		return
+	}
+
+	cmd := WhichCommand(intercom)
+
+	if cmd != nil {
+		m.ReplaceObjective(cmd)
+	} else {
+		fmt.Println("No handler for command")
+	}
+}
+
+//HELPER
 func amIReceiver(intercom models.Intercom, m *Migraine) bool {
 	_amIReceiver := false
 
@@ -64,18 +87,7 @@ func amIReceiver(intercom models.Intercom, m *Migraine) bool {
 	return _amIReceiver
 }
 
-func (m *Migraine) AddCommand(intercom models.Intercom) {
-	shouldListen := amIReceiver(intercom, m)
-	if !shouldListen {
-		fmt.Println("I am not a receiver for the command")
-		return
-	}
-
-	cmd := ParseCommand(intercom)
-
-	if cmd != nil {
-		m.CurrentObjective = cmd
-	} else {
-		fmt.Println("No handler for command")
-	}
+// =========== Basic Command Shorthand ==========
+func (m *Migraine) Idle() {
+	m.ReplaceObjective(commands.IdleCommand{})
 }

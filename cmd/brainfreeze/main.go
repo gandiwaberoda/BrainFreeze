@@ -45,7 +45,7 @@ func main() {
 	defer gut.Stop()
 
 	// Artificial Intellegence
-	migraine := migraine.CreateMigraine(&config, gut)
+	migraine := migraine.CreateMigraine(&config, gut, state)
 	migraine.Start()
 	defer migraine.Stop()
 
