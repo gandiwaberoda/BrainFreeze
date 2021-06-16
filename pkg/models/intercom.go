@@ -37,9 +37,12 @@ type Intercom struct {
 func ParseIntercom(raw string) (Intercom, error) {
 	var parsed Intercom
 
-	if raw[0] == '{' {
+	// TODO: Sanitized input later
+	sanitized := raw
+
+	if sanitized[0] == '{' {
 		// json
-		err := json.Unmarshal([]byte(raw), &parsed)
+		err := json.Unmarshal([]byte(sanitized), &parsed)
 		if err != nil {
 			return Intercom{}, err
 		}
@@ -54,7 +57,7 @@ func ParseIntercom(raw string) (Intercom, error) {
 	// aTTacKer kick
 	// deFFenDER plannED(goto(10,30) dur(3000))
 
-	splitted := strings.Split(raw, " ")
+	splitted := strings.Split(sanitized, "/")
 	if len(splitted) < 2 {
 		return Intercom{}, errors.New("wrong command format")
 	}
@@ -67,8 +70,9 @@ func ParseIntercom(raw string) (Intercom, error) {
 	parsed.Receiver = MessageReceiver(receiverUpper)
 
 	// Parse content (Content adalah sisa setelah 2 tadi)
-	contentSubs := raw[len(receiverUpper):]
-	contentTrimmed := strings.TrimSpace(contentSubs)
+	contentSubs := sanitized[len(receiverUpper):]
+	contentNoDelim := strings.ReplaceAll(contentSubs, "/", "")
+	contentTrimmed := strings.TrimSpace(contentNoDelim)
 	parsed.Content = contentTrimmed
 	return parsed, nil
 }

@@ -1,4 +1,4 @@
-package migraine
+package parser
 
 import (
 	"harianugrah.com/brainfreeze/internal/migraine/commands"
@@ -6,14 +6,14 @@ import (
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 )
 
-var handlers []func(string, *configuration.FreezeConfig) (bool, commands.CommandInterface) = []func(string, *configuration.FreezeConfig) (bool, commands.CommandInterface){
+var handlers []func(models.Intercom, *configuration.FreezeConfig) (bool, commands.CommandInterface) = []func(models.Intercom, *configuration.FreezeConfig) (bool, commands.CommandInterface){
 	commands.ParseIdleCommand,
 	commands.ParseWasdCommand,
 }
 
 func WhichCommand(intercom models.Intercom, conf *configuration.FreezeConfig) commands.CommandInterface {
 	for _, isThis := range handlers {
-		thisIs, cmd := isThis(intercom.Content, conf)
+		thisIs, cmd := isThis(intercom, conf)
 		if thisIs {
 			return cmd
 		}

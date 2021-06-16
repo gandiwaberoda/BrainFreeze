@@ -11,7 +11,9 @@ import (
 type IdleCommand struct {
 }
 
-func ParseIdleCommand(cmd string, conf *configuration.FreezeConfig) (bool, CommandInterface) {
+func ParseIdleCommand(intercom models.Intercom, conf *configuration.FreezeConfig) (bool, CommandInterface) {
+	cmd := intercom.Content
+
 	if len(cmd) < 4 {
 		return false, nil
 	}

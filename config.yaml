@@ -27,6 +27,9 @@ diagnostic:
 migraine:
   migraineHz: 60
 
+fulfillment:
+  defaultDurationMs: 2000
+
 mecha:
   horizontalForceRange: 100
   verticalForceRange: 100

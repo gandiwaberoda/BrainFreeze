@@ -37,13 +37,18 @@ type MechanicalConfig struct {
 	VerticalForceRange   int `yaml:"verticalForceRange"`
 }
 
+type FulfillmentConfig struct {
+	DefaultDurationMs int `yaml:"defaultDurationMs"`
+}
+
 type FreezeConfig struct {
-	Robot      RobotConfig      `yaml:"robot"`
-	Camera     CameraConfig     `yaml:"camera"`
-	Expiration ExpirationConfig `yaml:"expiration"`
-	Diagnostic DiagnosticConfig `yaml:"diagnostic"`
-	Migraine   MigraineConfig   `yaml:"migraine"`
-	Mecha      MechanicalConfig `yaml:"mecha"`
+	Robot       RobotConfig       `yaml:"robot"`
+	Camera      CameraConfig      `yaml:"camera"`
+	Expiration  ExpirationConfig  `yaml:"expiration"`
+	Diagnostic  DiagnosticConfig  `yaml:"diagnostic"`
+	Migraine    MigraineConfig    `yaml:"migraine"`
+	Mecha       MechanicalConfig  `yaml:"mecha"`
+	Fulfillment FulfillmentConfig `yaml:"fulfillment"`
 }
 
 func LoadStartupConfig() (FreezeConfig, error) {

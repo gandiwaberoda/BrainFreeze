@@ -2,6 +2,7 @@ package models
 
 type Centimeter float64
 type Degree float64
+type Miliseconds int
 
 type Transform struct {
 	// cm

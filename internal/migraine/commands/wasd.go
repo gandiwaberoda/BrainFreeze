@@ -3,6 +3,8 @@ package commands
 import (
 	"strings"
 
+	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
+	"harianugrah.com/brainfreeze/internal/migraine/parser"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -30,8 +32,9 @@ const (
 )
 
 type WasdCommand struct {
-	Direction WasdDirection
-	conf      *configuration.FreezeConfig
+	Direction   WasdDirection
+	conf        *configuration.FreezeConfig
+	Fulfillment *fulfillments.FulfillmentInterface
 }
 
 var (
@@ -55,14 +58,23 @@ var (
 	}
 )
 
-func ParseWasdCommand(cmd string, conf *configuration.FreezeConfig) (bool, CommandInterface) {
+// WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
+func ParseWasdCommand(intercom models.Intercom, conf *configuration.FreezeConfig) (bool, CommandInterface) {
+	cmd := intercom.Content
 	dir := strings.ToUpper(strings.TrimSpace(cmd))
 
 	for _, v := range acceptedDir {
 		if dir == string(v) {
+			parseFulfilment := parser.WhichFulfillment(intercom, conf)
+
+			if parseFulfilment == nil {
+				parseFulfilment = fulfillments.DefaultDurationFulfillment()
+			}
+
 			return true, &WasdCommand{
-				Direction: WasdDirection(dir),
-				conf:      conf,
+				Direction:   WasdDirection(dir),
+				conf:        conf,
+				Fulfillment: &parseFulfilment,
 			}
 		}
 	}
