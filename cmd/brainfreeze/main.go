@@ -85,7 +85,7 @@ func main() {
 
 	// Wanda Vision
 	globalWaitGroup.Add(1)
-	topCamera := acquisition.CreateTopCameraAcquisition(&config)
+	topCamera := acquisition.CreateTopCameraAcquisition(&config, true, true, true)
 	topCamera.Start()
 	defer topCamera.Stop()
 

@@ -14,3 +14,6 @@ xcamprev:
 
 run:
 	go run ./cmd/brainfreeze/main.go
+
+roi:
+	go run cmd/cameraroi/main.go

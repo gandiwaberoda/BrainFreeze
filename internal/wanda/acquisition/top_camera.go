@@ -1,13 +1,15 @@
 package acquisition
 
 import (
+	// "image"
+	// "image/color"
+	// "math"
+	// "time"
 	"fmt"
 	"image"
 	"image/color"
-	"math"
 	"strconv"
 	"sync"
-	"time"
 
 	"github.com/faiface/mainthread"
 	"gocv.io/x/gocv"
@@ -15,78 +17,94 @@ import (
 )
 
 type TopCameraAcquisition struct {
-	Lock      *sync.Mutex
-	IsRunning bool
-	vc        *gocv.VideoCapture
-	conf      *configuration.FreezeConfig
-	Frame     gocv.Mat
-	imgChan   chan gocv.Mat
+	Lock         *sync.RWMutex
+	IsRunning    bool
+	vc           *gocv.VideoCapture
+	conf         *configuration.FreezeConfig
+	Frame        gocv.Mat
+	previewImage bool
+	threaded     bool
+	preprocess   bool
 }
 
-func CreateTopCameraAcquisition(conf *configuration.FreezeConfig) *TopCameraAcquisition {
+func CreateTopCameraAcquisition(conf *configuration.FreezeConfig, threaded bool, preprocess bool, previewImage bool) *TopCameraAcquisition {
+
 	return &TopCameraAcquisition{
-		IsRunning: false,
-		conf:      conf,
-		Lock:      &sync.Mutex{},
-		imgChan:   make(chan gocv.Mat),
+		IsRunning:    false,
+		conf:         conf,
+		Lock:         &sync.RWMutex{},
+		previewImage: previewImage,
+		threaded:     threaded,
+		// circleMask:   circleMask,
+		Frame:      gocv.NewMat(),
+		preprocess: preprocess,
 	}
 }
 
-func showImg(c *TopCameraAcquisition) {
-	// now we can run stuff on the main thread like this
-	mainthread.CallNonBlock(func() {
-		fmt.Println("printing from the main thread")
-
-		prevWindow := gocv.NewWindow("Preview Window")
-		defer prevWindow.Close()
-		mat := gocv.NewMat()
-
-		for {
-			mat = <-c.imgChan
-			// prevWindow.IMShow(topCamera.Read())
-			prevWindow.IMShow(mat)
-
-			keyPressed := prevWindow.WaitKey(1)
-			if keyPressed == 'q' {
-				return
-			}
-
-		}
-
-	})
-	fmt.Println("printing from another thread")
-}
-
 func worker(c *TopCameraAcquisition) {
+	vvc, _ := gocv.VideoCaptureFile(c.conf.Camera.Src[0])
+	defer vvc.Close()
+
+	// frame := gocv.NewMatWithSize(c.conf.Camera.RawHeight, c.conf.Camera.RawWidth, gocv.MatTypeCV8UC3)
 	frame := gocv.NewMat()
 
+	circleMask := gocv.Zeros(c.conf.Camera.RawHeight, c.conf.Camera.RawWidth, gocv.MatTypeCV8UC1)
+	mid := image.Point{
+		X: c.conf.Camera.MidpointX, Y: c.conf.Camera.MidpointY,
+	}
+	white := color.RGBA{255, 255, 255, 0}
+	gocv.Circle(&circleMask, mid, c.conf.Camera.MidpointRad, white, -1)
+
 	for {
-		startTime := time.Now()
+		// c.vc.Read(&frame)
+		vvc.Read(&frame)
 
-		c.vc.Read(&frame)
-
-		fpsPos := image.Point{X: 10, Y: 40}
-		fpsColor := color.RGBA{255, 255, 255, 0}
-		elapsedUs := time.Since(startTime).Microseconds()
-		fps := math.Pow(10.0, 6.0) / float64(elapsedUs)
-		elapsedStr := "FPS: " + fmt.Sprintf("%f", fps)
-
-		gocv.PutText(&frame, elapsedStr, fpsPos, gocv.FontHersheyPlain, 1.5, fpsColor, 1)
+		// if c.preprocess {
+		// 	preprocessTopCameraFrame(&frame)
+		// }
+		// m := gocv.Zeros(300, 300, gocv.MatTypeCV8UC1)
+		// gocv.Circle()
+		// masked := gocv.NewMat()
+		// frame.CopyToWithMask(&masked, circleMask)
 
 		c.Lock.Lock()
-		c.Frame = frame
-		c.imgChan <- frame
+		c.Frame = circleMask
 		c.Lock.Unlock()
 	}
 }
 
-func PreprocessTopCameraFrame(frame *gocv.Mat) {
+// func preprocessTopCameraFrame(frame *gocv.Mat) {
 
-}
+// 	startTime := time.Now()
+
+// 	src := frame.Clone()
+
+// 	fpsPos := image.Point{X: 10, Y: 40}
+// 	fpsColor := color.RGBA{255, 255, 255, 0}
+// 	elapsedUs := time.Since(startTime).Microseconds()
+// 	fps := math.Pow(10.0, 6.0) / float64(elapsedUs)
+// 	elapsedStr := "FPS: " + fmt.Sprintf("%f", fps)
+
+// 	gocv.PutText(frame, elapsedStr, fpsPos, gocv.FontHersheyPlain, 1.5, fpsColor, 1)
+// 	// frame = res.Clone()
+// }
 
 func (c *TopCameraAcquisition) Read() gocv.Mat {
-	c.Lock.Lock()
-	defer c.Lock.Unlock()
+	frame := gocv.NewMat()
+	defer frame.Close()
+
+	if !c.threaded {
+		c.Lock.Lock()
+		defer c.Lock.Unlock()
+
+		c.vc.Read(&frame)
+		c.Frame = frame.Clone()
+
+		return c.Frame
+	}
+
+	c.Lock.RLock()
+	defer c.Lock.RUnlock()
 	return c.Frame
 }
 
@@ -113,12 +131,42 @@ func (c *TopCameraAcquisition) Start() {
 	}
 	c.vc = vc
 
-	go worker(c)
-	mainthread.Run(func() {
-		showImg(c)
-	})
+	if c.threaded {
+		go worker(c)
+	}
+
+	if c.previewImage {
+		mainthread.Run(func() {
+			showImg(c)
+		})
+	}
+
 }
 
 func (c *TopCameraAcquisition) Stop() {
 	c.vc.Close()
 }
+
+// func showImg(c *TopCameraAcquisition) {
+// 	// now we can run stuff on the main thread like this
+// 	mainthread.CallNonBlock(func() {
+// 		fmt.Println("printing from the main thread")
+
+// 		prevWindow := gocv.NewWindow("Preview Window")
+// 		defer prevWindow.Close()
+// 		// mat := gocv.NewMat()
+
+// 		for {
+// 			// mat = <-c.imgChan
+// 			prevWindow.IMShow(c.Frame)
+
+// 			keyPressed := prevWindow.WaitKey(1)
+// 			if keyPressed == 'q' {
+// 				return
+// 			}
+
+// 		}
+
+// 	})
+// 	fmt.Println("printing from another thread")
+// }
