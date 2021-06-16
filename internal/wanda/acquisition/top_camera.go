@@ -5,23 +5,25 @@ import (
 	"image/color"
 	"strconv"
 	"sync"
+	"time"
 
-	"github.com/faiface/mainthread"
 	"gocv.io/x/gocv"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 )
 
 type TopCameraAcquisition struct {
-	Lock  *sync.RWMutex
-	vc    *gocv.VideoCapture
-	conf  *configuration.FreezeConfig
-	frame gocv.Mat
+	Lock       *sync.RWMutex
+	vc         *gocv.VideoCapture
+	conf       *configuration.FreezeConfig
+	frame      gocv.Mat
+	firstFrame bool
 }
 
 func CreateTopCameraAcquisition(conf *configuration.FreezeConfig, threaded bool, preprocess bool, previewImage bool) *TopCameraAcquisition {
 	return &TopCameraAcquisition{
-		conf: conf,
-		Lock: &sync.RWMutex{},
+		conf:       conf,
+		Lock:       &sync.RWMutex{},
+		firstFrame: false,
 	}
 }
 
@@ -57,13 +59,19 @@ func (c *TopCameraAcquisition) read() {
 	newSize := image.Point{c.conf.Camera.PostWidth, c.conf.Camera.PostHeight}
 	gocv.Resize(frameCropped, &res, newSize, 0, 0, gocv.InterpolationLinear)
 	c.frame = res
+	c.firstFrame = true
 }
 
 func (c *TopCameraAcquisition) Read() gocv.Mat {
+	if !c.firstFrame {
+		<-time.After(time.Millisecond * 200)
+	}
 	return c.frame
 }
 
 func (c *TopCameraAcquisition) Start() {
+	c.firstFrame = false
+
 	src := c.conf.Camera.Src[0]
 
 	var vc *gocv.VideoCapture
@@ -86,31 +94,8 @@ func (c *TopCameraAcquisition) Start() {
 	c.vc = vc
 
 	go worker(c)
-
-	mainthread.Run(func() {
-		showImg(c)
-	})
-
 }
 
 func (c *TopCameraAcquisition) Stop() {
 	c.vc.Close()
-}
-
-//====================== Helper ================
-func showImg(c *TopCameraAcquisition) {
-	// now we can run stuff on the main thread like this
-	mainthread.CallNonBlock(func() {
-		prevWindow := gocv.NewWindow("Preview Window")
-		defer prevWindow.Close()
-
-		for {
-			prevWindow.IMShow(c.Read())
-
-			keyPressed := prevWindow.WaitKey(1)
-			if keyPressed == 'q' {
-				return
-			}
-		}
-	})
 }

@@ -89,13 +89,10 @@ func main() {
 	topCamera.Start()
 	defer topCamera.Stop()
 
-	// for i := 0; true; i++ {
-	// 	x := models.Transform{WorldXcm: models.Centimeter(i)}
-	// 	state.UpdateMyTransform(x)
-	// 	fmt.Println("what")
-	// 	telepathyChannel.Send(fmt.Sprint("Apalah", i))
-	// 	// time.Sleep(time.Second * 1)
-	// }
+	// Stream Out
+	streamout := diagnostic.CreateNewStreamOutDiagnostic(topCamera, &config)
+	streamout.StartTopCameraOutput()
+	streamout.Start()
 
 	globalWaitGroup.Wait()
 }

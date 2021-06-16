@@ -32,7 +32,10 @@ type ExpirationConfig struct {
 }
 
 type DiagnosticConfig struct {
-	TelemetryHz time.Duration `yaml:"telemetryHz"`
+	TelemetryHz        time.Duration `yaml:"telemetryHz"`
+	EnableStream       bool          `yaml:"enableStream"`
+	StreamTopProcessed bool          `yaml:"streamTopProcessed"`
+	StreamHost         string        `yaml:"streamHost"`
 }
 
 type MigraineConfig struct {

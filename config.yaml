@@ -31,6 +31,9 @@ serial:
 
 diagnostic:
   telemetryHz: 60
+  enableStream: true
+  streamHost: "localhost:6910"
+  streamTopProcessed: true
 
 migraine:
   migraineHz: 60
