@@ -32,12 +32,18 @@ type MigraineConfig struct {
 	MigraineHz int `yaml:"migraineHz"`
 }
 
+type MechanicalConfig struct {
+	HorizontalForceRange int `yaml:"horizontalForceRange"`
+	VerticalForceRange   int `yaml:"verticalForceRange"`
+}
+
 type FreezeConfig struct {
 	Robot      RobotConfig      `yaml:"robot"`
 	Camera     CameraConfig     `yaml:"camera"`
 	Expiration ExpirationConfig `yaml:"expiration"`
 	Diagnostic DiagnosticConfig `yaml:"diagnostic"`
 	Migraine   MigraineConfig   `yaml:"migraine"`
+	Mecha      MechanicalConfig `yaml:"mecha"`
 }
 
 func LoadStartupConfig() (FreezeConfig, error) {

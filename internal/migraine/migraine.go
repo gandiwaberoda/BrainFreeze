@@ -32,7 +32,10 @@ func worker(m *Migraine) {
 		}
 
 		fmt.Println("Current objective:", m.CurrentObjective.GetName())
-		m.gut.Send("Apalah")
+		force := models.Force{}
+		m.CurrentObjective.Tick(&force, m.state)
+
+		m.gut.Send(force.AsGutCommandString())
 	}
 }
 
@@ -63,7 +66,7 @@ func (m *Migraine) AddCommand(intercom models.Intercom) {
 		return
 	}
 
-	cmd := WhichCommand(intercom)
+	cmd := WhichCommand(intercom, m.config)
 
 	if cmd != nil {
 		m.ReplaceObjective(cmd)

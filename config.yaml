@@ -26,3 +26,7 @@ diagnostic:
 
 migraine:
   migraineHz: 60
+
+mecha:
+  horizontalForceRange: 100
+  verticalForceRange: 100
