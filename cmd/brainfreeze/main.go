@@ -30,8 +30,8 @@ func main() {
 	defer state.StopWatcher()
 
 	// Gut
-	// gut := gut.CreateGutSerial()
-	gut := gut.CreateGutConsole()
+	gut := gut.CreateGutSerial()
+	// gut := gut.CreateGutConsole()
 	globalWaitGroup.Add(1)
 	gut.RegisterHandler(func(s string) {
 		gtb, err := gutmodel.ParseGutToBrain(s)
@@ -41,7 +41,10 @@ func main() {
 		}
 		state.UpdateGutToBrain(gtb)
 	})
-	gut.Start()
+	_, errGut := gut.Start()
+	if errGut != nil {
+		log.Panicln("Gut not yet opened:", errGut.Error())
+	}
 	defer gut.Stop()
 
 	// Artificial Intellegence
@@ -63,7 +66,6 @@ func main() {
 
 		if intercom.Kind == models.COMMAND {
 			// Bawa ke migraine
-			fmt.Println("Command")
 			migraine.AddCommand(intercom)
 		}
 	})

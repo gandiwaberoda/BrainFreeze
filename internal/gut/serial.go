@@ -2,6 +2,7 @@ package gut
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 
@@ -65,6 +66,10 @@ func (g *GutSerial) Stop() (bool, error) {
 }
 
 func (g *GutSerial) Send(msg string) (bool, error) {
+	if g.Port == nil {
+		return false, errors.New("port is not yet opened")
+	}
+
 	_, err := g.Port.Write([]byte(msg))
 	if err != nil {
 		return false, err
