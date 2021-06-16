@@ -52,7 +52,11 @@ func (c *TopCameraAcquisition) read() {
 	y1 := c.conf.Camera.MidpointY + c.conf.Camera.MidpointRad
 	rect := image.Rect(x0, y0, x1, y1)
 
-	c.frame = res.Region(rect)
+	frameCropped := res.Region(rect)
+
+	newSize := image.Point{c.conf.Camera.PostWidth, c.conf.Camera.PostHeight}
+	gocv.Resize(frameCropped, &res, newSize, 0, 0, gocv.InterpolationLinear)
+	c.frame = res
 }
 
 func (c *TopCameraAcquisition) Read() gocv.Mat {
