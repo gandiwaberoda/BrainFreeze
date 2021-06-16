@@ -32,3 +32,7 @@ func (i IdleCommand) GetName() string {
 func (i IdleCommand) Tick(force *models.Force, state *state.StateAccess) {
 
 }
+
+func (i IdleCommand) ShouldClear() bool {
+	return false
+}

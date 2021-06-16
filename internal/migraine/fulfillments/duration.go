@@ -54,5 +54,6 @@ func (f DurationFuilfillment) GetName() string {
 
 func (f DurationFuilfillment) Tick(state *state.StateAccess) bool {
 	elapsed := time.Since(f.StartTime)
+	fmt.Println(elapsed.Milliseconds(), f.Milis)
 	return elapsed.Milliseconds() > int64(f.Milis)
 }

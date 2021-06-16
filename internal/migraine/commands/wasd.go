@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
-	"harianugrah.com/brainfreeze/internal/migraine/parser"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -34,7 +33,8 @@ const (
 type WasdCommand struct {
 	Direction   WasdDirection
 	conf        *configuration.FreezeConfig
-	Fulfillment *fulfillments.FulfillmentInterface
+	fulfillment fulfillments.FulfillmentInterface
+	shouldClear bool
 }
 
 var (
@@ -65,7 +65,7 @@ func ParseWasdCommand(intercom models.Intercom, conf *configuration.FreezeConfig
 
 	for _, v := range acceptedDir {
 		if dir == string(v) {
-			parseFulfilment := parser.WhichFulfillment(intercom, conf)
+			parseFulfilment := fulfillments.WhichFulfillment(intercom, conf)
 
 			if parseFulfilment == nil {
 				parseFulfilment = fulfillments.DefaultDurationFulfillment()
@@ -74,7 +74,7 @@ func ParseWasdCommand(intercom models.Intercom, conf *configuration.FreezeConfig
 			return true, &WasdCommand{
 				Direction:   WasdDirection(dir),
 				conf:        conf,
-				Fulfillment: &parseFulfilment,
+				fulfillment: parseFulfilment,
 			}
 		}
 	}
@@ -122,4 +122,9 @@ func TockWasd(dir WasdDirection, conf configuration.FreezeConfig, force *models.
 
 func (i *WasdCommand) Tick(force *models.Force, state *state.StateAccess) {
 	TockWasd(i.Direction, *i.conf, force, state)
+	i.shouldClear = i.fulfillment.Tick(state)
+}
+
+func (i *WasdCommand) ShouldClear() bool {
+	return i.shouldClear
 }

@@ -7,7 +7,6 @@ import (
 
 	"harianugrah.com/brainfreeze/internal/gut"
 	"harianugrah.com/brainfreeze/internal/migraine/commands"
-	"harianugrah.com/brainfreeze/internal/migraine/parser"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -37,7 +36,13 @@ func worker(m *Migraine) {
 		force := models.Force{}
 		m.CurrentObjective.Tick(&force, m.state)
 
-		// m.gut.Send(force.AsGutCommandString())
+		m.gut.Send(force.AsGutCommandString())
+
+		if m.CurrentObjective.ShouldClear() {
+			fmt.Println("Fulfilled")
+			m.Idle()
+		}
+
 	}
 }
 
@@ -68,7 +73,7 @@ func (m *Migraine) AddCommand(intercom models.Intercom) {
 		return
 	}
 
-	cmd := parser.WhichCommand(intercom, m.config)
+	cmd := commands.WhichCommand(intercom, m.config)
 
 	if cmd != nil {
 		m.ReplaceObjective(cmd)
