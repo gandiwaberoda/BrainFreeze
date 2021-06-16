@@ -3,6 +3,7 @@ module harianugrah.com/brainfreeze
 go 1.16
 
 require (
+	github.com/faiface/mainthread v0.0.0-20171120011319-8b78f0a41ae3
 	github.com/gorilla/websocket v1.4.2
 	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07
 	gocv.io/x/gocv v0.27.0 // indirect

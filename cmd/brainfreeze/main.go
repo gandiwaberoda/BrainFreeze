@@ -6,7 +6,6 @@ import (
 	"sync"
 	_ "time"
 
-	"gocv.io/x/gocv"
 	"harianugrah.com/brainfreeze/internal/diagnostic"
 	"harianugrah.com/brainfreeze/internal/gut"
 	"harianugrah.com/brainfreeze/internal/migraine"
@@ -19,6 +18,7 @@ import (
 )
 
 func main() {
+
 	globalWaitGroup := sync.WaitGroup{}
 
 	config, err := configuration.LoadStartupConfig()
@@ -88,22 +88,6 @@ func main() {
 	topCamera := acquisition.CreateTopCameraAcquisition(&config)
 	topCamera.Start()
 	defer topCamera.Stop()
-
-	prevWindow := gocv.NewWindow("Preview Window")
-	vc, _ := gocv.VideoCaptureDevice(0)
-	defer prevWindow.Close()
-	mat := gocv.NewMat()
-	for {
-		// prevWindow.IMShow(topCamera.Read())
-		vc.Read(&mat)
-		prevWindow.IMShow(mat)
-
-		keyPressed := prevWindow.WaitKey(1)
-		if keyPressed == 'q' {
-			break
-		}
-
-	}
 
 	// for i := 0; true; i++ {
 	// 	x := models.Transform{WorldXcm: models.Centimeter(i)}
