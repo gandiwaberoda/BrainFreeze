@@ -52,6 +52,7 @@ func (c *StreamOutDiagnostic) StartTopCameraOutput() {
 
 func (c *StreamOutDiagnostic) StopTopCameraOutput() {
 	c.stopTopChan <- struct{}{}
+
 }
 
 func (c *StreamOutDiagnostic) Start() {
