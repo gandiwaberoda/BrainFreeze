@@ -2,6 +2,7 @@ package ball
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 
 	"gocv.io/x/gocv"
@@ -10,13 +11,22 @@ import (
 )
 
 type NarrowHaesveBall struct {
-	conf *configuration.FreezeConfig
+	conf     *configuration.FreezeConfig
+	upperHsv gocv.Scalar
+	lowerHsv gocv.Scalar
 }
 
 func NewNarrowHaesveBall(conf *configuration.FreezeConfig) *NarrowHaesveBall {
 	return &NarrowHaesveBall{
 		conf: conf,
 	}
+}
+
+func getRectMidpoint(rect image.Rectangle) image.Point {
+	x := (rect.Max.X + rect.Min.X) / 2
+	y := (rect.Max.Y + rect.Min.Y) / 2
+
+	return image.Pt(x, y)
 }
 
 func filter(src gocv.Mat, dst *gocv.Mat) {
@@ -49,18 +59,20 @@ func (n *NarrowHaesveBall) Detect(hsvFrame gocv.Mat) []models.DetectionObject {
 	detecteds := []models.DetectionObject{}
 	for i := 0; i < pointVecs.Size(); i++ {
 		it := pointVecs.At(i)
-		// area := gocv.ContourArea(it)
-		// if area < 5 {
-		// 	// Skip kalau ukurannya kekecilan
-		// 	continue
-		// }
+		area := gocv.ContourArea(it)
+		fmt.Println("x", area)
+		if area < n.conf.Wanda.MinimumHsvArea {
+			// Skip kalau ukurannya kekecilan
+			continue
+		}
 
 		rect := gocv.BoundingRect(it)
 		gocv.Rectangle(&hsvFrame, rect, c, 2)
 		fmt.Println(rect)
 
 		d := models.DetectionObject{
-			Bbox: rect,
+			Bbox:     rect,
+			Midpoint: getRectMidpoint(rect),
 		}
 		detecteds = append(detecteds, d)
 	}
