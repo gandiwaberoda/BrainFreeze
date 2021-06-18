@@ -68,19 +68,24 @@ func (c *TopCameraAcquisition) read() {
 	rect := image.Rect(x0, y0, x1, y1)
 
 	// Ambil area persegi ROI
-	c.maskedFrame = c.maskedFrame.Region(rect)
+	resImg := c.maskedFrame.Region(rect)
+	defer resImg.Close()
+
+	cropped := resImg.Clone()
+	defer cropped.Close()
 
 	// Normalize ukuran biar standar di hsv sama dnn
 	newSize := image.Point{c.conf.Camera.PostWidth, c.conf.Camera.PostHeight}
-	gocv.Resize(c.maskedFrame, &c.postFrame, newSize, 0, 0, gocv.InterpolationLinear)
+	gocv.Resize(cropped, &c.postFrame, newSize, 0, 0, gocv.InterpolationLinear)
 	c.firstFrame = true
 }
 
-func (c *TopCameraAcquisition) Read() gocv.Mat {
+func (c *TopCameraAcquisition) Read(dst *gocv.Mat) {
 	if !c.firstFrame {
 		<-time.After(time.Millisecond * 1000)
 	}
-	return c.postFrame
+
+	c.postFrame.CopyTo(dst)
 }
 
 func (c *TopCameraAcquisition) Start() {

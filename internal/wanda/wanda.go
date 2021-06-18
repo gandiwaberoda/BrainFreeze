@@ -1,8 +1,9 @@
 package wanda
 
 import (
-	"fmt"
+	// "image/color"
 
+	// "gocv.io/x/gocv"
 	"gocv.io/x/gocv"
 	"harianugrah.com/brainfreeze/internal/wanda/acquisition"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/ball"
@@ -26,18 +27,29 @@ func NewWandaVision(conf *configuration.FreezeConfig, state *state.StateAccess) 
 }
 
 func worker(w *WandaVision) {
-	hsvFrame := gocv.NewMat()
+	win := gocv.NewWindow("hhh")
 
+	// vc, _ := gocv.VideoCaptureDevice(0)
+
+	// warna := color.RGBA{0, 255, 0, 0}
 	for {
-		frame := w.topCamera.Read()
+		// hsvFrame := gocv.NewMat()
+		frame := gocv.NewMat()
+		w.topCamera.Read(&frame)
+		// w.topCamera.Read(&frame)
+		// frame := gocv.NewMat()
+		// vc.Read(&frame)
+		// frame.Close()
 
-		gocv.CvtColor(frame, &hsvFrame, gocv.ColorBGRToHSV)
+		// gocv.CvtColor(frame, &hsvFrame, gocv.ColorBGRToHSV)
 
 		// Ball
-		narrowBallRes := w.ballNarrow.Detect(hsvFrame)
-		if len(narrowBallRes) > 0 {
-			w.state.UpdateBallTransform(narrowBallRes[0].AsTransform())
-		}
+		// narrowBallRes := w.ballNarrow.Detect(hsvFrame)
+		// if len(narrowBallRes) > 0 {
+		// 	transform := narrowBallRes[0].AsTransform(w.conf)
+		// 	gocv.Rectangle(&frame, narrowBallRes[0].Bbox, warna, 3)
+		// 	w.state.UpdateBallTransform(transform)
+		// }
 
 		// EGP
 
@@ -46,6 +58,10 @@ func worker(w *WandaVision) {
 		// F
 
 		// E
+
+		win.IMShow(frame)
+		win.WaitKey(1)
+		frame.Close()
 	}
 }
 
@@ -56,6 +72,7 @@ func (w *WandaVision) Start() {
 	w.ballNarrow = ball.NewNarrowHaesveBall(w.conf)
 
 	go worker(w)
+	// worker(w)
 
 	w.isRunning = true
 }

@@ -55,6 +55,10 @@ type TelepathyConfig struct {
 	ChitChatHost string `yaml:"chitchatHost"`
 }
 
+type WandaConfig struct {
+	MinimumHsvArea float64 `yaml:"minimumHsvArea"`
+}
+
 type FreezeConfig struct {
 	Robot       RobotConfig       `yaml:"robot"`
 	Camera      CameraConfig      `yaml:"camera"`
@@ -64,6 +68,7 @@ type FreezeConfig struct {
 	Mecha       MechanicalConfig  `yaml:"mecha"`
 	Fulfillment FulfillmentConfig `yaml:"fulfillment"`
 	Telepathy   TelepathyConfig   `yaml:"telepathy"`
+	Wanda       WandaConfig       `yaml:"wanda"`
 }
 
 func LoadStartupConfig() (FreezeConfig, error) {

@@ -36,6 +36,9 @@ diagnostic:
   streamHost: "localhost:6910"
   streamTopProcessed: true
 
+wanda:
+  minimumHsvArea: 400
+
 migraine:
   migraineHz: 60
 

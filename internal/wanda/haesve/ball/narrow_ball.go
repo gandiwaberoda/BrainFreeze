@@ -17,8 +17,13 @@ type NarrowHaesveBall struct {
 }
 
 func NewNarrowHaesveBall(conf *configuration.FreezeConfig) *NarrowHaesveBall {
+	upper := gocv.NewScalar(33, 255, 255, 1)
+	lower := gocv.NewScalar(8, 120, 112, 0)
+
 	return &NarrowHaesveBall{
-		conf: conf,
+		conf:     conf,
+		upperHsv: upper,
+		lowerHsv: lower,
 	}
 }
 
@@ -29,11 +34,8 @@ func getRectMidpoint(rect image.Rectangle) image.Point {
 	return image.Pt(x, y)
 }
 
-func filter(src gocv.Mat, dst *gocv.Mat) {
-	upper := gocv.NewScalar(33, 255, 255, 1)
-	lower := gocv.NewScalar(8, 120, 112, 0)
-
-	gocv.InRangeWithScalar(src, lower, upper, dst)
+func (n *NarrowHaesveBall) filter(src gocv.Mat, dst *gocv.Mat) {
+	gocv.InRangeWithScalar(src, n.lowerHsv, n.upperHsv, dst)
 }
 
 // Input adalah Mat yang sudah dalam format hsv
@@ -42,8 +44,9 @@ func (n *NarrowHaesveBall) Detect(hsvFrame gocv.Mat) []models.DetectionObject {
 	h := hsvFrame.Rows()
 
 	filtered := gocv.NewMatWithSize(h, w, gocv.MatTypeCV8UC1)
+	defer filtered.Close()
 
-	filter(hsvFrame, &filtered)
+	n.filter(hsvFrame, &filtered)
 
 	erodeMat := gocv.Ones(3, 3, gocv.MatTypeCV8UC1)
 	gocv.Erode(filtered, &filtered, erodeMat)
@@ -55,6 +58,7 @@ func (n *NarrowHaesveBall) Detect(hsvFrame gocv.Mat) []models.DetectionObject {
 
 	hierarchyMat := gocv.NewMat()
 	pointVecs := gocv.FindContoursWithParams(filtered, &hierarchyMat, gocv.RetrievalExternal, gocv.ChainApproxNone)
+	hierarchyMat.Close()
 
 	detecteds := []models.DetectionObject{}
 	for i := 0; i < pointVecs.Size(); i++ {
