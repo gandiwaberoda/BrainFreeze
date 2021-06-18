@@ -3,18 +3,17 @@ package ball
 import (
 	"fmt"
 	"image/color"
-	"time"
 
 	"gocv.io/x/gocv"
-	"harianugrah.com/brainfreeze/internal/wanda/haesve"
+	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 )
 
 type NarrowHaesveBall struct {
-	conf configuration.FreezeConfig
+	conf *configuration.FreezeConfig
 }
 
-func CreateNewNarrowHaesveBall(conf configuration.FreezeConfig) *NarrowHaesveBall {
+func NewNarrowHaesveBall(conf *configuration.FreezeConfig) *NarrowHaesveBall {
 	return &NarrowHaesveBall{
 		conf: conf,
 	}
@@ -28,7 +27,7 @@ func filter(src gocv.Mat, dst *gocv.Mat) {
 }
 
 // Input adalah Mat yang sudah dalam format hsv
-func (n *NarrowHaesveBall) Detect(hsvFrame gocv.Mat) []haesve.HaesevDetected {
+func (n *NarrowHaesveBall) Detect(hsvFrame gocv.Mat) []models.DetectionObject {
 	w := hsvFrame.Cols()
 	h := hsvFrame.Rows()
 
@@ -46,6 +45,8 @@ func (n *NarrowHaesveBall) Detect(hsvFrame gocv.Mat) []haesve.HaesevDetected {
 
 	hierarchyMat := gocv.NewMat()
 	pointVecs := gocv.FindContoursWithParams(filtered, &hierarchyMat, gocv.RetrievalExternal, gocv.ChainApproxNone)
+
+	detecteds := []models.DetectionObject{}
 	for i := 0; i < pointVecs.Size(); i++ {
 		it := pointVecs.At(i)
 		// area := gocv.ContourArea(it)
@@ -57,9 +58,12 @@ func (n *NarrowHaesveBall) Detect(hsvFrame gocv.Mat) []haesve.HaesevDetected {
 		rect := gocv.BoundingRect(it)
 		gocv.Rectangle(&hsvFrame, rect, c, 2)
 		fmt.Println(rect)
+
+		d := models.DetectionObject{
+			Bbox: rect,
+		}
+		detecteds = append(detecteds, d)
 	}
 
-	gocv.IMWrite("./temp/"+time.Now().String()+".jpg", hsvFrame)
-
-	return nil
+	return detecteds
 }

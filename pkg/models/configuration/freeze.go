@@ -51,6 +51,10 @@ type FulfillmentConfig struct {
 	DefaultDurationMs int `yaml:"defaultDurationMs"`
 }
 
+type TelepathyConfig struct {
+	ChitChatHost string `yaml:"chitchatHost"`
+}
+
 type FreezeConfig struct {
 	Robot       RobotConfig       `yaml:"robot"`
 	Camera      CameraConfig      `yaml:"camera"`
@@ -59,6 +63,7 @@ type FreezeConfig struct {
 	Migraine    MigraineConfig    `yaml:"migraine"`
 	Mecha       MechanicalConfig  `yaml:"mecha"`
 	Fulfillment FulfillmentConfig `yaml:"fulfillment"`
+	Telepathy   TelepathyConfig   `yaml:"telepathy"`
 }
 
 func LoadStartupConfig() (FreezeConfig, error) {

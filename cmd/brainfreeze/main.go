@@ -9,7 +9,7 @@ import (
 	"harianugrah.com/brainfreeze/internal/diagnostic"
 	"harianugrah.com/brainfreeze/internal/gut"
 	"harianugrah.com/brainfreeze/internal/migraine"
-	"harianugrah.com/brainfreeze/internal/wanda/acquisition"
+	"harianugrah.com/brainfreeze/internal/wanda"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/gutmodel"
@@ -75,24 +75,23 @@ func main() {
 	if errTelepathy != nil {
 		log.Fatalln(errTelepathy.Error())
 	}
-	defer telepathyChannel.Stop()
+	// defer telepathyChannel.Stop()
 
 	// Telemetry
 	globalWaitGroup.Add(1)
 	telemetry := diagnostic.CreateNewTelemetry(telepathyChannel, &config, state)
 	telemetry.Start()
-	defer telemetry.Stop()
+	// defer telemetry.Stop()
 
 	// Wanda Vision
 	globalWaitGroup.Add(1)
-	topCamera := acquisition.CreateTopCameraAcquisition(&config, true, true, true)
-	topCamera.Start()
-	defer topCamera.Stop()
+	vision := wanda.NewWandaVision(&config, state)
+	vision.Start()
 
 	// Stream Out
-	streamout := diagnostic.CreateNewStreamOutDiagnostic(topCamera, &config)
-	streamout.StartTopCameraOutput()
-	streamout.Start()
+	// streamout := diagnostic.CreateNewStreamOutDiagnostic(topCamera, &config)
+	// streamout.StartTopCameraOutput()
+	// streamout.Start()
 
 	globalWaitGroup.Wait()
 }

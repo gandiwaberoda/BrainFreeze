@@ -1,16 +1,10 @@
 package haesve
 
 import (
-	"image"
-
 	"gocv.io/x/gocv"
+	"harianugrah.com/brainfreeze/pkg/models"
 )
 
-type HaesevDetected struct {
-	image.Rectangle
-	midpoint image.Point
-}
-
 type HaesveInterface interface {
-	Detect(gocv.Mat) []HaesevDetected
+	Detect(gocv.Mat) []models.DetectionObject
 }

@@ -12,18 +12,37 @@ import (
 )
 
 type TopCameraAcquisition struct {
-	Lock       *sync.RWMutex
-	vc         *gocv.VideoCapture
-	conf       *configuration.FreezeConfig
-	frame      gocv.Mat
-	firstFrame bool
+	Lock        *sync.RWMutex
+	vc          *gocv.VideoCapture
+	conf        *configuration.FreezeConfig
+	frame       gocv.Mat
+	postFrame   gocv.Mat
+	firstFrame  bool
+	maskedFrame gocv.Mat
+	circleMask  gocv.Mat
 }
 
-func CreateTopCameraAcquisition(conf *configuration.FreezeConfig, threaded bool, preprocess bool, previewImage bool) *TopCameraAcquisition {
+func CreateTopCameraAcquisition(conf *configuration.FreezeConfig) *TopCameraAcquisition {
+	circleMask := gocv.NewMatWithSize(conf.Camera.RawHeight, conf.Camera.RawWidth, gocv.MatTypeCV8UC3)
+
+	mid := image.Point{
+		X: conf.Camera.MidpointX, Y: conf.Camera.MidpointY,
+	}
+	white := color.RGBA{255, 255, 255, 0}
+	gocv.Circle(&circleMask, mid, conf.Camera.MidpointRad, white, -1)
+
+	_rawframe := gocv.NewMatWithSize(conf.Camera.RawHeight, conf.Camera.RawWidth, gocv.MatTypeCV8UC3)
+	_maskedframe := gocv.NewMatWithSize(conf.Camera.RawHeight, conf.Camera.RawWidth, gocv.MatTypeCV8UC3)
+	_postframe := gocv.NewMatWithSize(conf.Camera.PostHeight, conf.Camera.PostWidth, gocv.MatTypeCV8UC3)
+
 	return &TopCameraAcquisition{
-		conf:       conf,
-		Lock:       &sync.RWMutex{},
-		firstFrame: false,
+		conf:        conf,
+		Lock:        &sync.RWMutex{},
+		firstFrame:  false,
+		frame:       _rawframe,
+		maskedFrame: _maskedframe,
+		postFrame:   _postframe,
+		circleMask:  circleMask,
 	}
 }
 
@@ -36,17 +55,11 @@ func worker(c *TopCameraAcquisition) {
 }
 
 func (c *TopCameraAcquisition) read() {
-	circleMask := gocv.Zeros(c.conf.Camera.RawHeight, c.conf.Camera.RawWidth, gocv.MatTypeCV8UC1)
-	mid := image.Point{
-		X: c.conf.Camera.MidpointX, Y: c.conf.Camera.MidpointY,
-	}
-	white := color.RGBA{255, 255, 255, 0}
-	gocv.Circle(&circleMask, mid, c.conf.Camera.MidpointRad, white, -1)
+	// Baca frame dari kamera
+	c.vc.Read(&c.frame)
 
-	f := gocv.NewMatWithSize(c.conf.Camera.RawHeight, c.conf.Camera.RawWidth, gocv.MatTypeCV8UC3)
-	c.vc.Read(&f)
-	res := gocv.NewMat()
-	f.CopyToWithMask(&res, circleMask)
+	// Masking area lingkaran
+	gocv.BitwiseAnd(c.frame, c.circleMask, &c.maskedFrame)
 
 	x0 := c.conf.Camera.MidpointX - c.conf.Camera.MidpointRad
 	y0 := c.conf.Camera.MidpointY - c.conf.Camera.MidpointRad
@@ -54,19 +67,20 @@ func (c *TopCameraAcquisition) read() {
 	y1 := c.conf.Camera.MidpointY + c.conf.Camera.MidpointRad
 	rect := image.Rect(x0, y0, x1, y1)
 
-	frameCropped := res.Region(rect)
+	// Ambil area persegi ROI
+	c.maskedFrame = c.maskedFrame.Region(rect)
 
+	// Normalize ukuran biar standar di hsv sama dnn
 	newSize := image.Point{c.conf.Camera.PostWidth, c.conf.Camera.PostHeight}
-	gocv.Resize(frameCropped, &res, newSize, 0, 0, gocv.InterpolationLinear)
-	c.frame = res
+	gocv.Resize(c.maskedFrame, &c.postFrame, newSize, 0, 0, gocv.InterpolationLinear)
 	c.firstFrame = true
 }
 
 func (c *TopCameraAcquisition) Read() gocv.Mat {
 	if !c.firstFrame {
-		<-time.After(time.Millisecond * 200)
+		<-time.After(time.Millisecond * 1000)
 	}
-	return c.frame
+	return c.postFrame
 }
 
 func (c *TopCameraAcquisition) Start() {

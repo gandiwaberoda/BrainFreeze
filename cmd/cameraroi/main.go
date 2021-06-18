@@ -32,7 +32,7 @@ func main() {
 		log.Fatalln("Gagal meload config", err)
 	}
 
-	topCam := acquisition.CreateTopCameraAcquisition(&config, false, false, false)
+	topCam := acquisition.CreateTopCameraAcquisition(&config)
 	topCam.Start()
 	firstFrame := topCam.Read()
 
