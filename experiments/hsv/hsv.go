@@ -5,8 +5,8 @@ import (
 	"image/color"
 
 	"gocv.io/x/gocv"
-	"harianugrah.com/brainfreeze/internal/wanda/haesve/ball"
-	"harianugrah.com/brainfreeze/pkg/models/configuration"
+	// "harianugrah.com/brainfreeze/internal/wanda/haesve/ball"
+	// "harianugrah.com/brainfreeze/pkg/models/configuration"
 )
 
 func main() {
@@ -21,8 +21,8 @@ func main() {
 	hsvFrame := gocv.NewMat()
 	defer hsvFrame.Close()
 
-	config, _ := configuration.LoadStartupConfig()
-	ballHsv := ball.NewNarrowHaesveBall(&config)
+	// config, _ := configuration.LoadStartupConfig()
+	// ballHsv := ball.NewNarrowHaesveBall(&config)
 
 	win := gocv.NewWindow("entah")
 
@@ -39,7 +39,7 @@ func main() {
 		gocv.BitwiseAnd(frame, circleMask, &frame)
 
 		gocv.CvtColor(frame, &hsvFrame, gocv.ColorBGRToHSV)
-		ballHsv.Detect(hsvFrame)
+		// ballHsv.Detect(hsvFrame)
 		win.IMShow(frame)
 		win.WaitKey(1)
 	}

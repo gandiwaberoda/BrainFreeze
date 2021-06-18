@@ -1,6 +1,7 @@
 package ball
 
 import (
+	// "fmt"
 	"fmt"
 	"image"
 	"image/color"
@@ -34,31 +35,36 @@ func getRectMidpoint(rect image.Rectangle) image.Point {
 	return image.Pt(x, y)
 }
 
-func (n *NarrowHaesveBall) filter(src gocv.Mat, dst *gocv.Mat) {
-	gocv.InRangeWithScalar(src, n.lowerHsv, n.upperHsv, dst)
-}
-
 // Input adalah Mat yang sudah dalam format hsv
-func (n *NarrowHaesveBall) Detect(hsvFrame gocv.Mat) []models.DetectionObject {
+func (n *NarrowHaesveBall) Detect(hsvFrame *gocv.Mat) []models.DetectionObject {
+	// defer hsvFrame.Close()
+	// win := gocv.NewWindow("tanya")
+	// win.IMShow(*hsvFrame)
+	// win.WaitKey(1)
+
 	w := hsvFrame.Cols()
 	h := hsvFrame.Rows()
 
 	filtered := gocv.NewMatWithSize(h, w, gocv.MatTypeCV8UC1)
 	defer filtered.Close()
 
-	n.filter(hsvFrame, &filtered)
+	gocv.InRangeWithScalar(*hsvFrame, n.lowerHsv, n.upperHsv, &filtered)
 
 	erodeMat := gocv.Ones(3, 3, gocv.MatTypeCV8UC1)
+	defer erodeMat.Close()
 	gocv.Erode(filtered, &filtered, erodeMat)
 
 	dilateMat := gocv.Ones(21, 21, gocv.MatTypeCV8UC1)
+	defer dilateMat.Close()
 	gocv.Dilate(filtered, &filtered, dilateMat)
 
 	c := color.RGBA{255, 0, 0, 0}
 
 	hierarchyMat := gocv.NewMat()
+	defer hierarchyMat.Close()
+
 	pointVecs := gocv.FindContoursWithParams(filtered, &hierarchyMat, gocv.RetrievalExternal, gocv.ChainApproxNone)
-	hierarchyMat.Close()
+	defer pointVecs.Close()
 
 	detecteds := []models.DetectionObject{}
 	for i := 0; i < pointVecs.Size(); i++ {
@@ -71,7 +77,7 @@ func (n *NarrowHaesveBall) Detect(hsvFrame gocv.Mat) []models.DetectionObject {
 		}
 
 		rect := gocv.BoundingRect(it)
-		gocv.Rectangle(&hsvFrame, rect, c, 2)
+		gocv.Rectangle(hsvFrame, rect, c, 2)
 		fmt.Println(rect)
 
 		d := models.DetectionObject{
