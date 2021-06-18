@@ -11,6 +11,8 @@ type RobotState struct {
 	MyName           string
 	CurrentObjective string
 
+	FpsHsv int
+
 	MyTransform           models.Transform
 	MyTransformLastUpdate time.Time
 	MyTransformExpired    bool

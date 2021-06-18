@@ -1,13 +1,13 @@
 package wanda
 
 import (
+	"fmt"
 	"image"
 	"image/color"
-	"strconv"
-	"time"
 
 	// "gocv.io/x/gocv"
 	"gocv.io/x/gocv"
+	"harianugrah.com/brainfreeze/internal/diagnostic"
 	"harianugrah.com/brainfreeze/internal/wanda/acquisition"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/ball"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
@@ -20,18 +20,16 @@ type WandaVision struct {
 	topCamera  *acquisition.TopCameraAcquisition
 	ballNarrow *ball.NarrowHaesveBall
 	state      *state.StateAccess
+	fpsHsv     *diagnostic.FpsGauge
 }
 
 func NewWandaVision(conf *configuration.FreezeConfig, state *state.StateAccess) *WandaVision {
 	return &WandaVision{
-		conf:  conf,
-		state: state,
+		conf:   conf,
+		state:  state,
+		fpsHsv: diagnostic.NewFpsGauge(),
 	}
 }
-
-var frameCountSec int = 0
-var fps = 0
-var lastCheck = time.Now()
 
 func worker(w *WandaVision) {
 	win := gocv.NewWindow("hhh")
@@ -39,24 +37,10 @@ func worker(w *WandaVision) {
 	warna := color.RGBA{0, 255, 0, 0}
 	hsvFrame := gocv.NewMat()
 
-	go func() {
-		ticker := time.NewTicker(time.Millisecond * 1500)
-		for {
-			<-ticker.C
-
-			elapsed := time.Since(lastCheck)
-
-			fps = frameCountSec / int(elapsed.Seconds())
-
-			frameCountSec = 0
-			lastCheck = time.Now()
-		}
-	}()
-
 	frame := gocv.NewMat()
 	for {
 		w.topCamera.Read(&frame)
-		frameCountSec++
+		w.fpsHsv.Tick()
 
 		gocv.CvtColor(frame, &hsvFrame, gocv.ColorBGRToHSV)
 
@@ -66,6 +50,9 @@ func worker(w *WandaVision) {
 			transform := narrowBallRes[0].AsTransform(w.conf)
 			gocv.Rectangle(&frame, narrowBallRes[0].Bbox, warna, 3)
 			w.state.UpdateBallTransform(transform)
+		} else if len(narrowBallRes) == 0 {
+			// Pake yang wide ball
+			fmt.Println("loss")
 		}
 
 		// EGP
@@ -76,8 +63,10 @@ func worker(w *WandaVision) {
 
 		// E
 
-		// elapsed := time.Since(started)
-		gocv.PutText(&hsvFrame, strconv.Itoa(fps), image.Point{10, 60}, gocv.FontHersheyPlain, 5, color.RGBA{0, 255, 255, 0}, 3)
+		fpsText := fmt.Sprint(w.fpsHsv.Read(), "FPS")
+		gocv.PutText(&hsvFrame, fpsText, image.Point{10, 60}, gocv.FontHersheyPlain, 5, color.RGBA{0, 255, 255, 0}, 3)
+
+		w.state.UpdateFpsHsv(w.fpsHsv.Read())
 
 		win.IMShow(hsvFrame)
 		keyPressed := win.WaitKey(1)
@@ -90,6 +79,8 @@ func worker(w *WandaVision) {
 func (w *WandaVision) Start() {
 	w.topCamera = acquisition.CreateTopCameraAcquisition(w.conf)
 	w.topCamera.Start()
+
+	w.fpsHsv.Start()
 
 	w.ballNarrow = ball.NewNarrowHaesveBall(w.conf)
 
