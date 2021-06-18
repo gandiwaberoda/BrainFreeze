@@ -1,7 +1,10 @@
 package wanda
 
 import (
+	"image"
 	"image/color"
+	"strconv"
+	"time"
 
 	// "gocv.io/x/gocv"
 	"gocv.io/x/gocv"
@@ -26,15 +29,34 @@ func NewWandaVision(conf *configuration.FreezeConfig, state *state.StateAccess) 
 	}
 }
 
+var frameCountSec int = 0
+var fps = 0
+var lastCheck = time.Now()
+
 func worker(w *WandaVision) {
 	win := gocv.NewWindow("hhh")
 
 	warna := color.RGBA{0, 255, 0, 0}
 	hsvFrame := gocv.NewMat()
 
+	go func() {
+		ticker := time.NewTicker(time.Millisecond * 1500)
+		for {
+			<-ticker.C
+
+			elapsed := time.Since(lastCheck)
+
+			fps = frameCountSec / int(elapsed.Seconds())
+
+			frameCountSec = 0
+			lastCheck = time.Now()
+		}
+	}()
+
 	frame := gocv.NewMat()
 	for {
 		w.topCamera.Read(&frame)
+		frameCountSec++
 
 		gocv.CvtColor(frame, &hsvFrame, gocv.ColorBGRToHSV)
 
@@ -53,6 +75,9 @@ func worker(w *WandaVision) {
 		// F
 
 		// E
+
+		// elapsed := time.Since(started)
+		gocv.PutText(&hsvFrame, strconv.Itoa(fps), image.Point{10, 60}, gocv.FontHersheyPlain, 5, color.RGBA{0, 255, 255, 0}, 3)
 
 		win.IMShow(hsvFrame)
 		keyPressed := win.WaitKey(1)
