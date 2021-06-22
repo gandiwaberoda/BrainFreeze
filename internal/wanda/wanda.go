@@ -5,7 +5,6 @@ import (
 	"image"
 	"image/color"
 
-	// "gocv.io/x/gocv"
 	"gocv.io/x/gocv"
 	"harianugrah.com/brainfreeze/internal/diagnostic"
 	"harianugrah.com/brainfreeze/internal/wanda/acquisition"
@@ -87,7 +86,6 @@ func (w *WandaVision) Start() {
 	w.ballNarrow = ball.NewNarrowHaesveBall(w.conf)
 
 	go worker(w)
-	// worker(w)
 
 	w.isRunning = true
 }
