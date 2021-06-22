@@ -35,9 +35,11 @@ func worker(w *WandaVision) {
 	win := gocv.NewWindow("hhh")
 
 	warna := color.RGBA{0, 255, 0, 0}
-	hsvFrame := gocv.NewMat()
 
 	frame := gocv.NewMat()
+	hsvFrame := gocv.NewMat()
+	defer hsvFrame.Close()
+
 	for {
 		w.topCamera.Read(&frame)
 		w.fpsHsv.Tick()

@@ -10,7 +10,9 @@ import (
 )
 
 func main() {
-	vc, err := gocv.VideoCaptureFile("/Users/hariangr/Documents/MyFiles/Developer/Robotec/Beroda/ng/BrainDead/assets/captured/2021-04-23 14:50:34.157190 x 60.00024.1280.0.720.0.mp4")
+	// vc, err := gocv.VideoCaptureFile("/Users/hariangr/Documents/MyFiles/Developer/Robotec/Beroda/ng/BrainDead/assets/captured/2021-04-23 14:50:34.157190 x 60.00024.1280.0.720.0.mp4")
+
+	vc, err := gocv.VideoCaptureDevice(0)
 	if err != nil {
 		panic(err)
 	}
@@ -26,21 +28,28 @@ func main() {
 
 	win := gocv.NewWindow("entah")
 
-	circleMask := gocv.NewMatWithSize(720, 1280, gocv.MatTypeCV8UC3)
 	mid := image.Point{
 		X: 582, Y: 406,
 	}
 	white := color.RGBA{255, 255, 255, 0}
-	gocv.Circle(&circleMask, mid, 287, white, -1)
 
 	for {
 		vc.Read(&frame)
+		circleMask := gocv.NewMatWithSize(frame.Rows(), frame.Cols(), gocv.MatTypeCV8U)
+		gocv.Circle(&circleMask, mid, 287, white, -1)
+		maskedFrame := gocv.NewMatWithSize(frame.Rows(), frame.Cols(), gocv.MatTypeCV8U)
 
-		gocv.BitwiseAnd(frame, circleMask, &frame)
+		frame.CopyToWithMask(&maskedFrame, circleMask)
 
-		gocv.CvtColor(frame, &hsvFrame, gocv.ColorBGRToHSV)
-		// ballHsv.Detect(hsvFrame)
-		win.IMShow(frame)
+		// n := gocv.NewMat()
+
+		// gocv.BitwiseAnd(frame, circleMask, &n)
+		// frame.CopyToWithMask(&n, circleMask)
+
+		// gocv.CvtColor(frame, &hsvFrame, gocv.ColorBGRToHSV)
+		// x := ballHsv.Detect(&hsvFrame)
+		// fmt.Println(x)
+		win.IMShow(maskedFrame)
 		win.WaitKey(1)
 	}
 

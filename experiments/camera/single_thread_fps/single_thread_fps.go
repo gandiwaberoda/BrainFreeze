@@ -13,8 +13,8 @@ import (
 func main() {
 	log.Println("FPS HSV camera test")
 
-	// webcam, err := gocv.VideoCaptureDevice(0)
-	webcam, err := gocv.VideoCaptureFile("C:/Users/root/Documents/hariangr/temp.mp4")
+	webcam, err := gocv.VideoCaptureDevice(0)
+	// webcam, err := gocv.VideoCaptureFile("C:/Users/root/Documents/hariangr/temp.mp4")
 	if err != nil {
 		log.Fatalf("Failed to open video capture device")
 	}
