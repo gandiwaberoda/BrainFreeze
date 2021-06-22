@@ -56,8 +56,8 @@ func main() {
 
 	// Telepathy
 	globalWaitGroup.Add(1)
-	telepathyChannel := telepathy.CreateWebsocketTelepathy(&config)
-	// telepathyChannel := telepathy.CreateConsoleTelepathy()
+	// telepathyChannel := telepathy.CreateWebsocketTelepathy(&config)
+	telepathyChannel := telepathy.CreateConsoleTelepathy()
 	telepathyChannel.RegisterHandler(func(s string) {
 		// fmt.Println("handle", s)
 		intercom, err := models.ParseIntercom(s)
