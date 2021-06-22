@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"sync"
-	_ "time"
 
 	"harianugrah.com/brainfreeze/internal/diagnostic"
 	"harianugrah.com/brainfreeze/internal/gut"
@@ -28,7 +27,6 @@ func main() {
 		fmt.Println(selfCheck)
 		return
 	}
-
 	fmt.Println("Self check finished")
 
 	// Mulai Proses
@@ -84,13 +82,13 @@ func main() {
 	if errTelepathy != nil {
 		log.Fatalln(errTelepathy.Error())
 	}
-	// defer telepathyChannel.Stop()
+	defer telepathyChannel.Stop()
 
 	// Telemetry
 	globalWaitGroup.Add(1)
 	telemetry := diagnostic.CreateNewTelemetry(telepathyChannel, &config, state)
 	telemetry.Start()
-	// defer telemetry.Stop()
+	defer telemetry.Stop()
 
 	// Wanda Vision
 	globalWaitGroup.Add(1)
