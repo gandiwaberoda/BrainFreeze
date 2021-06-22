@@ -4,13 +4,21 @@ robot:
 
 camera:
   src:
-    - 0
-    - "C:/Users/root/Documents/hariangr/temp.mp4"
     - "/Users/hariangr/Documents/MyFiles/Developer/Robotec/Beroda/ng/BrainDead/assets/captured/2021-04-23 14:50:34.157190 x 60.00024.1280.0.720.0.mp4"
+    - "C:/Users/root/Documents/hariangr/temp.mp4"
+    - 0
+    
+  # Punya kamera 0 Mac
+  # midpointX: 309
+  # midpointY: 232
+  # midpointRad: 213
+  
+  # Punya video
+  midpointX: 583
+  midpointY: 405
+  midpointRad: 269
+
   useDshow: true
-  midpointX: 309
-  midpointY: 232
-  midpointRad: 213
   rawWidth: 1280
   rawHeight: 720
   postWidth: 640

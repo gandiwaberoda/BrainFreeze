@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"strconv"
 	"time"
 
 	"gocv.io/x/gocv"
@@ -31,7 +32,26 @@ func main() {
 		log.Fatalln("Gagal meload config", err)
 	}
 
-	topCam, _ := gocv.VideoCaptureDevice(0)
+	src := config.Camera.Src[0]
+	var errVc error
+	var topCam *gocv.VideoCapture
+
+	if len(src) == 1 {
+		// Kamera
+		srcInt, errInt := strconv.Atoi(src)
+		if errInt != nil {
+			panic(errInt)
+		}
+		topCam, errVc = gocv.VideoCaptureDevice(srcInt)
+	} else {
+		// Video
+		topCam, errVc = gocv.VideoCaptureFile(config.Camera.Src[0])
+	}
+
+	if errVc != nil {
+		panic(errVc)
+	}
+
 	firstFrame := gocv.NewMat()
 	topCam.Read(&firstFrame)
 
