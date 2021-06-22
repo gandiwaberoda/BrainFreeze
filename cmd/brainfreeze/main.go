@@ -18,15 +18,24 @@ import (
 )
 
 func main() {
-
-	globalWaitGroup := sync.WaitGroup{}
-
 	config, err := configuration.LoadStartupConfig()
 	if err != nil {
 		log.Fatalln("Gagal meload config", err)
 	}
 
+	selfCheck := diagnostic.ConfigValidate(config)
+	if selfCheck != nil {
+		fmt.Println(selfCheck)
+		return
+	}
+
+	fmt.Println("Self check finished")
+
+	// Mulai Proses
+	globalWaitGroup := sync.WaitGroup{}
+
 	// Local State
+	globalWaitGroup.Add(1)
 	state := state.CreateStateAccess(&config)
 	state.StartWatcher(&config)
 	defer state.StopWatcher()

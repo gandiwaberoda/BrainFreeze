@@ -45,6 +45,14 @@ func (c *TopCameraAcquisition) read() {
 	defer frame.Close()
 	c.vc.Read(&frame)
 
+	// Validasi config.yaml
+	if c.conf.Camera.RawHeight != frame.Rows() {
+		panic("Config RawHeight seharusnya " + strconv.Itoa(frame.Rows()))
+	}
+	if c.conf.Camera.RawWidth != frame.Cols() {
+		panic("Config RawWidth seharusnya " + strconv.Itoa(frame.Cols()))
+	}
+
 	// Masking area lingkaran
 	circleMask := gocv.NewMatWithSize(frame.Rows(), frame.Cols(), gocv.MatTypeCV8U)
 	defer circleMask.Close()

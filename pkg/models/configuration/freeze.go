@@ -1,12 +1,11 @@
 package configuration
 
 import (
-	"log"
 	"os"
 	"time"
 
 	"gopkg.in/yaml.v2"
-	"harianugrah.com/brainfreeze/pkg/errors"
+	frerror "harianugrah.com/brainfreeze/pkg/errors"
 )
 
 type RobotConfig struct {
@@ -85,14 +84,5 @@ func LoadStartupConfig() (FreezeConfig, error) {
 		return FreezeConfig{}, &frerror.ConfigError{Detail: err.Error()}
 	}
 
-	if !validateConfig(conf) {
-		log.Fatalln("Startup config tidak beres")
-	}
-
 	return conf, nil
-}
-
-// Validasi configurasi yang telat dimaut
-func validateConfig(conf FreezeConfig) bool {
-	return true
 }

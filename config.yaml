@@ -11,8 +11,8 @@ camera:
   midpointX: 309
   midpointY: 232
   midpointRad: 213
-  rawWidth: 640
-  rawHeight: 480
+  rawWidth: 1280
+  rawHeight: 720
   postWidth: 640
   postHeight: 640
 
