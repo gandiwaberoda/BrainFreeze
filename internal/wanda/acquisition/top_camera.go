@@ -71,6 +71,9 @@ func (c *TopCameraAcquisition) read() {
 	resImg := maskedframe.Region(rect)
 	defer resImg.Close()
 
+	// Flip vertically
+	gocv.Flip(resImg, &resImg, 0)
+
 	// Normalize ukuran biar standar di hsv sama dnn
 	newSize := image.Point{c.conf.Camera.PostWidth, c.conf.Camera.PostHeight}
 	gocv.Resize(resImg, &c.postFrame, newSize, 0, 0, gocv.InterpolationLinear)

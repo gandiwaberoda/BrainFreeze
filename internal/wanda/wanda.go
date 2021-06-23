@@ -33,7 +33,8 @@ func NewWandaVision(conf *configuration.FreezeConfig, state *state.StateAccess) 
 }
 
 // Harus diluar mainthread
-var win = gocv.NewWindow("hhh")
+var hsvWin = gocv.NewWindow("HSV")
+var rawWin = gocv.NewWindow("Post Processed")
 
 func worker(w *WandaVision) {
 	warna := color.RGBA{0, 255, 0, 0}
@@ -47,6 +48,10 @@ func worker(w *WandaVision) {
 		w.fpsHsv.Tick()
 
 		gocv.CvtColor(frame, &hsvFrame, gocv.ColorBGRToHSV)
+		// Blur
+		// gocv.GaussianBlur(hsvFrame, &hsvFrame, image.Point{41, 41}, 0, 0, gocv.BorderDefault)
+		// gocv.MedianBlur(hsvFrame, &hsvFrame, 11)
+		// gocv.BilateralFilter(hsvFrameSrc, &hsvFrame, 17, 125, 125)
 
 		// Ball
 		narrowBallRes := w.ballNarrow.Detect(&hsvFrame)
@@ -73,10 +78,13 @@ func worker(w *WandaVision) {
 		w.state.UpdateFpsHsv(w.fpsHsv.Read())
 
 		mainthread.Call(func() {
+			rawWin.IMShow(frame)
+			if keyPressed := hsvWin.WaitKey(1); keyPressed == 'q' {
+				return
+			}
 
-			win.IMShow(hsvFrame)
-			keyPressed := win.WaitKey(1)
-			if keyPressed == 'q' {
+			hsvWin.IMShow(hsvFrame)
+			if keyPressed := hsvWin.WaitKey(1); keyPressed == 'q' {
 				return
 			}
 
