@@ -1,0 +1,4 @@
+0 bola
+1 gawang
+2 obstacle
+3 robot
