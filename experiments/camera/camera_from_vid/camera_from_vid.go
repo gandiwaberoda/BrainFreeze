@@ -14,7 +14,8 @@ import (
 func main() {
 	log.Println("FPS camera test")
 
-	webcam, err := gocv.VideoCaptureFile("/Users/hariangr/Documents/MyFiles/Developer/Robotec/Beroda/ng/assets/captured/2021-04-23 14:53:43.070299 x 60.00024.1280.0.720.0.mp4")
+	// webcam, err := gocv.VideoCaptureFile("/Users/hariangr/Documents/MyFiles/Developer/Robotec/Beroda/ng/assets/captured/2021-04-23 14:53:43.070299 x 60.00024.1280.0.720.0.mp4")
+	webcam, err := gocv.VideoCaptureFile("C:/Users/root/Documents/hariangr/temp.mp4")
 	if err != nil {
 		log.Fatalf("Failed to open video capture device")
 	}

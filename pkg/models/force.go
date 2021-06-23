@@ -6,6 +6,7 @@ type Force struct {
 	x        float64
 	y        float64
 	rot      float64
+	kick     float64
 	handling float64
 }
 
@@ -13,6 +14,8 @@ func (f *Force) Idle() {
 	f.x = 0
 	f.y = 0
 	f.rot = 0
+	f.kick = 0
+	f.handling = 0
 }
 
 //#region
@@ -23,11 +26,8 @@ func (f *Force) AddY(_y float64) {
 	f.y += _y
 }
 
-func (f Force) GetX() float64 {
-	return f.x
-}
-func (f *Force) AddRot(_rot float64) {
-	f.rot += _rot
+func (f *Force) AddRot(_rot Degree) {
+	f.rot += float64(_rot)
 }
 func (f *Force) HandlingReverse() {
 	f.handling = -1.0
@@ -41,7 +41,19 @@ func (f *Force) DisableHandling() {
 	f.handling = 0.0
 }
 
+func (f *Force) Kick() {
+	f.kick = 1.0
+}
+
+func (f *Force) CancelKick() {
+	f.kick = 0.0
+}
+
 //#region
+func (f Force) GetX() float64 {
+	return f.x
+}
+
 func (f Force) GetY() float64 {
 	return f.y
 }
@@ -50,11 +62,15 @@ func (f Force) GetRot() float64 {
 	return f.rot
 }
 
+func (f Force) GetKick() float64 {
+	return f.kick
+}
+
 func (f Force) GetHandling() float64 {
 	return f.handling
 }
 
 //#region
 func (f Force) AsGutCommandString() string {
-	return fmt.Sprint("*a,", f.GetX(), ",", f.GetY(), ",", f.GetRot(), ",", f.GetHandling(), "#")
+	return fmt.Sprint("*a,", f.GetX(), ",", f.GetY(), ",", f.GetRot(), ",", f.GetKick(), ",", f.GetHandling(), "#")
 }

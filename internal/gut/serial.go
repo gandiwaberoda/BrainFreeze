@@ -7,15 +7,19 @@ import (
 	"log"
 
 	"github.com/tarm/serial"
+	"harianugrah.com/brainfreeze/pkg/models/configuration"
 )
 
 type GutSerial struct {
 	Gut
 	Port *serial.Port
+	conf *configuration.FreezeConfig
 }
 
-func CreateGutSerial() *GutSerial {
-	return &GutSerial{}
+func CreateGutSerial(conf *configuration.FreezeConfig) *GutSerial {
+	return &GutSerial{
+		conf: conf,
+	}
 }
 
 func worker(gut *GutSerial) {
@@ -43,7 +47,7 @@ func worker(gut *GutSerial) {
 }
 
 func (g *GutSerial) Start() (bool, error) {
-	c := &serial.Config{Name: "/dev/cu.usbmodem14401", Baud: 115200}
+	c := &serial.Config{Name: g.conf.Serial.Ports[0], Baud: 115200}
 
 	ser, err := serial.OpenPort(c)
 	if err != nil {

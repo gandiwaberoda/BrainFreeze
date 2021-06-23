@@ -1,172 +1,123 @@
 package acquisition
 
 import (
-	// "image"
-	// "image/color"
-	// "math"
-	// "time"
-	"fmt"
 	"image"
 	"image/color"
 	"strconv"
 	"sync"
+	"time"
 
-	"github.com/faiface/mainthread"
 	"gocv.io/x/gocv"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 )
 
 type TopCameraAcquisition struct {
-	Lock         *sync.RWMutex
-	IsRunning    bool
-	vc           *gocv.VideoCapture
-	conf         *configuration.FreezeConfig
-	Frame        gocv.Mat
-	previewImage bool
-	threaded     bool
-	preprocess   bool
+	Lock       *sync.RWMutex
+	vc         *gocv.VideoCapture
+	conf       *configuration.FreezeConfig
+	postFrame  gocv.Mat
+	firstFrame bool
 }
 
-func CreateTopCameraAcquisition(conf *configuration.FreezeConfig, threaded bool, preprocess bool, previewImage bool) *TopCameraAcquisition {
+func CreateTopCameraAcquisition(conf *configuration.FreezeConfig) *TopCameraAcquisition {
+	_postframe := gocv.NewMatWithSize(conf.Camera.PostHeight, conf.Camera.PostWidth, gocv.MatTypeCV8U)
 
 	return &TopCameraAcquisition{
-		IsRunning:    false,
-		conf:         conf,
-		Lock:         &sync.RWMutex{},
-		previewImage: previewImage,
-		threaded:     threaded,
-		// circleMask:   circleMask,
-		Frame:      gocv.NewMat(),
-		preprocess: preprocess,
+		conf:       conf,
+		Lock:       &sync.RWMutex{},
+		firstFrame: false,
+		postFrame:  _postframe,
+		vc:         &gocv.VideoCapture{},
 	}
 }
 
 func worker(c *TopCameraAcquisition) {
-	vvc, _ := gocv.VideoCaptureFile(c.conf.Camera.Src[0])
-	defer vvc.Close()
+	for {
+		// TODO: Bisa dipindah lockingnya ke dalam read() function
+		c.Lock.Lock()
+		c.read()
+		c.Lock.Unlock()
+	}
+}
 
-	// frame := gocv.NewMatWithSize(c.conf.Camera.RawHeight, c.conf.Camera.RawWidth, gocv.MatTypeCV8UC3)
+func (c *TopCameraAcquisition) read() {
+	// Baca frame dari kamera
 	frame := gocv.NewMat()
+	defer frame.Close()
+	c.vc.Read(&frame)
 
-	circleMask := gocv.Zeros(c.conf.Camera.RawHeight, c.conf.Camera.RawWidth, gocv.MatTypeCV8UC1)
+	if frame.Empty() {
+		return
+	}
+
+	// Masking area lingkaran
+	circleMask := gocv.NewMatWithSize(frame.Rows(), frame.Cols(), gocv.MatTypeCV8U)
+	defer circleMask.Close()
 	mid := image.Point{
 		X: c.conf.Camera.MidpointX, Y: c.conf.Camera.MidpointY,
 	}
 	white := color.RGBA{255, 255, 255, 0}
 	gocv.Circle(&circleMask, mid, c.conf.Camera.MidpointRad, white, -1)
 
-	for {
-		// c.vc.Read(&frame)
-		vvc.Read(&frame)
+	maskedframe := gocv.NewMatWithSize(frame.Rows(), frame.Cols(), gocv.MatTypeCV8U)
+	defer maskedframe.Close()
+	frame.CopyToWithMask(&maskedframe, circleMask)
 
-		// if c.preprocess {
-		// 	preprocessTopCameraFrame(&frame)
-		// }
-		// m := gocv.Zeros(300, 300, gocv.MatTypeCV8UC1)
-		// gocv.Circle()
-		// masked := gocv.NewMat()
-		// frame.CopyToWithMask(&masked, circleMask)
+	// Ambil area persegi ROI
+	x0 := c.conf.Camera.MidpointX - c.conf.Camera.MidpointRad
+	y0 := c.conf.Camera.MidpointY - c.conf.Camera.MidpointRad
+	x1 := c.conf.Camera.MidpointX + c.conf.Camera.MidpointRad
+	y1 := c.conf.Camera.MidpointY + c.conf.Camera.MidpointRad
+	rect := image.Rect(x0, y0, x1, y1)
+	resImg := maskedframe.Region(rect)
+	defer resImg.Close()
 
-		c.Lock.Lock()
-		c.Frame = circleMask
-		c.Lock.Unlock()
-	}
+	// Flip vertically
+	gocv.Flip(resImg, &resImg, 0)
+
+	// Normalize ukuran biar standar di hsv sama dnn
+	newSize := image.Point{c.conf.Camera.PostWidth, c.conf.Camera.PostHeight}
+	gocv.Resize(resImg, &c.postFrame, newSize, 0, 0, gocv.InterpolationLinear)
+
+	c.firstFrame = true
 }
 
-// func preprocessTopCameraFrame(frame *gocv.Mat) {
-
-// 	startTime := time.Now()
-
-// 	src := frame.Clone()
-
-// 	fpsPos := image.Point{X: 10, Y: 40}
-// 	fpsColor := color.RGBA{255, 255, 255, 0}
-// 	elapsedUs := time.Since(startTime).Microseconds()
-// 	fps := math.Pow(10.0, 6.0) / float64(elapsedUs)
-// 	elapsedStr := "FPS: " + fmt.Sprintf("%f", fps)
-
-// 	gocv.PutText(frame, elapsedStr, fpsPos, gocv.FontHersheyPlain, 1.5, fpsColor, 1)
-// 	// frame = res.Clone()
-// }
-
-func (c *TopCameraAcquisition) Read() gocv.Mat {
-	frame := gocv.NewMat()
-	defer frame.Close()
-
-	if !c.threaded {
-		c.Lock.Lock()
-		defer c.Lock.Unlock()
-
-		c.vc.Read(&frame)
-		c.Frame = frame.Clone()
-
-		return c.Frame
+func (c *TopCameraAcquisition) Read(dst *gocv.Mat) {
+	if !c.firstFrame {
+		<-time.After(time.Millisecond * 1000)
 	}
 
-	c.Lock.RLock()
-	defer c.Lock.RUnlock()
-	return c.Frame
+	if c.postFrame.Empty() {
+		c.Read(dst)
+	} else {
+		c.postFrame.CopyTo(dst)
+	}
 }
 
 func (c *TopCameraAcquisition) Start() {
+	c.firstFrame = false
+
 	src := c.conf.Camera.Src[0]
 
-	var vc *gocv.VideoCapture
 	var errVc error
-
 	if len(src) == 1 {
-		// Berupa angka
-		srcInt, err := strconv.Atoi(src)
-		if err != nil {
-			panic(err)
+		// Kamera
+		srcInt, errInt := strconv.Atoi(src)
+		if errInt != nil {
+			panic(errInt)
 		}
-		vc, errVc = gocv.VideoCaptureDevice(srcInt)
+		c.vc, errVc = gocv.VideoCaptureDevice(srcInt)
 	} else {
-		// Berupa video
-		vc, errVc = gocv.VideoCaptureFile(src)
+		// Video
+		c.vc, errVc = gocv.VideoCaptureFile(c.conf.Camera.Src[0])
 	}
-
 	if errVc != nil {
-		panic("can't open camera")
-	}
-	c.vc = vc
-
-	if c.threaded {
-		go worker(c)
+		panic(errVc)
 	}
 
-	if c.previewImage {
-		mainthread.Run(func() {
-			showImg(c)
-		})
-	}
-
+	go worker(c)
 }
 
 func (c *TopCameraAcquisition) Stop() {
 	c.vc.Close()
 }
-
-// func showImg(c *TopCameraAcquisition) {
-// 	// now we can run stuff on the main thread like this
-// 	mainthread.CallNonBlock(func() {
-// 		fmt.Println("printing from the main thread")
-
-// 		prevWindow := gocv.NewWindow("Preview Window")
-// 		defer prevWindow.Close()
-// 		// mat := gocv.NewMat()
-
-// 		for {
-// 			// mat = <-c.imgChan
-// 			prevWindow.IMShow(c.Frame)
-
-// 			keyPressed := prevWindow.WaitKey(1)
-// 			if keyPressed == 'q' {
-// 				return
-// 			}
-
-// 		}
-
-// 	})
-// 	fmt.Println("printing from another thread")
-// }

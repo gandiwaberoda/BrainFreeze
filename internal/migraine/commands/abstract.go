@@ -19,6 +19,9 @@ type CommandInterface interface {
 var handlers []func(models.Intercom, string, *configuration.FreezeConfig) (bool, CommandInterface) = []func(models.Intercom, string, *configuration.FreezeConfig) (bool, CommandInterface){
 	ParseIdleCommand,
 	ParseWasdCommand,
+	ParseLookatCommand,
+	ParseHandlingCommand,
+	ParseWatchatCommand,
 }
 
 func WhichCommand(intercom models.Intercom, conf *configuration.FreezeConfig) CommandInterface {

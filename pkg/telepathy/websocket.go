@@ -37,7 +37,7 @@ func listenMsg(tele *WebsocketTelepathy) {
 }
 
 func (tele *WebsocketTelepathy) Start() (bool, error) {
-	u := url.URL{Scheme: "ws", Host: "localhost:6901"}
+	u := url.URL{Scheme: "ws", Host: tele.config.Telepathy.ChitChatHost[0]}
 	log.Printf("connecting to %s", u.String())
 
 	ws, _, err := websocket.DefaultDialer.Dial(u.String(), nil)

@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 	"sync"
-	_ "time"
 
 	"harianugrah.com/brainfreeze/internal/diagnostic"
 	"harianugrah.com/brainfreeze/internal/gut"
 	"harianugrah.com/brainfreeze/internal/migraine"
-	"harianugrah.com/brainfreeze/internal/wanda/acquisition"
+	"harianugrah.com/brainfreeze/internal/wanda"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/gutmodel"
@@ -18,24 +18,36 @@ import (
 )
 
 func main() {
-
-	globalWaitGroup := sync.WaitGroup{}
-
 	config, err := configuration.LoadStartupConfig()
 	if err != nil {
 		log.Fatalln("Gagal meload config", err)
 	}
 
+	selfCheck := diagnostic.ConfigValidate(config)
+	if selfCheck != nil {
+		fmt.Println(selfCheck)
+		return
+	}
+	fmt.Println("Self check finished")
+
+	// Mulai Proses
+	globalWaitGroup := sync.WaitGroup{}
+
 	// Local State
+	globalWaitGroup.Add(1)
 	state := state.CreateStateAccess(&config)
 	state.StartWatcher(&config)
 	defer state.StopWatcher()
 
 	// Gut
-	// gut := gut.CreateGutSerial()
-	gut := gut.CreateGutConsole()
+	var gutTalk gut.GutInterface
+	if strings.ToUpper(config.Serial.Ports[0]) == "CONSOLE" {
+		gutTalk = gut.CreateGutConsole()
+	} else {
+		gutTalk = gut.CreateGutSerial(&config)
+	}
 	globalWaitGroup.Add(1)
-	gut.RegisterHandler(func(s string) {
+	gutTalk.RegisterHandler(func(s string) {
 		gtb, err := gutmodel.ParseGutToBrain(s)
 		if err != nil {
 			log.Println("wrong gtb", err)
@@ -43,21 +55,26 @@ func main() {
 		}
 		state.UpdateGutToBrain(gtb)
 	})
-	_, errGut := gut.Start()
+	_, errGut := gutTalk.Start()
 	if errGut != nil {
 		log.Panicln("Gut not yet opened:", errGut.Error())
 	}
-	defer gut.Stop()
+	defer gutTalk.Stop()
 
 	// Artificial Intellegence
-	migraine := migraine.CreateMigraine(&config, gut, state)
+	migraine := migraine.CreateMigraine(&config, gutTalk, state)
 	migraine.Start()
 	defer migraine.Stop()
 
 	// Telepathy
 	globalWaitGroup.Add(1)
-	telepathyChannel := telepathy.CreateWebsocketTelepathy(&config)
-	// telepathyChannel := telepathy.CreateConsoleTelepathy()
+
+	var telepathyChannel telepathy.Telepathy
+	if strings.ToUpper(config.Telepathy.ChitChatHost[0]) == "CONSOLE" {
+		telepathyChannel = telepathy.CreateConsoleTelepathy()
+	} else {
+		telepathyChannel = telepathy.CreateWebsocketTelepathy(&config)
+	}
 	telepathyChannel.RegisterHandler(func(s string) {
 		// fmt.Println("handle", s)
 		intercom, err := models.ParseIntercom(s)
@@ -83,19 +100,16 @@ func main() {
 	telemetry.Start()
 	defer telemetry.Stop()
 
-	// Wanda Vision
-	globalWaitGroup.Add(1)
-	topCamera := acquisition.CreateTopCameraAcquisition(&config, true, true, true)
-	topCamera.Start()
-	defer topCamera.Stop()
+	// Stream Out
+	// streamout := diagnostic.CreateNewStreamOutDiagnostic(topCamera, &config)
+	// streamout.StartTopCameraOutput()
+	// streamout.Start()
 
-	// for i := 0; true; i++ {
-	// 	x := models.Transform{WorldXcm: models.Centimeter(i)}
-	// 	state.UpdateMyTransform(x)
-	// 	fmt.Println("what")
-	// 	telepathyChannel.Send(fmt.Sprint("Apalah", i))
-	// 	// time.Sleep(time.Second * 1)
-	// }
+	// Wanda Vision
+	// Harus dijalankan paling terakhir, kalau mau nampilin Window di Macos karena bersifat blocking
+	globalWaitGroup.Add(1)
+	vision := wanda.NewWandaVision(&config, state)
+	vision.Start()
 
 	globalWaitGroup.Wait()
 }

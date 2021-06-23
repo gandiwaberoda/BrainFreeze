@@ -11,6 +11,8 @@ type RobotState struct {
 	MyName           string
 	CurrentObjective string
 
+	FpsHsv int
+
 	MyTransform           models.Transform
 	MyTransformLastUpdate time.Time
 	MyTransformExpired    bool
@@ -26,13 +28,13 @@ type RobotState struct {
 	FriendTransform           []models.Transform
 	FriendTransformLastUpdate time.Time
 
-	FriendGoalPostTransform           []models.Transform
+	FriendGoalPostTransform           models.Transform
 	FriendGoalPostTransformLastUpdate time.Time
 
 	EnemyTransform           []models.Transform
 	EnemyTransformLastUpdate time.Time
 
-	EnemyGoalPostTransform           []models.Transform
+	EnemyGoalPostTransform           models.Transform
 	EnemyGoalPostTransformLastUpdate time.Time
 
 	ObstacleTransform           []models.Transform
