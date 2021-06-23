@@ -2,10 +2,30 @@ package models_test
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"harianugrah.com/brainfreeze/pkg/models"
 )
+
+func TestDegreeRadianConversion(t *testing.T) {
+	tolerance := 0.01
+
+	deg := models.Degree(180)
+	if math.Abs(float64(deg.AsRadian())-3.14) > tolerance {
+		t.Fatalf(fmt.Sprintln("Gagal menerjemahkan degree ke radian, expected 3.14159 got", deg.AsRadian()))
+	}
+
+	deg = models.Degree(360)
+	if math.Abs(float64(deg.AsRadian())-6.28) > tolerance {
+		t.Fatalf(fmt.Sprintln("Gagal menerjemahkan degree ke radian, expected 6.28319 got", deg.AsRadian()))
+	}
+
+	rad := models.Radian(1)
+	if math.Abs(float64(rad.AsDegree())-57.2958) > tolerance {
+		t.Fatalf(fmt.Sprintln("Gagal menerjemahkan radian ke degree, expected 57.2958 got", rad.AsDegree()))
+	}
+}
 
 func TestDegreeHalfCircle(t *testing.T) {
 	d := models.Degree(0)

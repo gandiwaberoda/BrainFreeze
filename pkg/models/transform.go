@@ -9,7 +9,11 @@ type Miliseconds int
 type Radian float64
 
 func (r Radian) AsDegree() Degree {
-	return Degree(r * 180.0)
+	return Degree(r * (180.0 / math.Pi))
+}
+
+func (d Degree) AsRadian() Radian {
+	return Radian(d * (math.Pi / 180.0))
 }
 
 func (d *Degree) Rotate(am Degree) {

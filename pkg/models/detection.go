@@ -66,7 +66,7 @@ func EucDistance(xDist, yDist float64) float64 {
 }
 
 func pxToCm(px float64) float64 {
-	return px * 2
+	return px * 0.6
 }
 
 func (d DetectionObject) AsTransform(conf *configuration.FreezeConfig) Transform {
@@ -83,15 +83,19 @@ func (d DetectionObject) AsTransform(conf *configuration.FreezeConfig) Transform
 	rotTopDegree := robROTDegree
 	rotTopDegree.Rotate(Degree(conf.Camera.RobFrontOffsetDeg))
 
+	robRcm := pxToCm(rTopDist)
+	robXcm := robRcm * math.Sin(float64(robROTDegree.AsRadian()))
+	robYcm := robRcm * math.Cos(float64(robROTDegree.AsRadian()))
+
 	return Transform{
 		TopXpx: Centimeter(xTopDist),
 		TopYpx: Centimeter(yTopDist),
 		TopRpx: Centimeter(rTopDist),
 		TopROT: rotTopDegree,
 
-		RobXcm: Centimeter(pxToCm(xTopDist)),
-		RobYcm: Centimeter(pxToCm(yTopDist)),
-		RobRcm: Centimeter(pxToCm(rTopDist)),
+		RobXcm: Centimeter(pxToCm(robXcm)),
+		RobYcm: Centimeter(pxToCm(robYcm)),
+		RobRcm: Centimeter(robRcm),
 		RobROT: robROTDegree,
 	}
 }
