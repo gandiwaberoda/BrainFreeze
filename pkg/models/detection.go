@@ -14,6 +14,18 @@ type DetectionObject struct {
 	CloserPoint image.Point
 }
 
+func (d DetectionObject) Lerp(other DetectionObject, percentage float64) DetectionObject {
+	x := (percentage * float64(other.Midpoint.X)) + ((1 - percentage) * float64(d.Midpoint.X))
+	y := (percentage * float64(other.Midpoint.Y)) + ((1 - percentage) * float64(d.Midpoint.Y))
+
+	d.Midpoint = image.Point{
+		X: int(x),
+		Y: int(y),
+	}
+
+	return d
+}
+
 func NewDetectionObject(bbox image.Rectangle) DetectionObject {
 	d := DetectionObject{Bbox: bbox}
 

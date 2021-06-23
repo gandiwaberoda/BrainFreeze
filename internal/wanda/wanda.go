@@ -46,6 +46,7 @@ func worker(w *WandaVision) {
 	defer hsvFrame.Close()
 
 	var latestKnownBallDetection models.DetectionObject
+	latestKnownBallSet := false
 
 	for {
 		w.topCamera.Read(&frame)
@@ -54,8 +55,6 @@ func worker(w *WandaVision) {
 		gocv.CvtColor(frame, &hsvFrame, gocv.ColorBGRToHSV)
 		// Blur
 		gocv.GaussianBlur(hsvFrame, &hsvFrame, image.Point{7, 7}, 0, 0, gocv.BorderDefault)
-		// gocv.MedianBlur(hsvFrame, &hsvFrame, 11)
-		// gocv.BilateralFilter(hsvFrameSrc, &hsvFrame, 17, 125, 125)
 
 		// Ball
 		narrowBallFound, narrowBallRes := w.ballNarrow.Detect(&hsvFrame)
@@ -63,7 +62,13 @@ func worker(w *WandaVision) {
 			// TODO: Perlu lakukan classifier
 
 			if len(narrowBallRes) > 0 {
-				obj := narrowBallRes[0]
+				newer := narrowBallRes[0]
+				if !latestKnownBallSet {
+					latestKnownBallDetection = newer
+					latestKnownBallSet = true
+				}
+				obj := latestKnownBallDetection.Lerp(newer, 0.1)
+
 				transform := obj.AsTransform(w.conf)
 
 				gocv.Rectangle(&frame, narrowBallRes[0].Bbox, warnaNewest, 3)
