@@ -15,6 +15,10 @@ type HandlingCommand struct {
 }
 
 func ParseHandlingCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig) (bool, CommandInterface) {
+	if len(cmd) < 8 {
+		return false, nil
+	}
+
 	if strings.ToUpper(cmd[:8]) != "HANDLING" {
 		return false, &HandlingCommand{}
 	}

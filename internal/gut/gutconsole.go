@@ -1,6 +1,7 @@
 package gut
 
 type GutConsole struct {
+	Gut
 }
 
 func CreateGutConsole() *GutConsole {

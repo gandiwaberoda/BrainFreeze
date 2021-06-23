@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 
 	"harianugrah.com/brainfreeze/internal/diagnostic"
@@ -39,10 +40,14 @@ func main() {
 	defer state.StopWatcher()
 
 	// Gut
-	gut := gut.CreateGutSerial(&config)
-	// gut := gut.CreateGutConsole()
+	var gutTalk gut.GutInterface
+	if strings.ToUpper(config.Serial.Ports[0]) == "CONSOLE" {
+		gutTalk = gut.CreateGutConsole()
+	} else {
+		gutTalk = gut.CreateGutSerial(&config)
+	}
 	globalWaitGroup.Add(1)
-	gut.RegisterHandler(func(s string) {
+	gutTalk.RegisterHandler(func(s string) {
 		gtb, err := gutmodel.ParseGutToBrain(s)
 		if err != nil {
 			log.Println("wrong gtb", err)
@@ -50,21 +55,26 @@ func main() {
 		}
 		state.UpdateGutToBrain(gtb)
 	})
-	_, errGut := gut.Start()
+	_, errGut := gutTalk.Start()
 	if errGut != nil {
 		log.Panicln("Gut not yet opened:", errGut.Error())
 	}
-	defer gut.Stop()
+	defer gutTalk.Stop()
 
 	// Artificial Intellegence
-	migraine := migraine.CreateMigraine(&config, gut, state)
+	migraine := migraine.CreateMigraine(&config, gutTalk, state)
 	migraine.Start()
 	defer migraine.Stop()
 
 	// Telepathy
 	globalWaitGroup.Add(1)
-	telepathyChannel := telepathy.CreateWebsocketTelepathy(&config)
-	// telepathyChannel := telepathy.CreateConsoleTelepathy()
+
+	var telepathyChannel telepathy.Telepathy
+	if strings.ToUpper(config.Telepathy.ChitChatHost[0]) == "CONSOLE" {
+		telepathyChannel = telepathy.CreateConsoleTelepathy()
+	} else {
+		telepathyChannel = telepathy.CreateWebsocketTelepathy(&config)
+	}
 	telepathyChannel.RegisterHandler(func(s string) {
 		// fmt.Println("handle", s)
 		intercom, err := models.ParseIntercom(s)

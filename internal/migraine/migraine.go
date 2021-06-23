@@ -36,6 +36,10 @@ func worker(m *Migraine) {
 		force := models.Force{}
 		m.CurrentObjective.Tick(&force, m.state)
 
+		if m.CurrentObjective.ShouldClear() {
+			m.ReplaceObjective(commands.DefaultIdleCommand())
+		}
+
 		fmt.Println("TO GUT:", force.AsGutCommandString())
 		m.gut.Send(force.AsGutCommandString())
 

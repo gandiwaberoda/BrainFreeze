@@ -64,7 +64,7 @@ type FulfillmentConfig struct {
 }
 
 type TelepathyConfig struct {
-	ChitChatHost string `yaml:"chitchatHost"`
+	ChitChatHost []string `yaml:"chitchatHost"`
 }
 
 type WandaConfig struct {

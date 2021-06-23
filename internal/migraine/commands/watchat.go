@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"math"
 	"regexp"
 	"strings"
 
@@ -12,7 +11,7 @@ import (
 	"harianugrah.com/brainfreeze/pkg/models/state"
 )
 
-type LookatCommand struct {
+type WatchatCommand struct {
 	Target      string
 	conf        *configuration.FreezeConfig
 	fulfillment fulfillments.FulfillmentInterface
@@ -20,12 +19,12 @@ type LookatCommand struct {
 }
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParseLookatCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig) (bool, CommandInterface) {
-	if len(cmd) < 6 {
+func ParseWatchatCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig) (bool, CommandInterface) {
+	if len(cmd) < 7 {
 		return false, nil
 	}
 
-	if !strings.EqualFold(cmd[:6], "LOOKAT") {
+	if !strings.EqualFold(cmd[:7], "WATCHAT") {
 		return false, nil
 	}
 
@@ -33,8 +32,6 @@ func ParseLookatCommand(intercom models.Intercom, cmd string, conf *configuratio
 	foundParam := re.FindString(cmd)
 	foundParam = strings.ReplaceAll(foundParam, "(", "")
 	foundParam = strings.ReplaceAll(foundParam, ")", "")
-
-	fmt.Println("zzz", foundParam)
 
 	target := "BALL"
 	if foundParam != "" {
@@ -47,48 +44,31 @@ func ParseLookatCommand(intercom models.Intercom, cmd string, conf *configuratio
 		return false, nil
 	}
 
-	parsed := LookatCommand{
+	parsed := WatchatCommand{
 		Target:      target,
 		conf:        conf,
-		fulfillment: fulfillments.DefaultComplexFulfillment(),
+		fulfillment: fulfillments.DefaultHoldFulfillment(),
 	}
 
 	return true, &parsed
 }
 
-func (i LookatCommand) GetName() string {
-	return "LOOKAT:" + string(i.Target)
+func (i WatchatCommand) GetName() string {
+	return "WATCHAT:" + string(i.Target)
 }
 
-func TockLookat(target models.Transform, conf configuration.FreezeConfig, force *models.Force, state *state.StateAccess) {
-	rotForce := target.RobROT
-	if rotForce < models.Degree(-1*conf.Mecha.RotationForceRange) {
-		rotForce = models.Degree(-1 * conf.Mecha.RotationForceRange)
-	}
-
-	if rotForce > models.Degree(conf.Mecha.RotationForceRange) {
-		rotForce = models.Degree(conf.Mecha.RotationForceRange)
-	}
-
-	force.AddRot(rotForce)
-}
-
-func (i *LookatCommand) Tick(force *models.Force, state *state.StateAccess) {
+func (i *WatchatCommand) Tick(force *models.Force, state *state.StateAccess) {
 	_, target := state.GetTransformByKey(i.Target)
 
 	TockLookat(target, *i.conf, force, state)
 
-	if math.Abs(float64(target.RobROT)) < float64(i.conf.CommandParameter.LookatToleranceDeg) {
-		i.shouldClear = true
-	}
-
 	i.shouldClear = i.fulfillment.Tick(state)
 }
 
-func (i LookatCommand) ShouldClear() bool {
+func (i WatchatCommand) ShouldClear() bool {
 	return i.shouldClear
 }
 
-func (i LookatCommand) GetFulfillment() fulfillments.FulfillmentInterface {
+func (i WatchatCommand) GetFulfillment() fulfillments.FulfillmentInterface {
 	return i.fulfillment
 }
