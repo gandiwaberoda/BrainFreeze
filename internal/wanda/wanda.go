@@ -92,12 +92,9 @@ func (w *WandaVision) Start() {
 
 	w.ballNarrow = ball.NewNarrowHaesveBall(w.conf)
 
-	// go worker(w)
-
 	mainthread.Run(func() {
 		worker(w)
 	})
-	// panic("?????")
 
 	w.isRunning = true
 }

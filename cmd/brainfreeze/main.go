@@ -96,6 +96,7 @@ func main() {
 	// streamout.Start()
 
 	// Wanda Vision
+	// Harus dijalankan paling terakhir, kalau mau nampilin Window di Macos karena bersifat blocking
 	globalWaitGroup.Add(1)
 	vision := wanda.NewWandaVision(&config, state)
 	vision.Start()
