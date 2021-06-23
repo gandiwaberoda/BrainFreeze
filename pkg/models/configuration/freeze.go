@@ -70,6 +70,7 @@ type TelepathyConfig struct {
 type WandaConfig struct {
 	MinimumHsvArea float64 `yaml:"minimumHsvArea"`
 	MaximumHsvArea float64 `yaml:"maximumHsvArea"`
+	LerpValue      float64 `yaml:"lerpValue"`
 }
 
 type FreezeConfig struct {

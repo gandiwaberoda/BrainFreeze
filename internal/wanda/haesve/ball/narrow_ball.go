@@ -16,7 +16,7 @@ type NarrowHaesveBall struct {
 
 func NewNarrowHaesveBall(conf *configuration.FreezeConfig) *NarrowHaesveBall {
 	upper := gocv.NewScalar(37, 255, 255, 1)
-	lower := gocv.NewScalar(6, 115, 70, 0)
+	lower := gocv.NewScalar(6, 160, 70, 0)
 
 	return &NarrowHaesveBall{
 		conf:     conf,
@@ -84,10 +84,6 @@ func (n *NarrowHaesveBall) Detect(hsvFrame *gocv.Mat) (bool, []models.DetectionO
 		rect := gocv.BoundingRect(it)
 		gocv.Rectangle(hsvFrame, rect, c, 2)
 
-		// d := models.DetectionObject{
-		// 	Bbox:     rect,
-		// 	Midpoint: getRectMidpoint(rect),
-		// }
 		d := models.NewDetectionObject(rect)
 		detecteds = append(detecteds, d)
 	}

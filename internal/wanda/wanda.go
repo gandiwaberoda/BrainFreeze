@@ -67,7 +67,7 @@ func worker(w *WandaVision) {
 					latestKnownBallDetection = newer
 					latestKnownBallSet = true
 				}
-				obj := latestKnownBallDetection.Lerp(newer, 0.1)
+				obj := latestKnownBallDetection.Lerp(newer, w.conf.Wanda.LerpValue)
 
 				transform := obj.AsTransform(w.conf)
 
