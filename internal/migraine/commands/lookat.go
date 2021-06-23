@@ -12,6 +12,7 @@ import (
 	"harianugrah.com/brainfreeze/pkg/models/state"
 )
 
+// TODO: BUATKAN LOOKEDAT Fulfillment
 type LookatCommand struct {
 	Target      string
 	conf        *configuration.FreezeConfig
@@ -81,8 +82,6 @@ func (i *LookatCommand) Tick(force *models.Force, state *state.StateAccess) {
 	if math.Abs(float64(target.RobROT)) < float64(i.conf.CommandParameter.LookatToleranceDeg) {
 		i.shouldClear = true
 	}
-
-	i.shouldClear = i.fulfillment.Tick(state)
 }
 
 func (i LookatCommand) ShouldClear() bool {
