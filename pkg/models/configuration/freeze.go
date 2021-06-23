@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	"image"
 	"os"
 	"time"
 
@@ -23,6 +24,7 @@ type CameraConfig struct {
 	RawHeight   int      `yaml:"rawHeight"`
 	PostWidth   int      `yaml:"postWidth"`
 	PostHeight  int      `yaml:"postHeight"`
+	Midpoint    image.Point
 }
 
 type ExpirationConfig struct {
@@ -83,6 +85,8 @@ func LoadStartupConfig() (FreezeConfig, error) {
 	if err := decoder.Decode(&conf); err != nil {
 		return FreezeConfig{}, &frerror.ConfigError{Detail: err.Error()}
 	}
+
+	conf.Camera.Midpoint = image.Point{conf.Camera.PostWidth / 2, conf.Camera.PostHeight / 2}
 
 	return conf, nil
 }

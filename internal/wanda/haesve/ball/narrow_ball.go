@@ -3,7 +3,6 @@ package ball
 import (
 	// "fmt"
 	"fmt"
-	"image"
 	"image/color"
 
 	"gocv.io/x/gocv"
@@ -28,13 +27,6 @@ func NewNarrowHaesveBall(conf *configuration.FreezeConfig) *NarrowHaesveBall {
 	}
 }
 
-func getRectMidpoint(rect image.Rectangle) image.Point {
-	x := (rect.Max.X + rect.Min.X) / 2
-	y := (rect.Max.Y + rect.Min.Y) / 2
-
-	return image.Pt(x, y)
-}
-
 // Input adalah Mat yang sudah dalam format hsv
 func (n *NarrowHaesveBall) Detect(hsvFrame *gocv.Mat) []models.DetectionObject {
 	// defer hsvFrame.Close()
@@ -54,7 +46,7 @@ func (n *NarrowHaesveBall) Detect(hsvFrame *gocv.Mat) []models.DetectionObject {
 	defer erodeMat.Close()
 	gocv.Erode(filtered, &filtered, erodeMat)
 
-	dilateMat := gocv.Ones(21, 21, gocv.MatTypeCV8UC1)
+	dilateMat := gocv.Ones(17, 17, gocv.MatTypeCV8UC1)
 	defer dilateMat.Close()
 	gocv.Dilate(filtered, &filtered, dilateMat)
 
@@ -80,10 +72,11 @@ func (n *NarrowHaesveBall) Detect(hsvFrame *gocv.Mat) []models.DetectionObject {
 		gocv.Rectangle(hsvFrame, rect, c, 2)
 		fmt.Println(rect)
 
-		d := models.DetectionObject{
-			Bbox:     rect,
-			Midpoint: getRectMidpoint(rect),
-		}
+		// d := models.DetectionObject{
+		// 	Bbox:     rect,
+		// 	Midpoint: getRectMidpoint(rect),
+		// }
+		d := models.NewDetectionObject(rect)
 		detecteds = append(detecteds, d)
 	}
 

@@ -4,6 +4,12 @@ type Centimeter float64
 type Degree float64
 type Miliseconds int
 
+type Radian float64
+
+func (r Radian) AsDegree() Degree {
+	return Degree(r * 180.0)
+}
+
 type Transform struct {
 	// cm
 	EncXcm Centimeter

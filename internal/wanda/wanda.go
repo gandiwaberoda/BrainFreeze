@@ -56,8 +56,14 @@ func worker(w *WandaVision) {
 		// Ball
 		narrowBallRes := w.ballNarrow.Detect(&hsvFrame)
 		if len(narrowBallRes) > 0 {
-			transform := narrowBallRes[0].AsTransform(w.conf)
+			obj := narrowBallRes[0]
+			transform := obj.AsTransform(w.conf)
+
 			gocv.Rectangle(&frame, narrowBallRes[0].Bbox, warna, 3)
+			gocv.Circle(&frame, obj.Midpoint, obj.OuterRad, warna, 2)
+			// Origin to Ball Line
+			gocv.Line(&frame, w.conf.Camera.Midpoint, obj.Midpoint, warna, 2)
+
 			w.state.UpdateBallTransform(transform)
 		} else if len(narrowBallRes) == 0 {
 			// Pake yang wide ball
@@ -72,14 +78,14 @@ func worker(w *WandaVision) {
 
 		// E
 
+		// FPS Gauge
 		fpsText := fmt.Sprint(w.fpsHsv.Read(), "FPS")
 		gocv.PutText(&hsvFrame, fpsText, image.Point{10, 60}, gocv.FontHersheyPlain, 5, color.RGBA{0, 255, 255, 0}, 3)
-
 		w.state.UpdateFpsHsv(w.fpsHsv.Read())
 
 		mainthread.Call(func() {
 			rawWin.IMShow(frame)
-			if keyPressed := hsvWin.WaitKey(1); keyPressed == 'q' {
+			if keyPressed := rawWin.WaitKey(1); keyPressed == 'q' {
 				return
 			}
 
