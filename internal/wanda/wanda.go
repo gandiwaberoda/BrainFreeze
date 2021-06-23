@@ -5,6 +5,8 @@ import (
 	"image"
 	"image/color"
 
+	// "github.com/faiface/mainthread"
+	"github.com/faiface/mainthread"
 	"gocv.io/x/gocv"
 	"harianugrah.com/brainfreeze/internal/diagnostic"
 	"harianugrah.com/brainfreeze/internal/wanda/acquisition"
@@ -30,9 +32,10 @@ func NewWandaVision(conf *configuration.FreezeConfig, state *state.StateAccess) 
 	}
 }
 
-func worker(w *WandaVision) {
-	win := gocv.NewWindow("hhh")
+// Harus diluar mainthread
+var win = gocv.NewWindow("hhh")
 
+func worker(w *WandaVision) {
 	warna := color.RGBA{0, 255, 0, 0}
 
 	frame := gocv.NewMat()
@@ -69,11 +72,15 @@ func worker(w *WandaVision) {
 
 		w.state.UpdateFpsHsv(w.fpsHsv.Read())
 
-		win.IMShow(hsvFrame)
-		keyPressed := win.WaitKey(1)
-		if keyPressed == 'q' {
-			return
-		}
+		mainthread.Call(func() {
+
+			win.IMShow(hsvFrame)
+			keyPressed := win.WaitKey(1)
+			if keyPressed == 'q' {
+				return
+			}
+
+		})
 	}
 }
 
@@ -85,7 +92,12 @@ func (w *WandaVision) Start() {
 
 	w.ballNarrow = ball.NewNarrowHaesveBall(w.conf)
 
-	go worker(w)
+	// go worker(w)
+
+	mainthread.Run(func() {
+		worker(w)
+	})
+	// panic("?????")
 
 	w.isRunning = true
 }

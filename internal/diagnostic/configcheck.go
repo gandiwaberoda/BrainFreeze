@@ -42,7 +42,6 @@ func _checkCameraRawConfig(c configuration.FreezeConfig) error {
 	src := c.Camera.Src[0]
 	var errVc error
 	var vc *gocv.VideoCapture
-	defer vc.Close()
 
 	if len(src) == 1 {
 		// Kamera
@@ -55,6 +54,7 @@ func _checkCameraRawConfig(c configuration.FreezeConfig) error {
 		// Video
 		vc, errVc = gocv.VideoCaptureFile(c.Camera.Src[0])
 	}
+	defer vc.Close()
 
 	if errVc != nil {
 		return errVc

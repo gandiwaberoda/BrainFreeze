@@ -63,8 +63,8 @@ func main() {
 
 	// Telepathy
 	globalWaitGroup.Add(1)
-	// telepathyChannel := telepathy.CreateWebsocketTelepathy(&config)
-	telepathyChannel := telepathy.CreateConsoleTelepathy()
+	telepathyChannel := telepathy.CreateWebsocketTelepathy(&config)
+	// telepathyChannel := telepathy.CreateConsoleTelepathy()
 	telepathyChannel.RegisterHandler(func(s string) {
 		// fmt.Println("handle", s)
 		intercom, err := models.ParseIntercom(s)
@@ -90,15 +90,15 @@ func main() {
 	telemetry.Start()
 	defer telemetry.Stop()
 
-	// Wanda Vision
-	globalWaitGroup.Add(1)
-	vision := wanda.NewWandaVision(&config, state)
-	vision.Start()
-
 	// Stream Out
 	// streamout := diagnostic.CreateNewStreamOutDiagnostic(topCamera, &config)
 	// streamout.StartTopCameraOutput()
 	// streamout.Start()
+
+	// Wanda Vision
+	globalWaitGroup.Add(1)
+	vision := wanda.NewWandaVision(&config, state)
+	vision.Start()
 
 	globalWaitGroup.Wait()
 }
