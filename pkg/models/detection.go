@@ -53,12 +53,13 @@ func (d DetectionObject) AsTransform(conf *configuration.FreezeConfig) Transform
 	yTopDist := float64(conf.Camera.Midpoint.Y - d.Midpoint.Y)
 	rTopDist := EucDistance(xTopDist, yTopDist)
 
-	rotTopDegree := Radian(math.Atan2(yTopDist, xTopDist)).AsDegree()
+	robROTDegree := Radian(math.Atan2(yTopDist, xTopDist)).AsDegree()
 	// Balik
-	rotTopDegree = rotTopDegree * -1
+	robROTDegree = robROTDegree * -1
+	robROTDegree.Rotate(0)
 
-	robROTDegree := rotTopDegree
-	robROTDegree.Rotate(Degree(conf.Camera.RobFrontOffsetDeg))
+	rotTopDegree := robROTDegree
+	rotTopDegree.Rotate(Degree(conf.Camera.RobFrontOffsetDeg))
 
 	return Transform{
 		TopXpx: Centimeter(xTopDist),

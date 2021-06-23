@@ -39,8 +39,8 @@ func main() {
 	defer state.StopWatcher()
 
 	// Gut
-	// gut := gut.CreateGutSerial()
-	gut := gut.CreateGutConsole()
+	gut := gut.CreateGutSerial(&config)
+	// gut := gut.CreateGutConsole()
 	globalWaitGroup.Add(1)
 	gut.RegisterHandler(func(s string) {
 		gtb, err := gutmodel.ParseGutToBrain(s)

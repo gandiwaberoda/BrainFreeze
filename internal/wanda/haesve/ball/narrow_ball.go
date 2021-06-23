@@ -16,7 +16,7 @@ type NarrowHaesveBall struct {
 
 func NewNarrowHaesveBall(conf *configuration.FreezeConfig) *NarrowHaesveBall {
 	upper := gocv.NewScalar(37, 255, 255, 1)
-	lower := gocv.NewScalar(6, 120, 70, 0)
+	lower := gocv.NewScalar(6, 115, 70, 0)
 
 	return &NarrowHaesveBall{
 		conf:     conf,
@@ -26,11 +26,17 @@ func NewNarrowHaesveBall(conf *configuration.FreezeConfig) *NarrowHaesveBall {
 }
 
 // Input adalah Mat yang sudah dalam format hsv
-func (n *NarrowHaesveBall) Detect(hsvFrame *gocv.Mat) []models.DetectionObject {
+func (n *NarrowHaesveBall) Detect(hsvFrame *gocv.Mat) (bool, []models.DetectionObject) {
+	detecteds := []models.DetectionObject{}
+
 	// defer hsvFrame.Close()
 	// win := gocv.NewWindow("tanya")
 	// win.IMShow(*hsvFrame)
 	// win.WaitKey(1)
+
+	if hsvFrame.Empty() {
+		return false, detecteds
+	}
 
 	w := hsvFrame.Cols()
 	h := hsvFrame.Rows()
@@ -56,12 +62,22 @@ func (n *NarrowHaesveBall) Detect(hsvFrame *gocv.Mat) []models.DetectionObject {
 	pointVecs := gocv.FindContoursWithParams(filtered, &hierarchyMat, gocv.RetrievalExternal, gocv.ChainApproxNone)
 	defer pointVecs.Close()
 
-	detecteds := []models.DetectionObject{}
+	if pointVecs.Size() == 0 {
+		return false, detecteds
+	}
+
 	for i := 0; i < pointVecs.Size(); i++ {
+		// <-time.After(time.Millisecond * 1500)
 		it := pointVecs.At(i)
 		area := gocv.ContourArea(it)
+
+		// fmt.Println("ENTAH:", i, "AREA:", area)
+
 		if area < n.conf.Wanda.MinimumHsvArea {
 			// Skip kalau ukurannya kekecilan
+			continue
+		}
+		if area > n.conf.Wanda.MaximumHsvArea {
 			continue
 		}
 
@@ -76,5 +92,5 @@ func (n *NarrowHaesveBall) Detect(hsvFrame *gocv.Mat) []models.DetectionObject {
 		detecteds = append(detecteds, d)
 	}
 
-	return detecteds
+	return true, detecteds
 }

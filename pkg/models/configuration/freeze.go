@@ -33,6 +33,11 @@ type ExpirationConfig struct {
 	MyExpiration   time.Duration `yaml:"my"`
 }
 
+type SerialConfig struct {
+	Ports     []string `yaml:"ports"`
+	CommandHz int      `yaml:"commandHz"`
+}
+
 type DiagnosticConfig struct {
 	TelemetryHz        time.Duration `yaml:"telemetryHz"`
 	EnableStream       bool          `yaml:"enableStream"`
@@ -64,6 +69,7 @@ type TelepathyConfig struct {
 
 type WandaConfig struct {
 	MinimumHsvArea float64 `yaml:"minimumHsvArea"`
+	MaximumHsvArea float64 `yaml:"maximumHsvArea"`
 }
 
 type FreezeConfig struct {
@@ -77,6 +83,7 @@ type FreezeConfig struct {
 	Telepathy        TelepathyConfig        `yaml:"telepathy"`
 	Wanda            WandaConfig            `yaml:"wanda"`
 	CommandParameter CommandParameterConfig `yaml:"commandParameter"`
+	Serial           SerialConfig           `yaml:"serial"`
 }
 
 func LoadStartupConfig() (FreezeConfig, error) {

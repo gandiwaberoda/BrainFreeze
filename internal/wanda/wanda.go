@@ -11,6 +11,7 @@ import (
 	"harianugrah.com/brainfreeze/internal/diagnostic"
 	"harianugrah.com/brainfreeze/internal/wanda/acquisition"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/ball"
+	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
 )
@@ -37,11 +38,14 @@ var hsvWin = gocv.NewWindow("HSV")
 var rawWin = gocv.NewWindow("Post Processed")
 
 func worker(w *WandaVision) {
-	warna := color.RGBA{0, 255, 0, 0}
+	warnaNewest := color.RGBA{0, 255, 0, 0}
+	warnaLastKnown := color.RGBA{0, 0, 255, 0}
 
 	frame := gocv.NewMat()
 	hsvFrame := gocv.NewMat()
 	defer hsvFrame.Close()
+
+	var latestKnownBallDetection models.DetectionObject
 
 	for {
 		w.topCamera.Read(&frame)
@@ -49,23 +53,31 @@ func worker(w *WandaVision) {
 
 		gocv.CvtColor(frame, &hsvFrame, gocv.ColorBGRToHSV)
 		// Blur
-		// gocv.GaussianBlur(hsvFrame, &hsvFrame, image.Point{41, 41}, 0, 0, gocv.BorderDefault)
+		gocv.GaussianBlur(hsvFrame, &hsvFrame, image.Point{7, 7}, 0, 0, gocv.BorderDefault)
 		// gocv.MedianBlur(hsvFrame, &hsvFrame, 11)
 		// gocv.BilateralFilter(hsvFrameSrc, &hsvFrame, 17, 125, 125)
 
 		// Ball
-		narrowBallRes := w.ballNarrow.Detect(&hsvFrame)
-		if len(narrowBallRes) > 0 {
-			obj := narrowBallRes[0]
-			transform := obj.AsTransform(w.conf)
+		narrowBallFound, narrowBallRes := w.ballNarrow.Detect(&hsvFrame)
+		if narrowBallFound {
+			// TODO: Perlu lakukan classifier
 
-			gocv.Rectangle(&frame, narrowBallRes[0].Bbox, warna, 3)
-			gocv.Circle(&frame, obj.Midpoint, obj.OuterRad, warna, 2)
-			// Origin to Ball Line
-			gocv.Line(&frame, w.conf.Camera.Midpoint, obj.Midpoint, warna, 2)
+			if len(narrowBallRes) > 0 {
+				obj := narrowBallRes[0]
+				transform := obj.AsTransform(w.conf)
 
-			w.state.UpdateBallTransform(transform)
-		} else if len(narrowBallRes) == 0 {
+				gocv.Rectangle(&frame, narrowBallRes[0].Bbox, warnaNewest, 3)
+				gocv.Circle(&frame, obj.Midpoint, obj.OuterRad, warnaNewest, 2)
+				// Origin to Ball Line
+				gocv.Line(&frame, w.conf.Camera.Midpoint, obj.Midpoint, warnaNewest, 2)
+
+				w.state.UpdateBallTransform(transform)
+				latestKnownBallDetection = obj
+			} else {
+				gocv.Line(&frame, w.conf.Camera.Midpoint, latestKnownBallDetection.Midpoint, warnaLastKnown, 2)
+			}
+
+		} else {
 			// Pake yang wide ball
 			fmt.Println("loss")
 		}
