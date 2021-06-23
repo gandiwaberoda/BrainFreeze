@@ -62,11 +62,13 @@ func worker(w *WandaVision) {
 			// TODO: Perlu lakukan classifier
 
 			if len(narrowBallRes) > 0 {
-				newer := narrowBallRes[0]
+				// newer := narrowBallRes[0]
 				if !latestKnownBallSet {
-					latestKnownBallDetection = newer
+					latestKnownBallDetection = narrowBallRes[0]
 					latestKnownBallSet = true
 				}
+				sortedByDist := latestKnownBallDetection.SortDetectionsObjectByDistanceToMe(narrowBallRes)
+				newer := sortedByDist[0]
 				obj := latestKnownBallDetection.Lerp(newer, w.conf.Wanda.LerpValue)
 
 				transform := obj.AsTransform(w.conf)

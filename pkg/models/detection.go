@@ -3,6 +3,7 @@ package models
 import (
 	"image"
 	"math"
+	"sort"
 
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 )
@@ -26,6 +27,18 @@ func (d DetectionObject) Lerp(other DetectionObject, percentage float64) Detecti
 	return d
 }
 
+// Untuk mencari titik yang paling masuk akal menjadi bola, jika diketahui lokasi bola sebelumnya
+func (d DetectionObject) SortDetectionsObjectByDistanceToMe(other []DetectionObject) []DetectionObject {
+	sort.Slice(other, func(i, j int) bool {
+		distI := EucDistance(float64(d.Midpoint.X)-float64(other[i].Midpoint.X), float64(d.Midpoint.Y)-float64(other[i].Midpoint.Y))
+		distJ := EucDistance(float64(d.Midpoint.X)-float64(other[j].Midpoint.X), float64(d.Midpoint.Y)-float64(other[j].Midpoint.Y))
+
+		return distI < distJ
+	})
+
+	return other
+}
+
 func NewDetectionObject(bbox image.Rectangle) DetectionObject {
 	d := DetectionObject{Bbox: bbox}
 
@@ -46,9 +59,6 @@ func NewDetectionObject(bbox image.Rectangle) DetectionObject {
 }
 
 func EucDistance(xDist, yDist float64) float64 {
-	// xDist := math.Pow(float64(one.X-other.X), 2)
-	// yDist := math.Pow(float64(one.Y-other.Y), 2)
-
 	xD2 := math.Pow(xDist, 2)
 	yD2 := math.Pow(yDist, 2)
 
@@ -56,7 +66,7 @@ func EucDistance(xDist, yDist float64) float64 {
 }
 
 func pxToCm(px float64) float64 {
-	return px * 100
+	return px * 2
 }
 
 func (d DetectionObject) AsTransform(conf *configuration.FreezeConfig) Transform {
