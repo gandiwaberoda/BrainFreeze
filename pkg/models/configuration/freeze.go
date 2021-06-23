@@ -15,16 +15,17 @@ type RobotConfig struct {
 }
 
 type CameraConfig struct {
-	Src         []string `yaml:"src"`
-	UseDshow    bool     `yaml:"useDshow"`
-	MidpointX   int      `yaml:"midpointX"`
-	MidpointY   int      `yaml:"midpointY"`
-	MidpointRad int      `yaml:"midpointRad"`
-	RawWidth    int      `yaml:"rawWidth"`
-	RawHeight   int      `yaml:"rawHeight"`
-	PostWidth   int      `yaml:"postWidth"`
-	PostHeight  int      `yaml:"postHeight"`
-	Midpoint    image.Point
+	Src               []string `yaml:"src"`
+	UseDshow          bool     `yaml:"useDshow"`
+	MidpointX         int      `yaml:"midpointX"`
+	MidpointY         int      `yaml:"midpointY"`
+	MidpointRad       int      `yaml:"midpointRad"`
+	RawWidth          int      `yaml:"rawWidth"`
+	RawHeight         int      `yaml:"rawHeight"`
+	PostWidth         int      `yaml:"postWidth"`
+	PostHeight        int      `yaml:"postHeight"`
+	RobFrontOffsetDeg int      `yaml:"robFrontOffsetDeg"`
+	Midpoint          image.Point
 }
 
 type ExpirationConfig struct {
