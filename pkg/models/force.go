@@ -26,8 +26,8 @@ func (f *Force) AddY(_y float64) {
 func (f Force) GetX() float64 {
 	return f.x
 }
-func (f *Force) AddRot(_rot float64) {
-	f.rot += _rot
+func (f *Force) AddRot(_rot Degree) {
+	f.rot += float64(_rot)
 }
 func (f *Force) HandlingReverse() {
 	f.handling = -1.0

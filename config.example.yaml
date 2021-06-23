@@ -4,15 +4,31 @@ robot:
 
 camera:
   src:
-    - "C:/Users/root/Documents/hariangr/temp.mp4"
     - "/Users/hariangr/Documents/MyFiles/Developer/Robotec/Beroda/ng/BrainDead/assets/captured/2021-04-23 14:50:34.157190 x 60.00024.1280.0.720.0.mp4"
     - 0
-  useDshow: true
-  midpointX: 309
-  midpointY: 232
-  midpointRad: 213
+    - "C:/Users/root/Documents/hariangr/temp.mp4"
+    
+  # Punya kamera 0 Mac
+  # midpointX: 309
+  # midpointY: 232
+  # midpointRad: 213
+  
+  # Punya video
+  midpointX: 583
+  midpointY: 405
+  midpointRad: 269
   rawWidth: 1280
   rawHeight: 720
+  robFrontOffsetDeg: -90 # Putar 
+
+  # Punya kemera TOP GANDIWA
+  # midpointX: 917
+  # midpointY: 597
+  # midpointRad: 383
+  # rawWidth: 1920
+  # rawHeight: 1080
+
+  useDshow: true
   postWidth: 640
   postHeight: 640
 
@@ -22,7 +38,8 @@ expiration:
   my: 1500000000
 
 telepathy:
-  chitchatHost: "192.168.1.4:6901"
+  # chitchatHost: "192.168.1.4:6901"
+  chitchatHost: "localhost:6901"
 
 serial:
   ports:
@@ -48,3 +65,7 @@ fulfillment:
 mecha:
   horizontalForceRange: 100
   verticalForceRange: 100
+  rotationForceRange: 50
+
+commandParameter:
+  lookatToleranceDeg: 10

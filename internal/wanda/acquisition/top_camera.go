@@ -33,6 +33,7 @@ func CreateTopCameraAcquisition(conf *configuration.FreezeConfig) *TopCameraAcqu
 
 func worker(c *TopCameraAcquisition) {
 	for {
+		// TODO: Bisa dipindah lockingnya ke dalam read() function
 		c.Lock.Lock()
 		c.read()
 		c.Lock.Unlock()

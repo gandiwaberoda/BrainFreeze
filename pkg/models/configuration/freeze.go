@@ -47,6 +47,11 @@ type MigraineConfig struct {
 type MechanicalConfig struct {
 	HorizontalForceRange int `yaml:"horizontalForceRange"`
 	VerticalForceRange   int `yaml:"verticalForceRange"`
+	RotationForceRange   int `yaml:"rotationForceRange"`
+}
+
+type CommandParameterConfig struct {
+	LookatToleranceDeg int `yaml:"lookatToleranceDeg"`
 }
 
 type FulfillmentConfig struct {
@@ -62,15 +67,16 @@ type WandaConfig struct {
 }
 
 type FreezeConfig struct {
-	Robot       RobotConfig       `yaml:"robot"`
-	Camera      CameraConfig      `yaml:"camera"`
-	Expiration  ExpirationConfig  `yaml:"expiration"`
-	Diagnostic  DiagnosticConfig  `yaml:"diagnostic"`
-	Migraine    MigraineConfig    `yaml:"migraine"`
-	Mecha       MechanicalConfig  `yaml:"mecha"`
-	Fulfillment FulfillmentConfig `yaml:"fulfillment"`
-	Telepathy   TelepathyConfig   `yaml:"telepathy"`
-	Wanda       WandaConfig       `yaml:"wanda"`
+	Robot            RobotConfig            `yaml:"robot"`
+	Camera           CameraConfig           `yaml:"camera"`
+	Expiration       ExpirationConfig       `yaml:"expiration"`
+	Diagnostic       DiagnosticConfig       `yaml:"diagnostic"`
+	Migraine         MigraineConfig         `yaml:"migraine"`
+	Mecha            MechanicalConfig       `yaml:"mecha"`
+	Fulfillment      FulfillmentConfig      `yaml:"fulfillment"`
+	Telepathy        TelepathyConfig        `yaml:"telepathy"`
+	Wanda            WandaConfig            `yaml:"wanda"`
+	CommandParameter CommandParameterConfig `yaml:"commandParameter"`
 }
 
 func LoadStartupConfig() (FreezeConfig, error) {

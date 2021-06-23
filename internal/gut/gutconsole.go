@@ -1,9 +1,5 @@
 package gut
 
-import (
-	"fmt"
-)
-
 type GutConsole struct {
 }
 
@@ -20,7 +16,6 @@ func (g *GutConsole) Stop() (bool, error) {
 }
 
 func (g *GutConsole) Send(msg string) (bool, error) {
-	fmt.Println("TO GUT:", msg)
 	return true, nil
 }
 

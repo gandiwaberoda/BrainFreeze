@@ -1,8 +1,6 @@
 package ball
 
 import (
-	// "fmt"
-	"fmt"
 	"image/color"
 
 	"gocv.io/x/gocv"
@@ -62,7 +60,6 @@ func (n *NarrowHaesveBall) Detect(hsvFrame *gocv.Mat) []models.DetectionObject {
 	for i := 0; i < pointVecs.Size(); i++ {
 		it := pointVecs.At(i)
 		area := gocv.ContourArea(it)
-		fmt.Println("x", area)
 		if area < n.conf.Wanda.MinimumHsvArea {
 			// Skip kalau ukurannya kekecilan
 			continue
@@ -70,7 +67,6 @@ func (n *NarrowHaesveBall) Detect(hsvFrame *gocv.Mat) []models.DetectionObject {
 
 		rect := gocv.BoundingRect(it)
 		gocv.Rectangle(hsvFrame, rect, c, 2)
-		fmt.Println(rect)
 
 		// d := models.DetectionObject{
 		// 	Bbox:     rect,
