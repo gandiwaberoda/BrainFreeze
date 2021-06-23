@@ -36,7 +36,7 @@ func worker(m *Migraine) {
 		force := models.Force{}
 		m.CurrentObjective.Tick(&force, m.state)
 
-		// fmt.Println("TO GUT:", force.AsGutCommandString())
+		fmt.Println("TO GUT:", force.AsGutCommandString())
 		m.gut.Send(force.AsGutCommandString())
 
 		if m.CurrentObjective.ShouldClear() {
@@ -56,7 +56,11 @@ func (m *Migraine) Start() {
 }
 
 func (m *Migraine) Stop() {
-
+	// TODO
+	// Agar saat software ditutup, gak nyantol terus bergerak
+	idleForce := models.Force{}
+	m.gut.Send(idleForce.AsGutCommandString())
+	fmt.Println("whhhhh")
 }
 
 func (m *Migraine) ReplaceObjective(cmd commands.CommandInterface) {
