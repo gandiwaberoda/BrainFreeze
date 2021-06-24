@@ -2,19 +2,18 @@ package wanda
 
 import (
 	"fmt"
-	"image"
-	"image/color"
-
-	// "github.com/faiface/mainthread"
 	"github.com/faiface/mainthread"
 	"gocv.io/x/gocv"
 	"harianugrah.com/brainfreeze/internal/diagnostic"
 	"harianugrah.com/brainfreeze/internal/wanda/acquisition"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/ball"
+	"harianugrah.com/brainfreeze/internal/wanda/haesve/dummy"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/magenta"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
+	"image"
+	"image/color"
 )
 
 type WandaVision struct {
@@ -23,6 +22,7 @@ type WandaVision struct {
 	topCamera     *acquisition.TopCameraAcquisition
 	ballNarrow    *ball.NarrowHaesveBall
 	magentaNarrow *magenta.NarrowHaesveMagenta
+	dummyNarrow   *dummy.NarrowHaesveDummy
 	state         *state.StateAccess
 	fpsHsv        *diagnostic.FpsGauge
 }
@@ -34,6 +34,9 @@ func NewWandaVision(conf *configuration.FreezeConfig, state *state.StateAccess) 
 		fpsHsv: diagnostic.NewFpsGauge(),
 	}
 }
+
+// TODO: SIGSEGV Handle
+// Penyebabnya karena Dilate
 
 // Harus diluar mainthread
 var hsvWin = gocv.NewWindow("HSV")
@@ -105,6 +108,9 @@ func worker(w *WandaVision) {
 
 		// E
 
+		// Dummy
+		w.dummyNarrow.Detect(&hsvFrame)
+
 		// FPS Gauge
 		fpsText := fmt.Sprint(w.fpsHsv.Read(), "FPS")
 		gocv.PutText(&hsvFrame, fpsText, image.Point{10, 60}, gocv.FontHersheyPlain, 5, color.RGBA{0, 255, 255, 0}, 3)
@@ -133,6 +139,7 @@ func (w *WandaVision) Start() {
 
 	w.ballNarrow = ball.NewNarrowHaesveBall(w.conf)
 	w.magentaNarrow = magenta.NewNarrowHaesveBall(w.conf)
+	w.dummyNarrow = dummy.NewNarrowHaesveDummy(w.conf)
 
 	mainthread.Run(func() {
 		worker(w)
