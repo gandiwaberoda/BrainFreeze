@@ -11,18 +11,20 @@ import (
 	"harianugrah.com/brainfreeze/internal/diagnostic"
 	"harianugrah.com/brainfreeze/internal/wanda/acquisition"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/ball"
+	"harianugrah.com/brainfreeze/internal/wanda/haesve/magenta"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
 )
 
 type WandaVision struct {
-	isRunning  bool
-	conf       *configuration.FreezeConfig
-	topCamera  *acquisition.TopCameraAcquisition
-	ballNarrow *ball.NarrowHaesveBall
-	state      *state.StateAccess
-	fpsHsv     *diagnostic.FpsGauge
+	isRunning     bool
+	conf          *configuration.FreezeConfig
+	topCamera     *acquisition.TopCameraAcquisition
+	ballNarrow    *ball.NarrowHaesveBall
+	magentaNarrow *magenta.NarrowHaesveMagenta
+	state         *state.StateAccess
+	fpsHsv        *diagnostic.FpsGauge
 }
 
 func NewWandaVision(conf *configuration.FreezeConfig, state *state.StateAccess) *WandaVision {
@@ -98,7 +100,8 @@ func worker(w *WandaVision) {
 
 		// FGP
 
-		// F
+		// Magenta
+		w.magentaNarrow.Detect(&hsvFrame)
 
 		// E
 
@@ -129,6 +132,7 @@ func (w *WandaVision) Start() {
 	w.fpsHsv.Start()
 
 	w.ballNarrow = ball.NewNarrowHaesveBall(w.conf)
+	w.magentaNarrow = magenta.NewNarrowHaesveBall(w.conf)
 
 	mainthread.Run(func() {
 		worker(w)
