@@ -59,10 +59,8 @@ func TockGetball(lastRotTime time.Time, conf configuration.FreezeConfig, force *
 		}
 	}
 
-	fmt.Println("WWW", time.Since(lastRotTime))
 	if time.Since(lastRotTime) < time.Duration(conf.CommandParameter.RotToMoveDelay) && conf.CommandParameter.OnlyOneDegreeMovement {
 		// Kasih delay ketika berpindah dari rotasi ke translasi
-		fmt.Println("Delayed")
 		force.Idle()
 		return false
 	}

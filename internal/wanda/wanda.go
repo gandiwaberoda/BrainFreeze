@@ -93,7 +93,6 @@ func worker(w *WandaVision) {
 			} else {
 				gocv.Line(&frame, w.conf.Camera.Midpoint, latestKnownBallDetection.Midpoint, warnaLastKnown, 2)
 			}
-
 		} else {
 			// Pake yang wide ball
 			fmt.Println("loss")
