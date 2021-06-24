@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	vc1, err1 := gocv.VideoCaptureDevice(0)
+	vc1, err1 := gocv.VideoCaptureDevice(1)
 	vc2, err2 := gocv.VideoCaptureDevice(2)
 
 	if err1 != nil {

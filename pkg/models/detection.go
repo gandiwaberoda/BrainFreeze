@@ -19,19 +19,19 @@ func (d DetectionObject) Lerp(other DetectionObject, percentage float64) Detecti
 	x := (percentage * float64(other.Midpoint.X)) + ((1 - percentage) * float64(d.Midpoint.X))
 	y := (percentage * float64(other.Midpoint.Y)) + ((1 - percentage) * float64(d.Midpoint.Y))
 
-	d.Midpoint = image.Point{
+	other.Midpoint = image.Point{
 		X: int(x),
 		Y: int(y),
 	}
 
-	return d
+	return other
 }
 
 // Untuk mencari titik yang paling masuk akal menjadi bola, jika diketahui lokasi bola sebelumnya
-func (d DetectionObject) SortDetectionsObjectByDistanceToMe(other []DetectionObject) []DetectionObject {
+func SortDetectionsObjectByDistanceToPoint(d image.Point, other []DetectionObject) []DetectionObject {
 	sort.Slice(other, func(i, j int) bool {
-		distI := EucDistance(float64(d.Midpoint.X)-float64(other[i].Midpoint.X), float64(d.Midpoint.Y)-float64(other[i].Midpoint.Y))
-		distJ := EucDistance(float64(d.Midpoint.X)-float64(other[j].Midpoint.X), float64(d.Midpoint.Y)-float64(other[j].Midpoint.Y))
+		distI := EucDistance(float64(d.X)-float64(other[i].Midpoint.X), float64(d.Y)-float64(other[i].Midpoint.Y))
+		distJ := EucDistance(float64(d.X)-float64(other[j].Midpoint.X), float64(d.Y)-float64(other[j].Midpoint.Y))
 
 		return distI < distJ
 	})

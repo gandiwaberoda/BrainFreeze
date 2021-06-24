@@ -38,6 +38,11 @@ var hsvWin = gocv.NewWindow("HSV")
 var rawWin = gocv.NewWindow("Post Processed")
 
 func worker(w *WandaVision) {
+	topCenter := image.Point{
+		w.conf.Camera.MidpointRad,
+		w.conf.Camera.MidpointRad,
+	}
+
 	warnaNewest := color.RGBA{0, 255, 0, 0}
 	warnaLastKnown := color.RGBA{0, 0, 255, 0}
 
@@ -67,7 +72,7 @@ func worker(w *WandaVision) {
 					latestKnownBallDetection = narrowBallRes[0]
 					latestKnownBallSet = true
 				}
-				sortedByDist := latestKnownBallDetection.SortDetectionsObjectByDistanceToMe(narrowBallRes)
+				sortedByDist := models.SortDetectionsObjectByDistanceToPoint(topCenter, narrowBallRes)
 				newer := sortedByDist[0]
 				obj := latestKnownBallDetection.Lerp(newer, w.conf.Wanda.LerpValue)
 
