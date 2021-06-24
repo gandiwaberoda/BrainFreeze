@@ -1,6 +1,7 @@
 package acquisition
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"strconv"
@@ -31,7 +32,7 @@ func CreateTopCameraAcquisition(conf *configuration.FreezeConfig) *TopCameraAcqu
 	}
 }
 
-func worker(c *TopCameraAcquisition) {
+func workerTop(c *TopCameraAcquisition) {
 	for {
 		// TODO: Bisa dipindah lockingnya ke dalam read() function
 		c.Lock.Lock()
@@ -88,6 +89,7 @@ func (c *TopCameraAcquisition) Read(dst *gocv.Mat) {
 	}
 
 	if c.postFrame.Empty() {
+		fmt.Println("Waiting top camera...")
 		c.Read(dst)
 	} else {
 		c.postFrame.CopyTo(dst)
@@ -115,7 +117,7 @@ func (c *TopCameraAcquisition) Start() {
 		panic(errVc)
 	}
 
-	go worker(c)
+	go workerTop(c)
 }
 
 func (c *TopCameraAcquisition) Stop() {

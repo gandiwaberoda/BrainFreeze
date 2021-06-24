@@ -16,6 +16,7 @@ type RobotConfig struct {
 
 type CameraConfig struct {
 	Src               []string `yaml:"src"`
+	SrcForward        []string `yaml:"srcForward"`
 	UseDshow          bool     `yaml:"useDshow"`
 	MidpointX         int      `yaml:"midpointX"`
 	MidpointY         int      `yaml:"midpointY"`
