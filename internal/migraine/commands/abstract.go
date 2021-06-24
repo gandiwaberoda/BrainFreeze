@@ -22,6 +22,7 @@ var handlers []func(models.Intercom, string, *configuration.FreezeConfig) (bool,
 	ParseLookatCommand,
 	ParseHandlingCommand,
 	ParseWatchatCommand,
+	ParseGetballCommand,
 }
 
 func WhichCommand(intercom models.Intercom, conf *configuration.FreezeConfig) CommandInterface {

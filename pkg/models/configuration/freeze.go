@@ -57,7 +57,10 @@ type MechanicalConfig struct {
 }
 
 type CommandParameterConfig struct {
-	LookatToleranceDeg int `yaml:"lookatToleranceDeg"`
+	LookatToleranceDeg    int  `yaml:"lookatToleranceDeg"`
+	HandlingOnDist        int  `yaml:"handlingOnDist"`
+	OnlyOneDegreeMovement bool `yaml:"onlyOneDegreeMovement"`
+	RotToMoveDelay        int  `yaml:"rotToMoveDelay"`
 }
 
 type FulfillmentConfig struct {

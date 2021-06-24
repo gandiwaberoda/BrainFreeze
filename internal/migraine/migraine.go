@@ -40,7 +40,6 @@ func worker(m *Migraine) {
 			m.ReplaceObjective(commands.DefaultIdleCommand())
 		}
 
-		fmt.Println("TO GUT:", force.AsGutCommandString())
 		m.gut.Send(force.AsGutCommandString())
 
 		if m.CurrentObjective.ShouldClear() {

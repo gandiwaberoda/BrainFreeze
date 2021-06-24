@@ -43,6 +43,8 @@ func main() {
 	var gutTalk gut.GutInterface
 	if strings.ToUpper(config.Serial.Ports[0]) == "CONSOLE" {
 		gutTalk = gut.CreateGutConsole()
+	} else if strings.ToUpper(config.Serial.Ports[0]) == "IGNORE" {
+		gutTalk = gut.CreateIgnoreConsole()
 	} else {
 		gutTalk = gut.CreateGutSerial(&config)
 	}

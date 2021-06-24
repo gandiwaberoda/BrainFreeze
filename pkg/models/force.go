@@ -72,5 +72,8 @@ func (f Force) GetHandling() float64 {
 
 //#region
 func (f Force) AsGutCommandString() string {
-	return fmt.Sprint("*a,", f.GetX(), ",", f.GetY(), ",", f.GetRot(), ",", f.GetKick(), ",", f.GetHandling(), "#")
+	rotStr := fmt.Sprintf("%.2f", f.GetRot())
+	xStr := fmt.Sprintf("%.2f", f.GetX())
+	yStr := fmt.Sprintf("%.2f", f.GetY())
+	return fmt.Sprint("*a,", xStr, ",", yStr, ",", rotStr, ",", f.GetKick(), ",", f.GetHandling(), "#")
 }
