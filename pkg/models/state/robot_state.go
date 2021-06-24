@@ -25,18 +25,27 @@ type RobotState struct {
 	GutToBrainLastUpdate time.Time
 	GutToBrainExpired    bool
 
-	FriendTransform           []models.Transform
-	FriendTransformLastUpdate time.Time
+	MagentaTransform           models.Transform
+	MagentaTransformLastUpdate time.Time
+	MagentaTransformExpired    bool
+
+	CyanTransform           models.Transform
+	CyanTransformLastUpdate time.Time
+	CyanTransformExpired    bool
 
 	FriendGoalPostTransform           models.Transform
 	FriendGoalPostTransformLastUpdate time.Time
+	FriendGoalPostTransformExpired    bool
 
 	EnemyTransform           []models.Transform
 	EnemyTransformLastUpdate time.Time
+	EnemyTransformExpired    bool
 
 	EnemyGoalPostTransform           models.Transform
 	EnemyGoalPostTransformLastUpdate time.Time
+	EnemyGoalPostTransformExpired    bool
 
-	ObstacleTransform           []models.Transform
-	ObstacleTransformLastUpdate time.Time
+	ObstacleTransform                []models.Transform
+	ObstacleTransformLastUpdate      time.Time
+	ObstacleGoalPostTransformExpired bool
 }

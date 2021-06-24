@@ -103,7 +103,10 @@ func worker(w *WandaVision) {
 		// FGP
 
 		// Magenta
-		w.magentaNarrow.Detect(&hsvFrame)
+		narrowMagentaFound, narrowMagentaRes := w.magentaNarrow.Detect(&hsvFrame)
+		if narrowMagentaFound {
+			w.state.UpdateMagentaTransform(narrowMagentaRes[0].AsTransform(w.conf))
+		}
 
 		// E
 
