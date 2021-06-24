@@ -17,3 +17,9 @@ run:
 
 roi:
 	go run cmd/cameraroi/main.go
+
+exe:
+	go build -o ./output ./cmd/brainfreeze 
+	go build -o ./output ./cmd/cameraroi 
+	go build -o ./output ./cmd/camerasrc
+	
