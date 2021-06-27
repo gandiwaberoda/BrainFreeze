@@ -1,4 +1,4 @@
-module github.com/berodagila/BrainFreeze.git
+module github.com/berodagila/BrainFreeze
 
 go 1.16
 
