@@ -5,8 +5,12 @@ robot:
 camera:
   src:
     - "/Users/hariangr/Documents/MyFiles/Developer/Robotec/Beroda/ng/BrainDead/assets/captured/2021-04-23 14:50:34.157190 x 60.00024.1280.0.720.0.mp4"
+    - 1
     - 0
     - "C:/Users/root/Documents/hariangr/temp.mp4"
+  srcForward:
+    - 2
+    - "DISABLE"
     
   # Punya kamera 0 Mac
   # midpointX: 309
@@ -24,10 +28,10 @@ camera:
   # Punya kemera TOP GANDIWA
   # midpointX: 917
   # midpointY: 597
-  # midpointRad: 383
+  # midpointRad: 365
   # rawWidth: 1920
   # rawHeight: 1080
-  # robFrontOffsetDeg: -90
+  # robFrontOffsetDeg: 90
 
   useDshow: true
   postWidth: 640
@@ -41,11 +45,13 @@ expiration:
 telepathy:
   # chitchatHost: "192.168.1.4:6901"
   chitchatHost: 
+    - "10.211.55.6:6901"
     - "localhost:6901"
     - "CONSOLE"
 
 serial:
   ports:
+    - "IGNORE"
     - "CONSOLE"
     - "/dev/cu.usbmodem141101"
     - "COM10"
@@ -60,6 +66,7 @@ diagnostic:
 wanda:
   minimumHsvArea: 50
   maximumHsvArea: 10000 # Kadang kadang dia full frame di detek
+  lerpValue: 0.1
 
 migraine:
   migraineHz: 60
@@ -70,7 +77,10 @@ fulfillment:
 mecha:
   horizontalForceRange: 100
   verticalForceRange: 100
-  rotationForceRange: 50
+  rotationForceRange: 10
 
 commandParameter:
   lookatToleranceDeg: 10
+  handlingOnDist: 290
+  onlyOneDegreeMovement: true
+  rotToMoveDelay: 2000000000 # nanosecond
