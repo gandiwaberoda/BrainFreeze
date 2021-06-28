@@ -2,6 +2,9 @@ package wanda
 
 import (
 	"fmt"
+	"image"
+	"image/color"
+
 	"github.com/faiface/mainthread"
 	"gocv.io/x/gocv"
 	"harianugrah.com/brainfreeze/internal/diagnostic"
@@ -12,8 +15,6 @@ import (
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
-	"image"
-	"image/color"
 )
 
 type WandaVision struct {
@@ -104,7 +105,7 @@ func worker(w *WandaVision) {
 
 		// Magenta
 		narrowMagentaFound, narrowMagentaRes := w.magentaNarrow.Detect(&hsvFrame)
-		if narrowMagentaFound {
+		if narrowMagentaFound && len(narrowMagentaRes) > 0 {
 			w.state.UpdateMagentaTransform(narrowMagentaRes[0].AsTransform(w.conf))
 		}
 
