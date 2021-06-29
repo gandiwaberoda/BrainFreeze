@@ -56,6 +56,16 @@ func main() {
 			return
 		}
 		state.UpdateGutToBrain(gtb)
+
+		t := models.Transform{
+			WorldXcm: gtb.AbsX,
+			WorldYcm: gtb.AbsY,
+			WorldROT: gtb.Gyro,
+			EncXcm:   gtb.AbsX,
+			EncYcm:   gtb.AbsY,
+			EncROT:   gtb.Gyro,
+		}
+		state.UpdateMyTransform(t)
 	})
 	_, errGut := gutTalk.Start()
 	if errGut != nil {
