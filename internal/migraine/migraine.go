@@ -2,6 +2,7 @@ package migraine
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -77,6 +78,18 @@ func (m *Migraine) AddCommand(intercom models.Intercom) {
 	shouldListen := amIReceiver(intercom, m)
 	if !shouldListen {
 		fmt.Println("I am not a receiver for the command")
+		return
+	}
+
+	if len(intercom.Content) >= 3 && strings.EqualFold(intercom.Content[:3], "FWD") {
+		// TODO: Command khusus untuk mengforward data serial
+
+		re, _ := regexp.Compile(`\((.+)\)`)
+		foundParam := re.FindString(intercom.Content)
+		foundParam = strings.ReplaceAll(foundParam, "(", "")
+		foundParam = strings.ReplaceAll(foundParam, ")", "")
+		m.gut.Send(foundParam)
+		m.Idle()
 		return
 	}
 
