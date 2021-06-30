@@ -10,6 +10,7 @@ import (
 	"harianugrah.com/brainfreeze/internal/diagnostic"
 	"harianugrah.com/brainfreeze/internal/wanda/acquisition"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/ball"
+	"harianugrah.com/brainfreeze/internal/wanda/haesve/cyan"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/dummy"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/magenta"
 	"harianugrah.com/brainfreeze/pkg/models"
@@ -24,6 +25,7 @@ type WandaVision struct {
 	ballNarrow    *ball.NarrowHaesveBall
 	magentaNarrow *magenta.NarrowHaesveMagenta
 	dummyNarrow   *dummy.NarrowHaesveDummy
+	cyanNarrow    *cyan.NarrowHaesveCyan
 	state         *state.StateAccess
 	fpsHsv        *diagnostic.FpsGauge
 }
@@ -109,6 +111,12 @@ func worker(w *WandaVision) {
 			w.state.UpdateMagentaTransform(narrowMagentaRes[0].AsTransform(w.conf))
 		}
 
+		// Cyan
+		narrowCyanFound, narrowCyanRes := w.cyanNarrow.Detect(&hsvFrame)
+		if narrowCyanFound && len(narrowCyanRes) > 0 {
+			w.state.UpdateCyanTransform(narrowCyanRes[0].AsTransform(w.conf))
+		}
+
 		// E
 
 		// Dummy
@@ -143,6 +151,7 @@ func (w *WandaVision) Start() {
 	w.ballNarrow = ball.NewNarrowHaesveBall(w.conf)
 	w.magentaNarrow = magenta.NewNarrowHaesveMagenta(w.conf)
 	w.dummyNarrow = dummy.NewNarrowHaesveDummy(w.conf)
+	w.cyanNarrow = cyan.NewNarrowHaesveCyan(w.conf)
 
 	mainthread.Run(func() {
 		worker(w)
