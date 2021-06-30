@@ -141,7 +141,7 @@ func (w *WandaVision) Start() {
 	w.fpsHsv.Start()
 
 	w.ballNarrow = ball.NewNarrowHaesveBall(w.conf)
-	w.magentaNarrow = magenta.NewNarrowHaesveBall(w.conf)
+	w.magentaNarrow = magenta.NewNarrowHaesveMagenta(w.conf)
 	w.dummyNarrow = dummy.NewNarrowHaesveDummy(w.conf)
 
 	mainthread.Run(func() {

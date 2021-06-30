@@ -14,7 +14,7 @@ type NarrowHaesveMagenta struct {
 	lowerHsv gocv.Scalar
 }
 
-func NewNarrowHaesveBall(conf *configuration.FreezeConfig) *NarrowHaesveMagenta {
+func NewNarrowHaesveMagenta(conf *configuration.FreezeConfig) *NarrowHaesveMagenta {
 	upper := gocv.NewScalar(157, 255, 255, 1)
 	lower := gocv.NewScalar(144, 114, 161, 0)
 
@@ -24,8 +24,6 @@ func NewNarrowHaesveBall(conf *configuration.FreezeConfig) *NarrowHaesveMagenta 
 		lowerHsv: lower,
 	}
 }
-
-var counter int = 0
 
 // Input adalah Mat yang sudah dalam format hsv
 func (n *NarrowHaesveMagenta) Detect(hsvFrame *gocv.Mat) (bool, []models.DetectionObject) {
