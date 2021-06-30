@@ -1,6 +1,10 @@
 robot:
   name: Gandiwa
   role: ATTACKER
+  # A (Corner kiri gawang sendiri), B (Sisi kiri gawang), C (Tengah lapangan sebelah kiri), D (Tengah lapangan), H (Tengah gawang sendiri)
+  # B atau F posisi start waktu lomba
+  startPos: A
+
 
 camera:
   src:

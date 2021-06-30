@@ -10,8 +10,10 @@ import (
 )
 
 type RobotConfig struct {
-	Name string    `yaml:"name"`
-	Role RobotType `yaml:"role"`
+	Name     string    `yaml:"name"`
+	Role     RobotType `yaml:"role"`
+	StartPos string    `yaml:"startPos"`
+	StartRot int       `yaml:"startRot"`
 }
 
 type CameraConfig struct {

@@ -1,6 +1,11 @@
 package models
 
-import "math"
+import (
+	"math"
+	"strings"
+
+	"harianugrah.com/brainfreeze/pkg/models/configuration"
+)
 
 type Centimeter float64
 type Degree float64
@@ -65,4 +70,45 @@ type Transform struct {
 	TopRpx Centimeter
 	// Rotasi relative ke midpoint omni, relative ke arah depan robot
 	TopROT Degree
+}
+
+func (t *Transform) InjectWorldTransfromFromEncTransform(conf *configuration.FreezeConfig) {
+	startRot := conf.Robot.StartRot
+	t.WorldROT = t.EncROT + Degree(startRot)
+
+	startPos := strings.ToUpper(conf.Robot.StartPos)
+
+	offsetX := float64(0)
+	offsetY := float64(0)
+	switch startPos {
+	case "A":
+		offsetX = 0
+		offsetY = 0
+	case "B":
+		offsetX = 0
+		offsetY = 450 / 2
+	case "C":
+		offsetX = 0
+		offsetY = 450
+	case "D":
+		offsetX = 600 / 2
+		offsetY = 450
+	case "E":
+		offsetX = 600
+		offsetY = 450
+	case "F":
+		offsetX = 600
+		offsetY = 450 / 2
+	case "G":
+		offsetX = 600
+		offsetY = 0
+	case "H":
+		offsetX = 600 / 2
+		offsetY = 0
+	default:
+		panic("Invalid startpos")
+	}
+
+	t.WorldXcm = t.EncXcm + Centimeter(offsetX)
+	t.WorldYcm = t.EncYcm + Centimeter(offsetY)
 }
