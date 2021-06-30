@@ -51,14 +51,14 @@ func TockGetball(lastRotTime time.Time, conf configuration.FreezeConfig, force *
 	if models.Degree(math.Abs(float64(rotError))) > models.Degree(conf.CommandParameter.LookatToleranceDeg) {
 		TockLookat(ballState, conf, force, state)
 
-		if conf.CommandParameter.OnlyOneDegreeMovement {
+		if !conf.CommandParameter.AllowXYRotTogether {
 			// Jika hanya boleh satu degree dalam satu waktu
 			// Rotasi rotasi aja dulu
 			return true
 		}
 	}
 
-	if time.Since(lastRotTime) < time.Duration(conf.CommandParameter.RotToMoveDelay) && conf.CommandParameter.OnlyOneDegreeMovement {
+	if time.Since(lastRotTime) < time.Duration(conf.CommandParameter.RotToMoveDelay) && !conf.CommandParameter.AllowXYRotTogether {
 		// Kasih delay ketika berpindah dari rotasi ke translasi
 		force.Idle()
 		return false
@@ -87,10 +87,10 @@ func TockGetball(lastRotTime time.Time, conf configuration.FreezeConfig, force *
 	}
 
 	// Dekati bola kedepan
-	if conf.CommandParameter.OnlyOneDegreeMovement {
+	if conf.CommandParameter.AllowXYTogether {
+		force.AddX(limitedX)
 		force.AddY(limitedY)
 	} else {
-		force.AddX(limitedX)
 		force.AddY(limitedY)
 	}
 

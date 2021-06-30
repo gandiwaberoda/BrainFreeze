@@ -86,5 +86,9 @@ mecha:
 commandParameter:
   lookatToleranceDeg: 10
   handlingOnDist: 290
-  onlyOneDegreeMovement: true
+  # onlyOneDegreeMovement: true
+
+  allowXYTogether: true
+  allowXYRotTogether: false
+  
   rotToMoveDelay: 2000000000 # nanosecond

@@ -59,10 +59,15 @@ type MechanicalConfig struct {
 }
 
 type CommandParameterConfig struct {
-	LookatToleranceDeg    int  `yaml:"lookatToleranceDeg"`
-	HandlingOnDist        int  `yaml:"handlingOnDist"`
-	OnlyOneDegreeMovement bool `yaml:"onlyOneDegreeMovement"`
-	RotToMoveDelay        int  `yaml:"rotToMoveDelay"`
+	LookatToleranceDeg  int `yaml:"lookatToleranceDeg"`
+	PositionToleranceCm int `yaml:"positionToleranceCm"`
+
+	HandlingOnDist int `yaml:"handlingOnDist"`
+	RotToMoveDelay int `yaml:"rotToMoveDelay"`
+	// OnlyOneDegreeMovement bool `yaml:"onlyOneDegreeMovement"`
+
+	AllowXYTogether    bool `yaml:"allowXYTogether"`
+	AllowXYRotTogether bool `yaml:"allowXYRotTogether"`
 }
 
 type FulfillmentConfig struct {
