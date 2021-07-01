@@ -3,5 +3,6 @@
         "activityBar.background": "#51075A",
         "titleBar.activeBackground": "#720A7E",
         "titleBar.activeForeground": "#FEFBFF"
-    }
+    },
+    "python.pythonPath": "/Users/hariangr/opt/miniconda3/envs/tf/bin/python"
 }
