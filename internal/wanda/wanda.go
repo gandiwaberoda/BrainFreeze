@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"sort"
 
 	"github.com/faiface/mainthread"
 	"gocv.io/x/gocv"
@@ -12,6 +13,7 @@ import (
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/ball"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/cyan"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/dummy"
+	"harianugrah.com/brainfreeze/internal/wanda/haesve/goalpost"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/magenta"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
@@ -19,16 +21,17 @@ import (
 )
 
 type WandaVision struct {
-	isRunning     bool
-	conf          *configuration.FreezeConfig
-	topCamera     *acquisition.TopCameraAcquisition
-	forwardCamera *acquisition.ForwardCameraAcquisition
-	ballNarrow    *ball.NarrowHaesveBall
-	magentaNarrow *magenta.NarrowHaesveMagenta
-	dummyNarrow   *dummy.NarrowHaesveDummy
-	cyanNarrow    *cyan.NarrowHaesveCyan
-	state         *state.StateAccess
-	fpsHsv        *diagnostic.FpsGauge
+	isRunning      bool
+	conf           *configuration.FreezeConfig
+	topCamera      *acquisition.TopCameraAcquisition
+	forwardCamera  *acquisition.ForwardCameraAcquisition
+	ballNarrow     *ball.NarrowHaesveBall
+	magentaNarrow  *magenta.NarrowHaesveMagenta
+	dummyNarrow    *dummy.NarrowHaesveDummy
+	goalpostHaesve *goalpost.HaesveGoalpost
+	cyanNarrow     *cyan.NarrowHaesveCyan
+	state          *state.StateAccess
+	fpsHsv         *diagnostic.FpsGauge
 }
 
 func NewWandaVision(conf *configuration.FreezeConfig, state *state.StateAccess) *WandaVision {
@@ -136,6 +139,27 @@ func worker(w *WandaVision) {
 		// Dummy
 		w.dummyNarrow.Detect(&topHsvFrame)
 
+		// Forward Goalpost
+		if found, result := w.goalpostHaesve.Detect(&forHsvFrame); found {
+			if len(result) > 0 {
+				// result[0].
+				sort.Slice(result, func(i, j int) bool {
+					return result[i].BboxArea > result[j].BboxArea
+				})
+
+				gocv.Rectangle(&forFrame, result[0].Bbox, warnaNewest, 3)
+				gocv.PutText(&forFrame, "Gawang", result[0].Bbox.Min, gocv.FontHersheyPlain, 1.2, warnaNewest, 2)
+			}
+
+		}
+
+		// Forward Ball
+		if found, result := w.ballNarrow.Detect(&forHsvFrame); found {
+			if len(result) > 0 {
+				gocv.Rectangle(&topFrame, result[0].Bbox, warnaNewest, 3)
+			}
+		}
+
 		// FPS Gauge
 		fpsText := fmt.Sprint(w.fpsHsv.Read(), "FPS")
 		gocv.PutText(&topHsvFrame, fpsText, image.Point{10, 60}, gocv.FontHersheyPlain, 5, color.RGBA{0, 255, 255, 0}, 3)
@@ -179,6 +203,7 @@ func (w *WandaVision) Start() {
 	w.magentaNarrow = magenta.NewNarrowHaesveMagenta(w.conf)
 	w.dummyNarrow = dummy.NewNarrowHaesveDummy(w.conf)
 	w.cyanNarrow = cyan.NewNarrowHaesveCyan(w.conf)
+	w.goalpostHaesve = goalpost.NewHaesveGoalpost(w.conf)
 
 	mainthread.Run(func() {
 		worker(w)

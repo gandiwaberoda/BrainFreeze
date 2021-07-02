@@ -13,6 +13,8 @@ type DetectionObject struct {
 	Midpoint    image.Point
 	OuterRad    int
 	CloserPoint image.Point
+	ContourArea float64
+	BboxArea    float64
 }
 
 func (d DetectionObject) Lerp(other DetectionObject, percentage float64) DetectionObject {
