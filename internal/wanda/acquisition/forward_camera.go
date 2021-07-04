@@ -43,7 +43,13 @@ func (c *ForwardCameraAcquisition) read() {
 	// Baca frame dari kamera
 	frame := gocv.NewMat()
 	defer frame.Close()
-	c.vc.Read(&frame)
+	if ok := c.vc.Read(&frame); !ok {
+		// Reopen vc
+		c.vc.Close()
+		c.Start()
+		fmt.Println("Reopening forward camera because no next frame")
+		return
+	}
 
 	// if frame.Empty() {
 	// 	return

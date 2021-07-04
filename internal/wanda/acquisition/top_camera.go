@@ -47,7 +47,11 @@ func (c *TopCameraAcquisition) read() {
 	defer frame.Close()
 	c.vc.Read(&frame)
 
-	if frame.Empty() {
+	if ok := c.vc.Read(&frame); !ok {
+		// Reopen vc
+		c.vc.Close()
+		c.Start()
+		fmt.Println("Reopening top camera because no next frame")
 		return
 	}
 
