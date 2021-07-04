@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"runtime/debug"
 	"sort"
+	"sync"
 
 	"github.com/faiface/mainthread"
 	"gocv.io/x/gocv"
@@ -55,6 +55,12 @@ func NewWandaVision(conf *configuration.FreezeConfig, state *state.StateAccess) 
 // Penyebabnya karena Dilate
 
 // Harus diluar mainthread
+// var hsvWin *gocv.Window
+// var rawWin *gocv.Window
+
+// var hsvForwardWin *gocv.Window
+// var rawForwardWin *gocv.Window
+
 var hsvWin = gocv.NewWindow("HSV")
 var rawWin = gocv.NewWindow("Post Processed")
 
@@ -62,7 +68,6 @@ var hsvForwardWin = gocv.NewWindow("Forward HSV")
 var rawForwardWin = gocv.NewWindow("Forward Post Processed")
 
 func worker(w *WandaVision) {
-
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("recovered from xx ", r)
@@ -78,10 +83,7 @@ func worker(w *WandaVision) {
 	forHsvFrame := gocv.NewMat()
 	defer forHsvFrame.Close()
 
-	// var latestKnownBallDetection models.DetectionObject
-	// latestKnownBallSet := false
-
-	// wg := sync.WaitGroup{}
+	wg := sync.WaitGroup{}
 	for {
 		w.topCamera.Read(&topFrame)
 		gocv.CvtColor(topFrame, &topHsvFrame, gocv.ColorBGRToHSV)
@@ -94,71 +96,30 @@ func worker(w *WandaVision) {
 		w.fpsHsv.Tick()
 
 		// Ball
-		narrowBallFound, narrowBallRes := w.ballNarrow.Detect(&topHsvFrame)
-		if narrowBallFound {
-			// TODO: Perlu lakukan classifier
-
-			if len(narrowBallRes) > 0 {
-				// newer := narrowBallRes[0]
-				if !w.latestKnownBallSet {
-					w.latestKnownBallDetection = narrowBallRes[0]
-					w.latestKnownBallSet = true
-				}
-				sortedByDist := models.SortDetectionsObjectByDistanceToPoint(w.topCenter, narrowBallRes)
-				newer := sortedByDist[0]
-				obj := w.latestKnownBallDetection.Lerp(newer, w.conf.Wanda.LerpValue)
-
-				transform := obj.AsTransform(w.conf)
-
-				gocv.Rectangle(&topFrame, narrowBallRes[0].Bbox, w.warnaNewest, 3)
-				gocv.Circle(&topFrame, obj.Midpoint, obj.OuterRad, w.warnaNewest, 2)
-				// Origin to Ball Line
-				gocv.Line(&topFrame, w.conf.Camera.Midpoint, obj.Midpoint, w.warnaNewest, 2)
-
-				w.state.UpdateBallTransform(transform)
-				w.latestKnownBallDetection = obj
-			} else {
-				gocv.Line(&topFrame, w.conf.Camera.Midpoint, w.latestKnownBallDetection.Midpoint, w.warnaLastKnown, 2)
-			}
-		} else {
-			// Pake yang wide ball
-			fmt.Println("loss")
-		}
+		wg.Add(1)
+		go detectTopBall(w, &wg, &topFrame, &topHsvFrame)
 
 		// EGP
 
 		// FGP
 
 		// Magenta
-		narrowMagentaFound, narrowMagentaRes := w.magentaNarrow.Detect(&topHsvFrame)
-		if narrowMagentaFound && len(narrowMagentaRes) > 0 {
-			w.state.UpdateMagentaTransform(narrowMagentaRes[0].AsTransform(w.conf))
-		}
+		wg.Add(1)
+		go detectMagenta(w, &wg, &topFrame, &topHsvFrame)
 
 		// Cyan
-		narrowCyanFound, narrowCyanRes := w.cyanNarrow.Detect(&topHsvFrame)
-		if narrowCyanFound && len(narrowCyanRes) > 0 {
-			w.state.UpdateCyanTransform(narrowCyanRes[0].AsTransform(w.conf))
-		}
+		wg.Add(1)
+		go detectCyan(w, &wg, &topFrame, &topHsvFrame)
 
 		// E
 
 		// Dummy
-		w.dummyNarrow.Detect(&topHsvFrame)
+		wg.Add(1)
+		go detectDummy(w, &wg, &topFrame, &topHsvFrame)
 
 		// Forward Goalpost
-		if found, result := w.goalpostHaesve.Detect(&forHsvFrame); found {
-			if len(result) > 0 {
-				// result[0].
-				sort.Slice(result, func(i, j int) bool {
-					return result[i].BboxArea > result[j].BboxArea
-				})
-
-				gocv.Rectangle(&forFrame, result[0].Bbox, w.warnaNewest, 3)
-				gocv.PutText(&forFrame, "Gawang", result[0].Bbox.Min, gocv.FontHersheyPlain, 1.2, w.warnaNewest, 2)
-			}
-
-		}
+		wg.Add(1)
+		go detectForGoalpost(w, &wg, &forFrame, &forHsvFrame)
 
 		// Forward Ball
 		if found, result := w.ballNarrow.Detect(&forHsvFrame); found {
@@ -172,7 +133,7 @@ func worker(w *WandaVision) {
 		gocv.PutText(&topFrame, fpsText, image.Point{10, 60}, gocv.FontHersheyPlain, 5, color.RGBA{0, 255, 255, 0}, 3)
 		w.state.UpdateFpsHsv(w.fpsHsv.Read())
 
-		// wg.Wait()
+		wg.Wait()
 
 		if w.conf.Diagnostic.ShowScreen {
 			mainthread.Call(func() {
@@ -201,7 +162,13 @@ func worker(w *WandaVision) {
 }
 
 func (w *WandaVision) Start() {
-	debug.SetPanicOnFault(true)
+	// if hsvForwardWin == nil && w.conf.Diagnostic.ShowScreen {
+	// 	hsvWin = gocv.NewWindow("HSV")
+	// 	rawWin = gocv.NewWindow("Post Processed")
+
+	// 	hsvForwardWin = gocv.NewWindow("Forward HSV")
+	// 	rawForwardWin = gocv.NewWindow("Forward Post Processed")
+	// }
 
 	w.topCamera = acquisition.CreateTopCameraAcquisition(w.conf)
 	w.topCamera.Start()
@@ -240,7 +207,78 @@ func (w *WandaVision) Stop() {
 
 // Helper
 
-// func detectTopBall(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
+func detectTopBall(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
+	narrowBallFound, narrowBallRes := w.ballNarrow.Detect(topHsvFrame)
+	if narrowBallFound {
+		// TODO: Perlu lakukan classifier
+
+		if len(narrowBallRes) > 0 {
+			// newer := narrowBallRes[0]
+			if !w.latestKnownBallSet {
+				w.latestKnownBallDetection = narrowBallRes[0]
+				w.latestKnownBallSet = true
+			}
+			sortedByDist := models.SortDetectionsObjectByDistanceToPoint(w.topCenter, narrowBallRes)
+			newer := sortedByDist[0]
+			obj := w.latestKnownBallDetection.Lerp(newer, w.conf.Wanda.LerpValue)
+
+			transform := obj.AsTransform(w.conf)
+
+			gocv.Rectangle(topFrame, narrowBallRes[0].Bbox, w.warnaNewest, 3)
+			gocv.Circle(topFrame, obj.Midpoint, obj.OuterRad, w.warnaNewest, 2)
+			// Origin to Ball Line
+			gocv.Line(topFrame, w.conf.Camera.Midpoint, obj.Midpoint, w.warnaNewest, 2)
+
+			w.state.UpdateBallTransform(transform)
+			w.latestKnownBallDetection = obj
+		} else {
+			gocv.Line(topFrame, w.conf.Camera.Midpoint, w.latestKnownBallDetection.Midpoint, w.warnaLastKnown, 2)
+		}
+	} else {
+		// Pake yang wide ball
+		fmt.Println("loss")
+	}
+	wg.Done()
+}
+
+func detectMagenta(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
+	narrowMagentaFound, narrowMagentaRes := w.magentaNarrow.Detect(topHsvFrame)
+	if narrowMagentaFound && len(narrowMagentaRes) > 0 {
+		w.state.UpdateMagentaTransform(narrowMagentaRes[0].AsTransform(w.conf))
+	}
+	wg.Done()
+}
+
+func detectCyan(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
+	narrowCyanFound, narrowCyanRes := w.cyanNarrow.Detect(topHsvFrame)
+	if narrowCyanFound && len(narrowCyanRes) > 0 {
+		w.state.UpdateCyanTransform(narrowCyanRes[0].AsTransform(w.conf))
+	}
+	wg.Done()
+}
+
+func detectDummy(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
+	w.dummyNarrow.Detect(topHsvFrame)
+	wg.Done()
+}
+
+func detectForGoalpost(w *WandaVision, wg *sync.WaitGroup, forFrame *gocv.Mat, forHsvFrame *gocv.Mat) {
+	if found, result := w.goalpostHaesve.Detect(forHsvFrame); found {
+		if len(result) > 0 {
+			// result[0].
+			sort.Slice(result, func(i, j int) bool {
+				return result[i].BboxArea > result[j].BboxArea
+			})
+
+			gocv.Rectangle(forFrame, result[0].Bbox, w.warnaNewest, 3)
+			gocv.PutText(forFrame, "Gawang", result[0].Bbox.Min, gocv.FontHersheyPlain, 1.2, w.warnaNewest, 2)
+		}
+
+	}
+	wg.Done()
+}
+
+// func detectMagenta(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
 
 // 	wg.Done()
 // }
