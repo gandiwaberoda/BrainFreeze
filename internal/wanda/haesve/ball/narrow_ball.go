@@ -1,6 +1,7 @@
 package ball
 
 import (
+	"fmt"
 	"image/color"
 
 	"gocv.io/x/gocv"
@@ -26,8 +27,17 @@ func NewNarrowHaesveBall(conf *configuration.FreezeConfig) *NarrowHaesveBall {
 }
 
 // Input adalah Mat yang sudah dalam format hsv
-func (n *NarrowHaesveBall) Detect(hsvFrame *gocv.Mat) (bool, []models.DetectionObject) {
+func (n *NarrowHaesveBall) Detect(hsvFrame *gocv.Mat) (found bool, result []models.DetectionObject) {
 	detecteds := []models.DetectionObject{}
+
+	defer func() {
+		if r := recover(); r != nil {
+			found = false
+			result = detecteds
+			fmt.Println("recovered from ", r)
+			return
+		}
+	}()
 
 	// defer hsvFrame.Close()
 	// win := gocv.NewWindow("tanya")

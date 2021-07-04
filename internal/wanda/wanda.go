@@ -53,6 +53,14 @@ var hsvForwardWin = gocv.NewWindow("Forward HSV")
 var rawForwardWin = gocv.NewWindow("Forward Post Processed")
 
 func worker(w *WandaVision) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("recovered from xx ", r)
+			return
+		}
+	}()
+
 	topCenter := image.Point{
 		w.conf.Camera.MidpointRad,
 		w.conf.Camera.MidpointRad,

@@ -1,6 +1,7 @@
 package magenta
 
 import (
+	"fmt"
 	"image/color"
 
 	"gocv.io/x/gocv"
@@ -26,8 +27,17 @@ func NewNarrowHaesveMagenta(conf *configuration.FreezeConfig) *NarrowHaesveMagen
 }
 
 // Input adalah Mat yang sudah dalam format hsv
-func (n *NarrowHaesveMagenta) Detect(hsvFrame *gocv.Mat) (bool, []models.DetectionObject) {
+func (n *NarrowHaesveMagenta) Detect(hsvFrame *gocv.Mat) (found bool, result []models.DetectionObject) {
 	detecteds := []models.DetectionObject{}
+
+	defer func() {
+		if r := recover(); r != nil {
+			found = false
+			result = detecteds
+			fmt.Println("recovered from ", r)
+			return
+		}
+	}()
 
 	if hsvFrame.Empty() {
 		return false, detecteds

@@ -1,6 +1,7 @@
 package cyan
 
 import (
+	"fmt"
 	"image/color"
 
 	"gocv.io/x/gocv"
@@ -26,8 +27,17 @@ func NewNarrowHaesveCyan(conf *configuration.FreezeConfig) *NarrowHaesveCyan {
 }
 
 // Input adalah Mat yang sudah dalam format hsv
-func (n *NarrowHaesveCyan) Detect(hsvFrame *gocv.Mat) (bool, []models.DetectionObject) {
+func (n *NarrowHaesveCyan) Detect(hsvFrame *gocv.Mat) (found bool, result []models.DetectionObject) {
 	detecteds := []models.DetectionObject{}
+
+	defer func() {
+		if r := recover(); r != nil {
+			found = false
+			result = detecteds
+			fmt.Println("recovered from ", r)
+			return
+		}
+	}()
 
 	if hsvFrame.Empty() {
 		return false, detecteds
