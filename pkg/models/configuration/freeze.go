@@ -46,6 +46,7 @@ type DiagnosticConfig struct {
 	EnableStream       bool          `yaml:"enableStream"`
 	StreamTopProcessed bool          `yaml:"streamTopProcessed"`
 	StreamHost         string        `yaml:"streamHost"`
+	ShowScreen         bool          `yaml:"showScreen"`
 }
 
 type MigraineConfig struct {
