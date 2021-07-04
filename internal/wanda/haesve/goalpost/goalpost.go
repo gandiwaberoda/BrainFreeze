@@ -51,9 +51,9 @@ func (n *HaesveGoalpost) Detect(hsvFrame *gocv.Mat) (found bool, result []models
 
 	gocv.InRangeWithScalar(*hsvFrame, n.lowerHsv, n.upperHsv, &filtered)
 
-	dilateMat := gocv.Ones(9, 9, gocv.MatTypeCV8UC1)
-	defer dilateMat.Close()
-	gocv.Dilate(filtered, &filtered, dilateMat)
+	// dilateMat := gocv.Ones(9, 9, gocv.MatTypeCV8UC1)
+	// defer dilateMat.Close()
+	// gocv.Dilate(filtered, &filtered, dilateMat)
 
 	erodeMat := gocv.Ones(35, 35, gocv.MatTypeCV8UC1)
 	defer erodeMat.Close()
