@@ -25,9 +25,13 @@ func (f ComplexFuilfillment) IsFulfilled() bool {
 }
 
 func (f ComplexFuilfillment) AsString() string {
-	return "COMPLEX(" + strconv.FormatBool(f.IsFulfilled()) + ")"
+	return "COMPLEX(" + strconv.FormatBool(f.ShouldClear()) + ")"
 }
 
 func (f ComplexFuilfillment) Tick(state *state.StateAccess) bool {
-	return f.IsFulfilled()
+	return f.ShouldClear()
+}
+
+func (f ComplexFuilfillment) ShouldClear() bool {
+	return f.fulfilled
 }

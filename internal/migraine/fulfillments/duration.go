@@ -13,12 +13,13 @@ import (
 )
 
 type DurationFuilfillment struct {
-	StartTime time.Time
-	Milis     models.Miliseconds
+	StartTime   time.Time
+	Milis       models.Miliseconds
+	shouldClear bool
 }
 
-func DefaultDurationFulfillment() DurationFuilfillment {
-	return DurationFuilfillment{
+func DefaultDurationFulfillment() *DurationFuilfillment {
+	return &DurationFuilfillment{
 		StartTime: time.Now(),
 		Milis:     1000, // 1s
 	}
@@ -45,7 +46,7 @@ func ParseDurationFulfillment(intercom models.Intercom, fil string, conf *config
 		milis = models.Miliseconds(conf.Fulfillment.DefaultDurationMs)
 	}
 
-	return true, DurationFuilfillment{
+	return true, &DurationFuilfillment{
 		StartTime: time.Now(),
 		Milis:     models.Miliseconds(milis),
 	}
@@ -55,7 +56,13 @@ func (f DurationFuilfillment) AsString() string {
 	return "DUR(" + strconv.Itoa(int(f.Milis)) + ")"
 }
 
-func (f DurationFuilfillment) Tick(state *state.StateAccess) bool {
+func (f *DurationFuilfillment) Tick(state *state.StateAccess) bool {
 	elapsed := time.Since(f.StartTime)
-	return elapsed.Milliseconds() > int64(f.Milis)
+	fulfilled := elapsed.Milliseconds() > int64(f.Milis)
+	f.shouldClear = fulfilled
+	return fulfilled
+}
+
+func (f DurationFuilfillment) ShouldClear() bool {
+	return f.shouldClear
 }

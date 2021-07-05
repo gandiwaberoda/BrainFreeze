@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -21,6 +22,8 @@ type GetballCommand struct {
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
 func ParseGetballCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig) (bool, CommandInterface) {
+	fmt.Println(cmd)
+
 	if len(cmd) < 7 {
 		return false, nil
 	}

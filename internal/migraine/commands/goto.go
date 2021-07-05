@@ -80,7 +80,7 @@ func TockGoto(targetX int, targetY int, conf *configuration.FreezeConfig, force 
 	sud4XRad := (my.WorldROT * -1).AsRadian()
 	xErrorRob := xError*math.Cos(float64(sud4XRad)) + yError*math.Sin(float64(sud4XRad))
 
-	fmt.Println("robX: " + fmt.Sprint(xErrorRob) + ";; robY: " + fmt.Sprint(yErrorRob))
+	// fmt.Println("robX: " + fmt.Sprint(xErrorRob) + ";; robY: " + fmt.Sprint(yErrorRob))
 
 	if conf.CommandParameter.AllowXYTogether {
 		if int(math.Abs(yErrorRob)) > conf.CommandParameter.PositionToleranceCm {

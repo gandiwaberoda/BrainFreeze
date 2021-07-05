@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"fmt"
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
@@ -24,6 +25,7 @@ var handlers []func(models.Intercom, string, *configuration.FreezeConfig) (bool,
 	ParseWatchatCommand,
 	ParseGetballCommand,
 	ParseGotoCommand,
+	ParsePlannedCommand,
 }
 
 func WhichCommand(intercom models.Intercom, conf *configuration.FreezeConfig) CommandInterface {
@@ -33,7 +35,11 @@ func WhichCommand(intercom models.Intercom, conf *configuration.FreezeConfig) Co
 		return nil
 	}
 
+	// CMD berisi commandnya (GETBALL, WATCHAT) dan juga argumen, tanpa RECEIVER, tanpa FULFILLMENT
+	// Misal
+	// all/goto(300,400)/dur(5000)
 	cmd := strings.ToUpper(splitted[0])
+	cmd = strings.ReplaceAll(cmd, "\n", " ")
 
 	for _, isThis := range handlers {
 		thisIs, cmd := isThis(intercom, cmd, conf)
@@ -42,5 +48,6 @@ func WhichCommand(intercom models.Intercom, conf *configuration.FreezeConfig) Co
 		}
 	}
 
+	fmt.Println("Gak ketemu:", cmd)
 	return nil
 }

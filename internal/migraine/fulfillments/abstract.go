@@ -11,6 +11,7 @@ import (
 type FulfillmentInterface interface {
 	AsString() string
 	Tick(*state.StateAccess) bool // return value adalah isFulfilled
+	ShouldClear() bool
 }
 
 var fulfillers []func(models.Intercom, string, *configuration.FreezeConfig) (bool, FulfillmentInterface) = []func(models.Intercom, string, *configuration.FreezeConfig) (bool, FulfillmentInterface){
