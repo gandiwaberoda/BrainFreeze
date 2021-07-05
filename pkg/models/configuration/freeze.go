@@ -41,6 +41,10 @@ type SerialConfig struct {
 	CommandHz int      `yaml:"commandHz"`
 }
 
+type SimulatorConfig struct {
+	SimpservPort string `yaml:"simpservPort"`
+}
+
 type DiagnosticConfig struct {
 	TelemetryHz        time.Duration `yaml:"telemetryHz"`
 	EnableStream       bool          `yaml:"enableStream"`
@@ -97,6 +101,7 @@ type FreezeConfig struct {
 	Wanda            WandaConfig            `yaml:"wanda"`
 	CommandParameter CommandParameterConfig `yaml:"commandParameter"`
 	Serial           SerialConfig           `yaml:"serial"`
+	Simulator        SimulatorConfig        `yaml:"simulator"`
 }
 
 func LoadStartupConfig() (FreezeConfig, error) {
