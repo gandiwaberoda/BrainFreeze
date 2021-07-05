@@ -3,17 +3,21 @@ robot:
   role: ATTACKER
   # A (Corner kiri gawang sendiri), B (Sisi kiri gawang), C (Tengah lapangan sebelah kiri), D (Tengah lapangan), H (Tengah gawang sendiri)
   # B atau F posisi start waktu lomba
+  # WorldPosition (0,0) tu di posisi corner kiri gawang sendiri
   startPos: A
+  startRot: 0 # 0 apabila start menghadap ke gawang musuh, 90 apabila menghadap ke kanan (Misal dari corner kiri belakang, menghadap ke gawang sendiri), pake -90 apabila startPos F, pake 90 apabila startPos B
 
 
 camera:
   src:
+    - "/Users/hariangr/Documents/MyFiles/Developer/Robotec/Beroda/ng/assets/twocam/1Jul/Movie on 24-06-21 at 14.53.mov"
+    - 2
     - "/Users/hariangr/Documents/MyFiles/Developer/Robotec/Beroda/ng/BrainDead/assets/captured/2021-04-23 14:50:34.157190 x 60.00024.1280.0.720.0.mp4"
     - 1
-    - 0
     - "C:/Users/root/Documents/hariangr/temp.mp4"
   srcForward:
-    - 2
+    - "/Users/hariangr/Documents/MyFiles/Developer/Robotec/Beroda/ng/assets/twocam/1Jul/Movie on 01-07-21 at 17.39.mov"
+    - 1
     - "DISABLE"
     
   # Punya kamera 0 Mac
@@ -22,12 +26,12 @@ camera:
   # midpointRad: 213
   
   # Punya video
-  midpointX: 583
-  midpointY: 405
-  midpointRad: 269
-  rawWidth: 1280
-  rawHeight: 720
-  robFrontOffsetDeg: -90
+  # midpointX: 583
+  # midpointY: 405
+  # midpointRad: 269
+  # rawWidth: 1280
+  # rawHeight: 720
+  # robFrontOffsetDeg: -90
 
   # Punya kemera TOP GANDIWA
   # midpointX: 917
@@ -36,6 +40,14 @@ camera:
   # rawWidth: 1920
   # rawHeight: 1080
   # robFrontOffsetDeg: 90
+
+  # Punya 1Jul Top
+  midpointX: 917
+  midpointY: 597
+  midpointRad: 365
+  rawWidth: 1616
+  rawHeight: 1076
+  robFrontOffsetDeg: 90
 
   useDshow: true
   postWidth: 640
@@ -49,8 +61,8 @@ expiration:
 telepathy:
   # chitchatHost: "192.168.1.4:6901"
   chitchatHost: 
-    - "10.211.55.6:6901"
     - "localhost:6901"
+    - "10.211.55.6:6901"
     - "CONSOLE"
 
 serial:
@@ -66,6 +78,8 @@ diagnostic:
   enableStream: true
   streamHost: "localhost:6910"
   streamTopProcessed: true
+
+  showScreen: false
 
 wanda:
   minimumHsvArea: 50
@@ -85,10 +99,12 @@ mecha:
 
 commandParameter:
   lookatToleranceDeg: 10
+  positionToleranceCm: 5
+
   handlingOnDist: 290
-  # onlyOneDegreeMovement: true
+  # onlyOneDegreeMovement: true # Perlu di split antara Rotasi dan XY
 
   allowXYTogether: true
   allowXYRotTogether: false
-  
+
   rotToMoveDelay: 2000000000 # nanosecond
