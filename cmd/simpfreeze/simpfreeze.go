@@ -13,6 +13,7 @@ import (
 	"harianugrah.com/brainfreeze/internal/simpserv"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
+	"harianugrah.com/brainfreeze/pkg/models/gutmodel"
 	"harianugrah.com/brainfreeze/pkg/models/state"
 	"harianugrah.com/brainfreeze/pkg/telepathy"
 )
@@ -34,10 +35,36 @@ func main() {
 		log.Fatalln("Gagal meload config", err)
 	}
 
+	// Local State
+	globalWaitGroup.Add(1)
+	state := state.CreateStateAccess(&config)
+	state.StartWatcher(&config)
+	defer state.StopWatcher()
+
 	globalWaitGroup.Add(1)
 	simpse := simpserv.CreateSimpWs(&config)
 	simpse.RegisterHandler(func(s string) {
-		fmt.Println("New msg:", s)
+		if len(s) < 1 {
+			return
+		}
+
+		if s[0] == 'a' {
+			// GUT State
+			gtb, err := gutmodel.ParseGutToBrain(s[4:])
+			if err != nil {
+				log.Println("wrong gtb", err)
+				return
+			}
+			state.UpdateGutToBrain(gtb)
+
+			t := models.Transform{
+				EncXcm: gtb.AbsX,
+				EncYcm: gtb.AbsY,
+				EncROT: gtb.Gyro,
+			}
+			t.InjectWorldTransfromFromEncTransform(&config)
+			state.UpdateMyTransform(t)
+		}
 	})
 	simpse.Start()
 
@@ -49,12 +76,6 @@ func main() {
 	fmt.Println("Self check finished")
 
 	// // Mulai Proses
-
-	// Local State
-	globalWaitGroup.Add(1)
-	state := state.CreateStateAccess(&config)
-	state.StartWatcher(&config)
-	defer state.StopWatcher()
 
 	// Gut
 	globalWaitGroup.Add(1)
