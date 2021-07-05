@@ -14,7 +14,7 @@ type IdleCommand struct {
 }
 
 func DefaultIdleCommand() CommandInterface {
-	return IdleCommand{
+	return &IdleCommand{
 		fulfillment: fulfillments.DefaultHoldFulfillment(),
 	}
 }
@@ -24,19 +24,27 @@ func ParseIdleCommand(intercom models.Intercom, cmd string, conf *configuration.
 		return false, nil
 	}
 
-	if strings.ToUpper(cmd[:4]) == "IDLE" {
-		return true, DefaultIdleCommand()
+	if strings.ToUpper(cmd[:4]) != "IDLE" {
+		return false, nil
 	}
 
-	return false, nil
+	parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, curstate)
+	if parseFulfilment == nil {
+		parseFulfilment = fulfillments.DefaultHoldFulfillment()
+	}
+
+	return true, &IdleCommand{
+		fulfillment: parseFulfilment,
+	}
 }
 
 func (i IdleCommand) GetName() string {
 	return "IDLE"
 }
 
-func (i IdleCommand) Tick(force *models.Force, state *state.StateAccess) {
+func (i *IdleCommand) Tick(force *models.Force, state *state.StateAccess) {
 	force.Idle()
+	i.fulfillment.Tick()
 }
 
 func (i IdleCommand) ShouldClear() bool {

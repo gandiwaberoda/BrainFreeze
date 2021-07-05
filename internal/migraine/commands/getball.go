@@ -32,9 +32,14 @@ func ParseGetballCommand(intercom models.Intercom, cmd string, conf *configurati
 		return false, nil
 	}
 
+	parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, curstate)
+	if parseFulfilment == nil {
+		parseFulfilment = fulfillments.DefaultGotballFulfillment(curstate)
+	}
+
 	parsed := GetballCommand{
 		conf:             conf,
-		fulfillment:      fulfillments.DefaultGotballFulfillment(curstate),
+		fulfillment:      parseFulfilment,
 		lastRotationTime: time.Now(),
 	}
 

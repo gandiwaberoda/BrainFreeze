@@ -16,6 +16,7 @@ type DurationFuilfillment struct {
 	StartTime   time.Time
 	Milis       models.Miliseconds
 	shouldClear bool
+	elapsed     time.Duration
 }
 
 func DefaultDurationFulfillment() FulfillmentInterface {
@@ -60,8 +61,13 @@ func (f *DurationFuilfillment) Tick() {
 	elapsed := time.Since(f.StartTime)
 	fulfilled := elapsed.Milliseconds() > int64(f.Milis)
 	f.shouldClear = fulfilled
+	f.elapsed = elapsed
 }
 
 func (f DurationFuilfillment) ShouldClear() bool {
 	return f.shouldClear
+}
+
+func (f DurationFuilfillment) GetElapsed() time.Duration {
+	return f.elapsed
 }

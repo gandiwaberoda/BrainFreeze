@@ -18,8 +18,8 @@ type PlannedCommand struct {
 	current_obj        CommandInterface
 	intercom           models.Intercom
 	conf               *configuration.FreezeConfig
-	shouldClear        bool
-	state              *state.StateAccess
+	// shouldClear        bool
+	state *state.StateAccess
 }
 
 func ParsePlannedCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
@@ -36,6 +36,7 @@ func ParsePlannedCommand(intercom models.Intercom, cmd string, conf *configurati
 	parsed.intercom = intercom
 	parsed.conf = conf
 	parsed.fulfillment = fulfillments.DefaultComplexFulfillment()
+	parsed.state = curstate
 
 	re, _ := regexp.Compile(`\((.+)\)`)
 	foundParam := re.FindStringSubmatch(cmd)
@@ -82,12 +83,26 @@ func (i *PlannedCommand) NextObjective() (finished bool) {
 		Receiver: i.intercom.Receiver,
 		Content:  inkom_content,
 	}
-	i.current_obj = WhichCommand(inkom, i.conf, i.state)
+
+	nextcmd := WhichCommand(inkom, i.conf, i.state)
+	if nextcmd == nil {
+		fmt.Println("INVALID SUBCMD: " + nextup)
+		return i.NextObjective()
+	}
+
+	i.current_obj = nextcmd
+	str_obj := "PLANNED [" + i.current_obj.GetName() + " -> " + i.current_obj.GetFulfillment().AsString() + "]"
+	i.state.UpdateCurrentObjective(str_obj)
 	return false
 }
 
 func (i PlannedCommand) GetName() string {
-	return "PLANNED"
+	fmt.Println("...")
+	if i.current_obj != nil {
+		return "PLANNED [" + i.current_obj.GetName() + "]"
+	} else {
+		return "PLANNED [initializing]"
+	}
 }
 
 func (i *PlannedCommand) Tick(force *models.Force, state *state.StateAccess) {
@@ -101,10 +116,13 @@ func (i *PlannedCommand) Tick(force *models.Force, state *state.StateAccess) {
 
 	i.current_obj.Tick(force, state)
 	if i.current_obj.GetFulfillment().ShouldClear() {
-		if !i.NextObjective() {
-			i.shouldClear = true
+		fmt.Println("planned next")
+		if i.NextObjective() {
+			i.fulfillment.(*fulfillments.ComplexFuilfillment).Fulfilled()
 		}
 	}
+
+	i.fulfillment.Tick()
 }
 
 func (i PlannedCommand) ShouldClear() bool {

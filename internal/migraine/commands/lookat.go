@@ -48,10 +48,14 @@ func ParseLookatCommand(intercom models.Intercom, cmd string, conf *configuratio
 		return false, nil
 	}
 
+	parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, curstate)
+	if parseFulfilment == nil {
+		parseFulfilment = fulfillments.DefaultComplexFulfillment()
+	}
 	parsed := LookatCommand{
 		Target:      target,
 		conf:        conf,
-		fulfillment: fulfillments.DefaultComplexFulfillment(),
+		fulfillment: parseFulfilment,
 	}
 
 	return true, &parsed
@@ -79,9 +83,11 @@ func (i *LookatCommand) Tick(force *models.Force, state *state.StateAccess) {
 
 	TockLookat(target, *i.conf, force, state)
 
+	// FIXME: Ini perlu ganti pake fulfillmentnya tersendiri
 	if math.Abs(float64(target.RobROT)) < float64(i.conf.CommandParameter.LookatToleranceDeg) {
 		i.shouldClear = true
 	}
+	i.fulfillment.Tick()
 }
 
 func (i LookatCommand) ShouldClear() bool {

@@ -43,10 +43,14 @@ func ParseWatchatCommand(intercom models.Intercom, cmd string, conf *configurati
 		return false, nil
 	}
 
+	parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, curstate)
+	if parseFulfilment == nil {
+		parseFulfilment = fulfillments.DefaultHoldFulfillment()
+	}
 	parsed := WatchatCommand{
 		Target:      target,
 		conf:        conf,
-		fulfillment: fulfillments.DefaultHoldFulfillment(),
+		fulfillment: parseFulfilment,
 	}
 
 	return true, &parsed

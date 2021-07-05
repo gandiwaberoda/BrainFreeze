@@ -54,11 +54,16 @@ func ParseGotoCommand(intercom models.Intercom, cmd string, conf *configuration.
 		return false, nil
 	}
 
+	parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, curstate)
+	if parseFulfilment == nil {
+		parseFulfilment = fulfillments.DefaultComplexFulfillment()
+	}
+
 	parsed := GotoCommand{
 		TargetX:     tX,
 		TargetY:     tY,
 		conf:        conf,
-		fulfillment: fulfillments.DefaultComplexFulfillment(),
+		fulfillment: parseFulfilment,
 	}
 
 	return true, &parsed
@@ -113,14 +118,17 @@ func (i *GotoCommand) Tick(force *models.Force, state *state.StateAccess) {
 	my := state.GetState().MyTransform
 	yError := float64(targetY - int(my.WorldYcm))
 	xError := float64(targetX - int(my.WorldXcm))
+	// FIXME: Ini juga
 	if math.Abs(yError) < float64(conf.CommandParameter.PositionToleranceCm) && math.Abs(float64(xError)) < float64(conf.CommandParameter.PositionToleranceCm) {
 		i.shouldClear = true
 	}
+
+	i.fulfillment.Tick()
 }
 
-func (i GotoCommand) ShouldClear() bool {
-	return i.shouldClear
-}
+// func (i GotoCommand) ShouldClear() bool {
+// 	return i.shouldClear
+// }
 
 func (i GotoCommand) GetFulfillment() fulfillments.FulfillmentInterface {
 	return i.fulfillment

@@ -23,12 +23,14 @@ func ParseHandlingCommand(intercom models.Intercom, cmd string, conf *configurat
 		return false, &HandlingCommand{}
 	}
 
-	parsed := HandlingCommand{}
 	parsedFulfillment := fulfillments.WhichFulfillment(intercom, conf, curstate)
 	if parsedFulfillment == nil {
 		parsedFulfillment = fulfillments.DefaultHoldFulfillment()
 	}
-	parsed.fulfillment = parsedFulfillment
+
+	parsed := HandlingCommand{
+		fulfillment: parsedFulfillment,
+	}
 
 	return true, &parsed
 }
