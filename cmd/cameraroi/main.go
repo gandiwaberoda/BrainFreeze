@@ -71,8 +71,8 @@ func main() {
 
 	go captioner()
 
+	frame := gocv.NewMat()
 	for {
-		frame := gocv.NewMat()
 		topCam.Read(&frame)
 
 		mid := image.Point{
