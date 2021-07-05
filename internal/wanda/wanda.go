@@ -61,12 +61,6 @@ var rawWin *gocv.Window
 var hsvForwardWin *gocv.Window
 var rawForwardWin *gocv.Window
 
-// var hsvWin = gocv.NewWindow("HSV")
-// var rawWin = gocv.NewWindow("Post Processed")
-
-// var hsvForwardWin = gocv.NewWindow("Forward HSV")
-// var rawForwardWin = gocv.NewWindow("Forward Post Processed")
-
 func worker(w *WandaVision) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -85,14 +79,7 @@ func worker(w *WandaVision) {
 
 	wg := sync.WaitGroup{}
 	for {
-		// w.topCamera.Read(&topFrame)
-		// gocv.CvtColor(topFrame, &topHsvFrame, gocv.ColorBGRToHSV)
-		// gocv.GaussianBlur(topHsvFrame, &topHsvFrame, image.Point{7, 7}, 0, 0, gocv.BorderDefault)
 		w.topCamera.ReadHSV(&topHsvFrame)
-
-		// w.forwardCamera.Read(&forFrame)
-		// gocv.CvtColor(forFrame, &forHsvFrame, gocv.ColorBGRToHSV)
-		// gocv.GaussianBlur(forHsvFrame, &forHsvFrame, image.Point{7, 7}, 0, 0, gocv.BorderDefault)
 		w.forwardCamera.ReadHSV(&forHsvFrame)
 
 		w.fpsHsv.Tick()
@@ -194,6 +181,8 @@ func (w *WandaVision) Start() {
 	w.warnaNewest = color.RGBA{0, 255, 0, 0}
 	w.warnaLastKnown = color.RGBA{0, 0, 255, 0}
 
+	w.isRunning = true
+
 	if w.conf.Diagnostic.ShowScreen {
 		mainthread.Run(func() {
 			worker(w)
@@ -202,9 +191,6 @@ func (w *WandaVision) Start() {
 		go worker(w)
 	}
 
-	fmt.Println("aw")
-
-	w.isRunning = true
 }
 
 func (w *WandaVision) Stop() {
