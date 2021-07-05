@@ -4,10 +4,17 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 
+	"harianugrah.com/brainfreeze/internal/diagnostic"
+	"harianugrah.com/brainfreeze/internal/gut"
+	"harianugrah.com/brainfreeze/internal/migraine"
 	"harianugrah.com/brainfreeze/internal/simpserv"
+	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
+	"harianugrah.com/brainfreeze/pkg/models/state"
+	"harianugrah.com/brainfreeze/pkg/telepathy"
 )
 
 func main() {
@@ -34,22 +41,25 @@ func main() {
 	})
 	simpse.Start()
 
-	// selfCheck := diagnostic.ConfigValidate(config)
-	// if selfCheck != nil {
-	// 	fmt.Println(selfCheck)
-	// 	return
-	// }
-	// fmt.Println("Self check finished")
+	selfCheck := diagnostic.ConfigValidate(config)
+	if selfCheck != nil {
+		fmt.Println(selfCheck)
+		return
+	}
+	fmt.Println("Self check finished")
 
 	// // Mulai Proses
 
-	// // Local State
-	// globalWaitGroup.Add(1)
-	// state := state.CreateStateAccess(&config)
-	// state.StartWatcher(&config)
-	// defer state.StopWatcher()
+	// Local State
+	globalWaitGroup.Add(1)
+	state := state.CreateStateAccess(&config)
+	state.StartWatcher(&config)
+	defer state.StopWatcher()
 
-	// // Gut
+	// Gut
+	globalWaitGroup.Add(1)
+	gutTalk := gut.CreateGutSim(&config, simpse)
+
 	// var gutTalk gut.GutInterface
 	// if strings.ToUpper(config.Serial.Ports[0]) == "CONSOLE" {
 	// 	gutTalk = gut.CreateGutConsole()
@@ -81,44 +91,44 @@ func main() {
 	// }
 	// defer gutTalk.Stop()
 
-	// // Artificial Intellegence
-	// migraine := migraine.CreateMigraine(&config, gutTalk, state)
-	// migraine.Start()
-	// defer migraine.Stop()
+	// Artificial Intellegence
+	migraine := migraine.CreateMigraine(&config, gutTalk, state)
+	migraine.Start()
+	defer migraine.Stop()
 
-	// // Telepathy
-	// globalWaitGroup.Add(1)
+	// Telepathy
+	globalWaitGroup.Add(1)
 
-	// var telepathyChannel telepathy.Telepathy
-	// if strings.ToUpper(config.Telepathy.ChitChatHost[0]) == "CONSOLE" {
-	// 	telepathyChannel = telepathy.CreateConsoleTelepathy()
-	// } else {
-	// 	telepathyChannel = telepathy.CreateWebsocketTelepathy(&config)
-	// }
-	// telepathyChannel.RegisterHandler(func(s string) {
-	// 	// fmt.Println("handle", s)
-	// 	intercom, err := models.ParseIntercom(s)
-	// 	if err != nil {
-	// 		fmt.Println("Bukan intercom", err)
-	// 		return
-	// 	}
+	var telepathyChannel telepathy.Telepathy
+	if strings.ToUpper(config.Telepathy.ChitChatHost[0]) == "CONSOLE" {
+		telepathyChannel = telepathy.CreateConsoleTelepathy()
+	} else {
+		telepathyChannel = telepathy.CreateWebsocketTelepathy(&config)
+	}
+	telepathyChannel.RegisterHandler(func(s string) {
+		// fmt.Println("handle", s)
+		intercom, err := models.ParseIntercom(s)
+		if err != nil {
+			fmt.Println("Bukan intercom", err)
+			return
+		}
 
-	// 	if intercom.Kind == models.COMMAND {
-	// 		// Bawa ke migraine
-	// 		migraine.AddCommand(intercom)
-	// 	}
-	// })
-	// _, errTelepathy := telepathyChannel.Start()
-	// if errTelepathy != nil {
-	// 	log.Fatalln(errTelepathy.Error())
-	// }
-	// defer telepathyChannel.Stop()
+		if intercom.Kind == models.COMMAND {
+			// Bawa ke migraine
+			migraine.AddCommand(intercom)
+		}
+	})
+	_, errTelepathy := telepathyChannel.Start()
+	if errTelepathy != nil {
+		log.Fatalln(errTelepathy.Error())
+	}
+	defer telepathyChannel.Stop()
 
-	// // Telemetry
-	// globalWaitGroup.Add(1)
-	// telemetry := diagnostic.CreateNewTelemetry(telepathyChannel, &config, state)
-	// telemetry.Start()
-	// defer telemetry.Stop()
+	// Telemetry
+	globalWaitGroup.Add(1)
+	telemetry := diagnostic.CreateNewTelemetry(telepathyChannel, &config, state)
+	telemetry.Start()
+	defer telemetry.Stop()
 
 	// globalWaitGroup.Add(1)
 	// vision := wanda.NewWandaVision(&config, state)
