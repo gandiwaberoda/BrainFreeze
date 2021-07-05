@@ -2,8 +2,10 @@ package telepathy
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/url"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
@@ -23,6 +25,10 @@ func CreateWebsocketTelepathy(_config *configuration.FreezeConfig) *WebsocketTel
 }
 
 func listenMsg(tele *WebsocketTelepathy) {
+	defer func() {
+		fmt.Println("Stop listening 4 msg")
+	}()
+
 	for {
 		_, message, err := tele.ws.ReadMessage()
 		if err != nil {
@@ -36,18 +42,25 @@ func listenMsg(tele *WebsocketTelepathy) {
 	}
 }
 
-func (tele *WebsocketTelepathy) Start() (bool, error) {
+func (tele *WebsocketTelepathy) Connect() (bool, error) {
 	u := url.URL{Scheme: "ws", Host: tele.config.Telepathy.ChitChatHost[0]}
 	log.Printf("connecting to %s", u.String())
 
 	ws, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
-		return false, errors.New("failed connecting to websocket: " + err.Error())
+		<-time.After(time.Second * 1)
+		fmt.Println("failed connecting to websocket: " + err.Error())
+		// return false, errors.New("failed connecting to websocket: " + err.Error())
+		return tele.Connect()
 	}
 
-	tele.isRunning = true
 	tele.ws = ws
+	tele.isRunning = true
+	return true, nil
+}
 
+func (tele *WebsocketTelepathy) Start() (bool, error) {
+	tele.Connect()
 	go listenMsg(tele)
 
 	return true, nil
@@ -72,7 +85,9 @@ func (c *WebsocketTelepathy) Send(s string) (bool, error) {
 
 	err := c.ws.WriteMessage(websocket.TextMessage, []byte(s))
 	if err != nil {
-		return false, err
+		fmt.Println("Error ngirim data ke ws, reconnecting...", err)
+		c.Connect()
+		c.Send(s)
 	}
 
 	return true, nil
