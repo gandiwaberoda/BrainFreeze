@@ -85,13 +85,15 @@ func worker(w *WandaVision) {
 
 	wg := sync.WaitGroup{}
 	for {
-		w.topCamera.Read(&topFrame)
-		gocv.CvtColor(topFrame, &topHsvFrame, gocv.ColorBGRToHSV)
-		gocv.GaussianBlur(topHsvFrame, &topHsvFrame, image.Point{7, 7}, 0, 0, gocv.BorderDefault)
+		// w.topCamera.Read(&topFrame)
+		// gocv.CvtColor(topFrame, &topHsvFrame, gocv.ColorBGRToHSV)
+		// gocv.GaussianBlur(topHsvFrame, &topHsvFrame, image.Point{7, 7}, 0, 0, gocv.BorderDefault)
+		w.topCamera.ReadHSV(&topHsvFrame)
 
-		w.forwardCamera.Read(&forFrame)
-		gocv.CvtColor(forFrame, &forHsvFrame, gocv.ColorBGRToHSV)
-		gocv.GaussianBlur(forHsvFrame, &forHsvFrame, image.Point{7, 7}, 0, 0, gocv.BorderDefault)
+		// w.forwardCamera.Read(&forFrame)
+		// gocv.CvtColor(forFrame, &forHsvFrame, gocv.ColorBGRToHSV)
+		// gocv.GaussianBlur(forHsvFrame, &forHsvFrame, image.Point{7, 7}, 0, 0, gocv.BorderDefault)
+		w.forwardCamera.ReadHSV(&forHsvFrame)
 
 		w.fpsHsv.Tick()
 
