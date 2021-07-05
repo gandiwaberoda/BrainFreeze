@@ -59,12 +59,12 @@ var (
 )
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParseWasdCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig) (bool, CommandInterface) {
+func ParseWasdCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, CommandInterface) {
 	dir := strings.ToUpper(strings.TrimSpace(cmd))
 
 	for _, v := range acceptedDir {
 		if dir == string(v) {
-			parseFulfilment := fulfillments.WhichFulfillment(intercom, conf)
+			parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, state)
 
 			if parseFulfilment == nil {
 				parseFulfilment = fulfillments.DefaultDurationFulfillment()
@@ -85,7 +85,7 @@ func (i WasdCommand) GetName() string {
 	return "WASD:" + string(i.Direction)
 }
 
-func TockWasd(dir WasdDirection, conf configuration.FreezeConfig, force *models.Force, state *state.StateAccess) {
+func TockWasd(dir WasdDirection, conf configuration.FreezeConfig, force *models.Force, curstate *state.StateAccess) {
 	if dir == WDirection {
 		// Maju
 		force.AddY(float64(conf.Mecha.VerticalForceRange))
@@ -121,11 +121,7 @@ func TockWasd(dir WasdDirection, conf configuration.FreezeConfig, force *models.
 
 func (i *WasdCommand) Tick(force *models.Force, state *state.StateAccess) {
 	TockWasd(i.Direction, *i.conf, force, state)
-	i.shouldClear = i.fulfillment.Tick(state)
-}
-
-func (i *WasdCommand) ShouldClear() bool {
-	return i.shouldClear
+	i.fulfillment.Tick()
 }
 
 func (i WasdCommand) GetFulfillment() fulfillments.FulfillmentInterface {

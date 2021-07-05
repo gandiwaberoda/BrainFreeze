@@ -14,7 +14,7 @@ type HandlingCommand struct {
 	shouldClear bool
 }
 
-func ParseHandlingCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig) (bool, CommandInterface) {
+func ParseHandlingCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
 	if len(cmd) < 8 {
 		return false, nil
 	}
@@ -24,7 +24,7 @@ func ParseHandlingCommand(intercom models.Intercom, cmd string, conf *configurat
 	}
 
 	parsed := HandlingCommand{}
-	parsedFulfillment := fulfillments.WhichFulfillment(intercom, conf)
+	parsedFulfillment := fulfillments.WhichFulfillment(intercom, conf, curstate)
 	if parsedFulfillment == nil {
 		parsedFulfillment = fulfillments.DefaultHoldFulfillment()
 	}
@@ -39,7 +39,7 @@ func (i HandlingCommand) GetName() string {
 
 func (i *HandlingCommand) Tick(force *models.Force, state *state.StateAccess) {
 	force.EnableHandling()
-	i.shouldClear = i.fulfillment.Tick(state)
+	i.fulfillment.Tick()
 }
 
 func (i HandlingCommand) ShouldClear() bool {

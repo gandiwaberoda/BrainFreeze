@@ -14,14 +14,14 @@ import (
 
 // TODO: BUATKAN LOOKEDAT Fulfillment
 type GetballCommand struct {
-	conf             *configuration.FreezeConfig
-	fulfillment      fulfillments.FulfillmentInterface
-	shouldClear      bool
+	conf        *configuration.FreezeConfig
+	fulfillment fulfillments.FulfillmentInterface
+	// shouldClear      bool
 	lastRotationTime time.Time
 }
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParseGetballCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig) (bool, CommandInterface) {
+func ParseGetballCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
 	fmt.Println(cmd)
 
 	if len(cmd) < 7 {
@@ -34,7 +34,7 @@ func ParseGetballCommand(intercom models.Intercom, cmd string, conf *configurati
 
 	parsed := GetballCommand{
 		conf:             conf,
-		fulfillment:      fulfillments.DefaultComplexFulfillment(),
+		fulfillment:      fulfillments.DefaultGotballFulfillment(curstate),
 		lastRotationTime: time.Now(),
 	}
 
@@ -106,14 +106,17 @@ func (i *GetballCommand) Tick(force *models.Force, state *state.StateAccess) {
 		i.lastRotationTime = time.Now()
 	}
 
-	if state.GetState().GutToBrain.IsDribbling {
-		i.shouldClear = true
-	}
+	i.fulfillment.Tick()
+
+	// if state.GetState().GutToBrain.IsDribbling {
+	// 	// i.shouldClear = true
+	// 	i.fulfillment.Fulfilled()
+	// }
 }
 
-func (i GetballCommand) ShouldClear() bool {
-	return i.shouldClear
-}
+// func (i GetballCommand) ShouldClear() bool {
+// 	return i.shouldClear
+// }
 
 func (i GetballCommand) GetFulfillment() fulfillments.FulfillmentInterface {
 	return i.fulfillment

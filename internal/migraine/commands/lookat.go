@@ -21,7 +21,7 @@ type LookatCommand struct {
 }
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParseLookatCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig) (bool, CommandInterface) {
+func ParseLookatCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
 	if len(cmd) < 6 {
 		return false, nil
 	}

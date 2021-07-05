@@ -19,7 +19,7 @@ func DefaultIdleCommand() CommandInterface {
 	}
 }
 
-func ParseIdleCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig) (bool, CommandInterface) {
+func ParseIdleCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
 	if len(cmd) < 4 {
 		return false, nil
 	}

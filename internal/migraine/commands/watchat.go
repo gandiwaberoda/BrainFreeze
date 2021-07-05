@@ -15,11 +15,10 @@ type WatchatCommand struct {
 	Target      string
 	conf        *configuration.FreezeConfig
 	fulfillment fulfillments.FulfillmentInterface
-	shouldClear bool
 }
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParseWatchatCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig) (bool, CommandInterface) {
+func ParseWatchatCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
 	if len(cmd) < 7 {
 		return false, nil
 	}
@@ -62,11 +61,7 @@ func (i *WatchatCommand) Tick(force *models.Force, state *state.StateAccess) {
 
 	TockLookat(target, *i.conf, force, state)
 
-	i.shouldClear = i.fulfillment.Tick(state)
-}
-
-func (i WatchatCommand) ShouldClear() bool {
-	return i.shouldClear
+	i.fulfillment.Tick()
 }
 
 func (i WatchatCommand) GetFulfillment() fulfillments.FulfillmentInterface {

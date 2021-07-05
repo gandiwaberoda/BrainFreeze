@@ -11,11 +11,11 @@ import (
 type HoldFuilfillment struct {
 }
 
-func DefaultHoldFulfillment() *HoldFuilfillment {
+func DefaultHoldFulfillment() FulfillmentInterface {
 	return &HoldFuilfillment{}
 }
 
-func ParseHoldFulfillment(intercom models.Intercom, fil string, conf *configuration.FreezeConfig) (bool, FulfillmentInterface) {
+func ParseHoldFulfillment(intercom models.Intercom, fil string, conf *configuration.FreezeConfig, state *state.RobotState) (bool, FulfillmentInterface) {
 	if !strings.EqualFold(fil[:4], "HOLD") {
 		return false, nil
 	}
@@ -27,8 +27,8 @@ func (f HoldFuilfillment) AsString() string {
 	return "HOLD"
 }
 
-func (f *HoldFuilfillment) Tick(state *state.StateAccess) bool {
-	return false
+func (f *HoldFuilfillment) Tick() {
+	// return false
 }
 
 func (f HoldFuilfillment) ShouldClear() bool {

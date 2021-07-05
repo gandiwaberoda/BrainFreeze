@@ -37,13 +37,13 @@ func worker(m *Migraine) {
 		force := models.Force{}
 		m.CurrentObjective.Tick(&force, m.state)
 
-		if m.CurrentObjective.ShouldClear() {
+		if m.CurrentObjective.GetFulfillment().ShouldClear() {
 			m.ReplaceObjective(commands.DefaultIdleCommand())
 		}
 
 		m.gut.Send(force.AsGutCommandString())
 
-		if m.CurrentObjective.ShouldClear() {
+		if m.CurrentObjective.GetFulfillment().ShouldClear() {
 			m.Idle()
 		}
 
@@ -93,7 +93,7 @@ func (m *Migraine) AddCommand(intercom models.Intercom) {
 		return
 	}
 
-	cmd := commands.WhichCommand(intercom, m.config)
+	cmd := commands.WhichCommand(intercom, m.config, m.state)
 
 	if cmd != nil {
 		m.ReplaceObjective(cmd)

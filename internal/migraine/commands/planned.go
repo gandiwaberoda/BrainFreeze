@@ -12,16 +12,17 @@ import (
 )
 
 type PlannedCommand struct {
-	fulfillment        fulfillments.ComplexFuilfillment
+	fulfillment        fulfillments.FulfillmentInterface
 	subcommand_raw_str string
 	subcommands_str    []string // Sudah di ubah spasi menjadi / juga, delimeternya ;
 	current_obj        CommandInterface
 	intercom           models.Intercom
 	conf               *configuration.FreezeConfig
 	shouldClear        bool
+	state              *state.StateAccess
 }
 
-func ParsePlannedCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig) (bool, CommandInterface) {
+func ParsePlannedCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
 	if len(cmd) < 7 {
 		return false, nil
 	}
@@ -81,7 +82,7 @@ func (i *PlannedCommand) NextObjective() (finished bool) {
 		Receiver: i.intercom.Receiver,
 		Content:  inkom_content,
 	}
-	i.current_obj = WhichCommand(inkom, i.conf)
+	i.current_obj = WhichCommand(inkom, i.conf, i.state)
 	return false
 }
 
@@ -93,13 +94,13 @@ func (i *PlannedCommand) Tick(force *models.Force, state *state.StateAccess) {
 	if i.current_obj == nil {
 		fmt.Println("nilll")
 		if i.NextObjective() {
-			i.fulfillment.Fulfilled()
+			i.fulfillment.(*fulfillments.ComplexFuilfillment).Fulfilled()
 		}
 		return
 	}
 
 	i.current_obj.Tick(force, state)
-	if i.current_obj.ShouldClear() {
+	if i.current_obj.GetFulfillment().ShouldClear() {
 		if !i.NextObjective() {
 			i.shouldClear = true
 		}

@@ -18,14 +18,14 @@ type DurationFuilfillment struct {
 	shouldClear bool
 }
 
-func DefaultDurationFulfillment() *DurationFuilfillment {
+func DefaultDurationFulfillment() FulfillmentInterface {
 	return &DurationFuilfillment{
 		StartTime: time.Now(),
 		Milis:     1000, // 1s
 	}
 }
 
-func ParseDurationFulfillment(intercom models.Intercom, fil string, conf *configuration.FreezeConfig) (bool, FulfillmentInterface) {
+func ParseDurationFulfillment(intercom models.Intercom, fil string, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, FulfillmentInterface) {
 	if !strings.EqualFold(fil[:3], "DUR") {
 		return false, nil
 	}
@@ -56,11 +56,10 @@ func (f DurationFuilfillment) AsString() string {
 	return "DUR(" + strconv.Itoa(int(f.Milis)) + ")"
 }
 
-func (f *DurationFuilfillment) Tick(state *state.StateAccess) bool {
+func (f *DurationFuilfillment) Tick() {
 	elapsed := time.Since(f.StartTime)
 	fulfilled := elapsed.Milliseconds() > int64(f.Milis)
 	f.shouldClear = fulfilled
-	return fulfilled
 }
 
 func (f DurationFuilfillment) ShouldClear() bool {

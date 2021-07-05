@@ -13,11 +13,11 @@ import (
 type CommandInterface interface {
 	GetName() string
 	Tick(*models.Force, *state.StateAccess)
-	ShouldClear() bool
+	// ShouldClear() bool
 	GetFulfillment() fulfillments.FulfillmentInterface
 }
 
-var handlers []func(models.Intercom, string, *configuration.FreezeConfig) (bool, CommandInterface) = []func(models.Intercom, string, *configuration.FreezeConfig) (bool, CommandInterface){
+var handlers []func(models.Intercom, string, *configuration.FreezeConfig, *state.StateAccess) (bool, CommandInterface) = []func(models.Intercom, string, *configuration.FreezeConfig, *state.StateAccess) (bool, CommandInterface){
 	ParseIdleCommand,
 	ParseWasdCommand,
 	ParseLookatCommand,
@@ -28,7 +28,7 @@ var handlers []func(models.Intercom, string, *configuration.FreezeConfig) (bool,
 	ParsePlannedCommand,
 }
 
-func WhichCommand(intercom models.Intercom, conf *configuration.FreezeConfig) CommandInterface {
+func WhichCommand(intercom models.Intercom, conf *configuration.FreezeConfig, state *state.StateAccess) CommandInterface {
 	splitted := strings.Split(intercom.Content, "/")
 
 	if len(splitted) < 1 {
@@ -42,7 +42,7 @@ func WhichCommand(intercom models.Intercom, conf *configuration.FreezeConfig) Co
 	cmd = strings.ReplaceAll(cmd, "\n", " ")
 
 	for _, isThis := range handlers {
-		thisIs, cmd := isThis(intercom, cmd, conf)
+		thisIs, cmd := isThis(intercom, cmd, conf, state)
 		if thisIs {
 			return cmd
 		}

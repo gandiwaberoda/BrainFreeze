@@ -22,7 +22,7 @@ type GotoCommand struct {
 }
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParseGotoCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig) (bool, CommandInterface) {
+func ParseGotoCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
 	if len(cmd) < 4 {
 		return false, nil
 	}
