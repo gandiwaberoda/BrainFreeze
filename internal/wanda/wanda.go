@@ -55,17 +55,17 @@ func NewWandaVision(conf *configuration.FreezeConfig, state *state.StateAccess) 
 // Penyebabnya karena Dilate
 
 // Harus diluar mainthread
-// var hsvWin *gocv.Window
-// var rawWin *gocv.Window
+var hsvWin *gocv.Window
+var rawWin *gocv.Window
 
-// var hsvForwardWin *gocv.Window
-// var rawForwardWin *gocv.Window
+var hsvForwardWin *gocv.Window
+var rawForwardWin *gocv.Window
 
-var hsvWin = gocv.NewWindow("HSV")
-var rawWin = gocv.NewWindow("Post Processed")
+// var hsvWin = gocv.NewWindow("HSV")
+// var rawWin = gocv.NewWindow("Post Processed")
 
-var hsvForwardWin = gocv.NewWindow("Forward HSV")
-var rawForwardWin = gocv.NewWindow("Forward Post Processed")
+// var hsvForwardWin = gocv.NewWindow("Forward HSV")
+// var rawForwardWin = gocv.NewWindow("Forward Post Processed")
 
 func worker(w *WandaVision) {
 	defer func() {
@@ -162,13 +162,13 @@ func worker(w *WandaVision) {
 }
 
 func (w *WandaVision) Start() {
-	// if hsvForwardWin == nil && w.conf.Diagnostic.ShowScreen {
-	// 	hsvWin = gocv.NewWindow("HSV")
-	// 	rawWin = gocv.NewWindow("Post Processed")
+	if hsvForwardWin == nil && w.conf.Diagnostic.ShowScreen {
+		hsvWin = gocv.NewWindow("HSV")
+		rawWin = gocv.NewWindow("Post Processed")
 
-	// 	hsvForwardWin = gocv.NewWindow("Forward HSV")
-	// 	rawForwardWin = gocv.NewWindow("Forward Post Processed")
-	// }
+		hsvForwardWin = gocv.NewWindow("Forward HSV")
+		rawForwardWin = gocv.NewWindow("Forward Post Processed")
+	}
 
 	w.topCamera = acquisition.CreateTopCameraAcquisition(w.conf)
 	w.topCamera.Start()
@@ -192,9 +192,13 @@ func (w *WandaVision) Start() {
 	w.warnaNewest = color.RGBA{0, 255, 0, 0}
 	w.warnaLastKnown = color.RGBA{0, 0, 255, 0}
 
-	mainthread.Run(func() {
-		worker(w)
-	})
+	if w.conf.Diagnostic.ShowScreen {
+		mainthread.Run(func() {
+			worker(w)
+		})
+	} else {
+		go worker(w)
+	}
 
 	fmt.Println("aw")
 
