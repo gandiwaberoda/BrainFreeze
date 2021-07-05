@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"sync"
 
 	"harianugrah.com/brainfreeze/internal/simpserv"
@@ -10,9 +11,18 @@ import (
 )
 
 func main() {
+	argsWithoutProg := os.Args[1:]
+
 	globalWaitGroup := sync.WaitGroup{}
 
-	config, err := configuration.LoadStartupConfig()
+	var config configuration.FreezeConfig
+	var err error
+	if len(argsWithoutProg) >= 1 {
+		fmt.Println("Loading custom config file:", argsWithoutProg[0])
+		config, err = configuration.LoadStartupConfigByFile(argsWithoutProg[0])
+	} else if len(argsWithoutProg) == 0 {
+		config, err = configuration.LoadStartupConfig()
+	}
 	if err != nil {
 		log.Fatalln("Gagal meload config", err)
 	}

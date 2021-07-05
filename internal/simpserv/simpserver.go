@@ -57,7 +57,7 @@ func (s *SimpWs) echo(w http.ResponseWriter, r *http.Request) {
 func (s *SimpWs) Start() (bool, error) {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/echo", s.echo)
+	mux.HandleFunc("/", s.echo)
 
 	s.server = &http.Server{
 		Addr:    s.config.Simulator.SimpservPort,

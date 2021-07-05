@@ -104,14 +104,17 @@ type FreezeConfig struct {
 	Simulator        SimulatorConfig        `yaml:"simulator"`
 }
 
-func LoadStartupConfig() (FreezeConfig, error) {
+func LoadStartupConfigByFile(path string) (FreezeConfig, error) {
 	conf := FreezeConfig{}
 
-	reader, err := os.Open("./config.yaml")
+	reader, err := os.Open(path)
 	if err != nil {
 		return FreezeConfig{}, &frerror.ConfigError{Detail: err.Error()}
 	}
 	defer reader.Close()
+
+	// b, _ := ioutil.ReadAll(reader)
+	// fmt.Print("xx", b)
 
 	decoder := yaml.NewDecoder(reader)
 	if err := decoder.Decode(&conf); err != nil {
@@ -121,4 +124,8 @@ func LoadStartupConfig() (FreezeConfig, error) {
 	conf.Camera.Midpoint = image.Point{conf.Camera.PostWidth / 2, conf.Camera.PostHeight / 2}
 
 	return conf, nil
+}
+
+func LoadStartupConfig() (FreezeConfig, error) {
+	return LoadStartupConfigByFile("./config.yaml")
 }
