@@ -79,7 +79,9 @@ func worker(w *WandaVision) {
 
 	wg := sync.WaitGroup{}
 	for {
+		w.topCamera.Read(&topFrame)
 		w.topCamera.ReadHSV(&topHsvFrame)
+		w.forwardCamera.Read(&forFrame)
 		w.forwardCamera.ReadHSV(&forHsvFrame)
 
 		w.fpsHsv.Tick()
