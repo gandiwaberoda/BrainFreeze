@@ -10,7 +10,7 @@ import (
 var ACCEPTABLE_TRANSFORM_KEY = map[string]bool{"EGP": true, "FGP": true, "BALL": true, "MAGENTA": true, "CYAN": true, "CLOBS": true}
 
 func GetTransformKeyAcceptable(key string) bool {
-	_, found := ACCEPTABLE_TRANSFORM_KEY[key]
+	_, found := ACCEPTABLE_TRANSFORM_KEY[strings.ToUpper(key)]
 	return found
 }
 

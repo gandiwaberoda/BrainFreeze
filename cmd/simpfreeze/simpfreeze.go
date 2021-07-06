@@ -80,6 +80,7 @@ func main() {
 				RobXcm: models.Centimeter(x),
 				RobYcm: models.Centimeter(y),
 				RobROT: models.Degree(rot),
+				RobRcm: models.Centimeter(models.EucDistance(x, y)),
 			}
 			// fmt.Println(tr)
 			if strings.EqualFold(s[1:4], "BAL") {

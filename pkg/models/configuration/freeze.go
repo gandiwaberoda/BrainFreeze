@@ -75,6 +75,8 @@ type CommandParameterConfig struct {
 	LookatToleranceDeg  int `yaml:"lookatToleranceDeg"`
 	PositionToleranceCm int `yaml:"positionToleranceCm"`
 
+	ApproachDistanceCm int `yaml:"approachDistanceCm"`
+
 	HandlingOnDist int `yaml:"handlingOnDist"`
 	RotToMoveDelay int `yaml:"rotToMoveDelay"`
 	// OnlyOneDegreeMovement bool `yaml:"onlyOneDegreeMovement"`
