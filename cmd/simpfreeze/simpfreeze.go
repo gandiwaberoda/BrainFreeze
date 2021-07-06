@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -64,6 +65,31 @@ func main() {
 			}
 			t.InjectWorldTransfromFromEncTransform(&config)
 			state.UpdateMyTransform(t)
+		}
+
+		if s[0] == 'b' {
+			// Wanda State
+			splitted := strings.Split(s[5:len(s)-1], ",")
+
+			fmt.Println(s[1:4], splitted)
+
+			x, _ := strconv.ParseFloat(splitted[0], 64)
+			y, _ := strconv.ParseFloat(splitted[1], 64)
+			rot, _ := strconv.ParseFloat(splitted[2], 64)
+			tr := models.Transform{
+				RobXcm: models.Centimeter(x),
+				RobYcm: models.Centimeter(y),
+				RobROT: models.Degree(rot),
+			}
+			fmt.Println(tr)
+			if strings.EqualFold(s[1:4], "BAL") {
+				fmt.Println("UUU")
+				state.UpdateBallTransform(tr)
+			} else if strings.EqualFold(s[1:4], "EGP") {
+
+			} else if strings.EqualFold(s[1:4], "FGP") {
+
+			}
 		}
 	})
 	simpse.Start()
