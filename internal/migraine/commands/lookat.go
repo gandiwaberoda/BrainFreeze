@@ -12,7 +12,6 @@ import (
 	"harianugrah.com/brainfreeze/pkg/models/state"
 )
 
-// TODO: BUATKAN LOOKEDAT Fulfillment
 type LookatCommand struct {
 	Target      string
 	conf        *configuration.FreezeConfig
@@ -26,7 +25,7 @@ func ParseLookatCommand(intercom models.Intercom, cmd string, conf *configuratio
 		return false, nil
 	}
 
-	if !strings.EqualFold(cmd[:6], "LOOKAT") {
+	if len(cmd) < 6 || !strings.EqualFold(cmd[:6], "LOOKAT") {
 		return false, nil
 	}
 
@@ -83,7 +82,6 @@ func (i *LookatCommand) Tick(force *models.Force, state *state.StateAccess) {
 
 	TockLookat(target, *i.conf, force, state)
 
-	// FIXME: Ini perlu ganti pake fulfillmentnya tersendiri
 	if math.Abs(float64(target.RobROT)) < float64(i.conf.CommandParameter.LookatToleranceDeg) {
 		i.shouldClear = true
 	}
