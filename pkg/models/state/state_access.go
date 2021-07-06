@@ -19,6 +19,7 @@ type StateAccess struct {
 func CreateStateAccess(conf *configuration.FreezeConfig) *StateAccess {
 	state := &StateAccess{config: conf}
 	state.UpdateMyName(conf.Robot.Name)
+	state.UpdateMyColor(string(conf.Robot.Color))
 	return state
 }
 

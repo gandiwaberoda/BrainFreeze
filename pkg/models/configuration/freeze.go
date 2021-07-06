@@ -9,11 +9,19 @@ import (
 	frerror "harianugrah.com/brainfreeze/pkg/errors"
 )
 
+type RobotColor string
+
+const (
+	MAGENTA RobotColor = "MAGENTA"
+	CYAN    RobotColor = "CYAN"
+)
+
 type RobotConfig struct {
-	Name     string    `yaml:"name"`
-	Role     RobotType `yaml:"role"`
-	StartPos string    `yaml:"startPos"`
-	StartRot int       `yaml:"startRot"`
+	Name     string     `yaml:"name"`
+	Role     RobotType  `yaml:"role"`
+	StartPos string     `yaml:"startPos"`
+	StartRot int        `yaml:"startRot"`
+	Color    RobotColor `yaml:"color"`
 }
 
 type CameraConfig struct {

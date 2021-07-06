@@ -13,6 +13,13 @@ func (s *StateAccess) UpdateMyName(name string) {
 	s.myState.MyName = name
 }
 
+func (s *StateAccess) UpdateMyColor(col string) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	s.myState.MyColor = col
+}
+
 func (s *StateAccess) UpdateMyTransform(t models.Transform) {
 	s.lock.Lock()
 	defer s.lock.Unlock()

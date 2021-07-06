@@ -89,16 +89,20 @@ func main() {
 
 			} else if strings.EqualFold(s[1:4], "FGP") {
 
+			} else if strings.EqualFold(s[1:4], "MAG") {
+				state.UpdateMagentaTransform(tr)
+			} else if strings.EqualFold(s[1:4], "CYN") {
+				state.UpdateCyanTransform(tr)
 			}
 		}
 	})
 	simpse.Start()
 
-	selfCheck := diagnostic.ConfigValidate(config)
-	if selfCheck != nil {
-		fmt.Println(selfCheck)
-		return
-	}
+	// selfCheck := diagnostic.ConfigValidate(config)
+	// if selfCheck != nil {
+	// 	fmt.Println(selfCheck)
+	// 	return
+	// }
 	fmt.Println("Self check finished")
 
 	// // Mulai Proses
