@@ -88,10 +88,6 @@ func (i *LookatCommand) Tick(force *models.Force, state *state.StateAccess) {
 	i.fulfillment.Tick()
 }
 
-func (i LookatCommand) ShouldClear() bool {
-	return i.shouldClear
-}
-
 func (i LookatCommand) GetFulfillment() fulfillments.FulfillmentInterface {
 	return i.fulfillment
 }
