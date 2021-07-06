@@ -238,7 +238,9 @@ func detectTopBall(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHs
 func detectMagenta(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
 	narrowMagentaFound, narrowMagentaRes := w.magentaNarrow.Detect(topHsvFrame)
 	if narrowMagentaFound && len(narrowMagentaRes) > 0 {
-		w.state.UpdateMagentaTransform(narrowMagentaRes[0].AsTransform(w.conf))
+		obj := narrowMagentaRes[0]
+		w.state.UpdateMagentaTransform(obj.AsTransform(w.conf))
+		gocv.Circle(topFrame, obj.Midpoint, obj.OuterRad, w.warnaNewest, 2)
 	}
 	wg.Done()
 }
