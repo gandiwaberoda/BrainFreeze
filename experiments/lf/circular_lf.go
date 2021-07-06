@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -41,20 +40,22 @@ func main() {
 
 	// toShow := gocv.NewMat()
 	// blackAll := gocv.Ones(640, 640, gocv.MatTypeCV8SC3)
-	rad := float64(130)
+	rad := float64(150)
 
 	for {
 		// blackAll.CopyTo(&toShow)
 
 		topCamera.Read(&frame)
 		gocv.CvtColor(frame, &hsvFrame, gocv.ColorBGRToGray)
-		gocv.Threshold(hsvFrame, &hsvFrame, 254, 256, gocv.ThresholdBinary)
+		// fmt.Println("A:", hsvFrame.Type())
+		// gocv.Threshold(hsvFrame, &hsvFrame, 254, 256, gocv.ThresholdBinary)
+		// fmt.Println("B:", hsvFrame.Type())
 		// topCamera.ReadHSV(&hsvFrame)
 
 		// gocv.InRangeWithScalar(hsvFrame, lower, upper, &hsvFrame)
 
 		// gocv.Erode(hsvFrame, &hsvFrame, erodeMat)
-		gocv.Dilate(hsvFrame, &hsvFrame, dilateMat)
+		// gocv.Dilate(hsvFrame, &hsvFrame, dilateMat)
 
 		// str := ""
 
@@ -72,7 +73,10 @@ func main() {
 		// gocv.Canny(hsvFrame, &hsvFrame, 50, 200)
 		// gocv.Dilate(hsvFrame, &hsvFrame, dilateMat)
 
-		for i := -90.0; i <= 90.0; i++ {
+		gocv.EqualizeHist(hsvFrame, &hsvFrame)
+
+		lastOneWasWhite := true
+		for i := -110.0; i <= 110.0; i++ {
 			x := int(rad*math.Cos(i*math.Pi/180.0)) + 320
 			y := int(rad*math.Sin(i*math.Pi/180.0)) + 320
 			// x := 320
@@ -80,11 +84,16 @@ func main() {
 
 			// fmt.Println(x, y)
 
-			px := hsvFrame.GetIntAt(y, x)
+			px := hsvFrame.GetUCharAt(y, x)
 			// if math.Abs(px) > 0 {
-			if px != 0 {
-				fmt.Println(px)
-				gocv.Circle(&frame, image.Point{X: x, Y: y}, 5, color.RGBA{uint8(i + 90), 0, 0, 0}, -1)
+			if px > 253 {
+				// fmt.Println(px)
+				if !lastOneWasWhite {
+					gocv.Circle(&frame, image.Point{X: x, Y: y}, 5, color.RGBA{uint8(i + 90), 0, 0, 0}, -1)
+					lastOneWasWhite = true
+				}
+			} else {
+				lastOneWasWhite = false
 			}
 		}
 
