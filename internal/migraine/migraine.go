@@ -106,7 +106,7 @@ func (m *Migraine) AddCommand(intercom models.Intercom) {
 func amIReceiver(intercom models.Intercom, m *Migraine) bool {
 	_amIReceiver := false
 
-	myReceiverTag := []string{string(models.ALL), string(m.config.Robot.Name), string(m.config.Robot.Role)}
+	myReceiverTag := []string{string(models.ALL), string(m.config.Robot.Name), string(m.config.Robot.Role), string(m.config.Robot.Color)}
 
 	for _, v := range myReceiverTag {
 		// Case insensitive
