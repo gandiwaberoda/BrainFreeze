@@ -27,7 +27,7 @@ func DefaultDurationFulfillment() FulfillmentInterface {
 }
 
 func ParseDurationFulfillment(intercom models.Intercom, fil string, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, FulfillmentInterface) {
-	if !strings.EqualFold(fil[:3], "DUR") {
+	if len(fil) < 3 || !strings.EqualFold(fil[:3], "DUR") {
 		return false, nil
 	}
 

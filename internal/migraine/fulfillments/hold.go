@@ -16,7 +16,7 @@ func DefaultHoldFulfillment() FulfillmentInterface {
 }
 
 func ParseHoldFulfillment(intercom models.Intercom, fil string, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, FulfillmentInterface) {
-	if !strings.EqualFold(fil[:4], "HOLD") {
+	if len(fil) < 4 || !strings.EqualFold(fil[:4], "HOLD") {
 		return false, nil
 	}
 
