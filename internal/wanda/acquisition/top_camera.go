@@ -13,25 +13,28 @@ import (
 )
 
 type TopCameraAcquisition struct {
-	Lock         *sync.RWMutex
-	vc           *gocv.VideoCapture
-	conf         *configuration.FreezeConfig
-	postFrame    gocv.Mat
-	postHsvFrame gocv.Mat
-	firstFrame   bool
+	Lock          *sync.RWMutex
+	vc            *gocv.VideoCapture
+	conf          *configuration.FreezeConfig
+	postFrame     gocv.Mat
+	postHsvFrame  gocv.Mat
+	postGrayFrame gocv.Mat
+	firstFrame    bool
 }
 
 func CreateTopCameraAcquisition(conf *configuration.FreezeConfig) *TopCameraAcquisition {
 	_postframe := gocv.NewMatWithSize(conf.Camera.PostHeight, conf.Camera.PostWidth, gocv.MatTypeCV8U)
 	_postHsvFrame := gocv.NewMat()
+	_postGrayFrame := gocv.NewMat()
 
 	return &TopCameraAcquisition{
-		conf:         conf,
-		Lock:         &sync.RWMutex{},
-		firstFrame:   false,
-		postFrame:    _postframe,
-		postHsvFrame: _postHsvFrame,
-		vc:           &gocv.VideoCapture{},
+		conf:          conf,
+		Lock:          &sync.RWMutex{},
+		firstFrame:    false,
+		postFrame:     _postframe,
+		postHsvFrame:  _postHsvFrame,
+		postGrayFrame: _postGrayFrame,
+		vc:            &gocv.VideoCapture{},
 	}
 }
 
@@ -87,8 +90,14 @@ func (c *TopCameraAcquisition) read() {
 	newSize := image.Point{c.conf.Camera.PostWidth, c.conf.Camera.PostHeight}
 	gocv.Resize(resImg, &c.postFrame, newSize, 0, 0, gocv.InterpolationLinear)
 
+	// HSV Frame
 	gocv.CvtColor(c.postFrame, &c.postHsvFrame, gocv.ColorBGRToHSV)
 	gocv.GaussianBlur(c.postHsvFrame, &c.postHsvFrame, image.Point{7, 7}, 0, 0, gocv.BorderDefault)
+
+	// Gray Frame
+	gocv.CvtColor(c.postFrame, &c.postGrayFrame, gocv.ColorBGRToGray)
+	gocv.GaussianBlur(c.postGrayFrame, &c.postGrayFrame, image.Pt(3, 3), 0, 0, gocv.BorderDefault)
+	gocv.EqualizeHist(c.postGrayFrame, &c.postGrayFrame)
 
 	c.firstFrame = true
 }
@@ -116,6 +125,19 @@ func (c *TopCameraAcquisition) ReadHSV(dst *gocv.Mat) {
 		c.ReadHSV(dst)
 	} else {
 		c.postHsvFrame.CopyTo(dst)
+	}
+}
+
+func (c *TopCameraAcquisition) ReadGray(dst *gocv.Mat) {
+	if !c.firstFrame {
+		<-time.After(time.Millisecond * 1000)
+	}
+
+	if c.postHsvFrame.Empty() {
+		fmt.Println("Waiting top camera gray...")
+		c.ReadGray(dst)
+	} else {
+		c.postGrayFrame.CopyTo(dst)
 	}
 }
 

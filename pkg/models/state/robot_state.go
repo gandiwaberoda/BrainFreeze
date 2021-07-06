@@ -49,4 +49,6 @@ type RobotState struct {
 	ObstacleTransform                []models.Transform
 	ObstacleTransformLastUpdate      time.Time
 	ObstacleGoalPostTransformExpired bool
+
+	CircularFieldLine []float64 // Untuk line follower
 }

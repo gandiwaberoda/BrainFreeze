@@ -11,6 +11,7 @@ import (
 	"gocv.io/x/gocv"
 	"harianugrah.com/brainfreeze/internal/diagnostic"
 	"harianugrah.com/brainfreeze/internal/wanda/acquisition"
+	"harianugrah.com/brainfreeze/internal/wanda/circular"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/ball"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/cyan"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/dummy"
@@ -22,17 +23,18 @@ import (
 )
 
 type WandaVision struct {
-	isRunning      bool
-	conf           *configuration.FreezeConfig
-	topCamera      *acquisition.TopCameraAcquisition
-	forwardCamera  *acquisition.ForwardCameraAcquisition
-	ballNarrow     *ball.NarrowHaesveBall
-	magentaNarrow  *magenta.NarrowHaesveMagenta
-	dummyNarrow    *dummy.NarrowHaesveDummy
-	goalpostHaesve *goalpost.HaesveGoalpost
-	cyanNarrow     *cyan.NarrowHaesveCyan
-	state          *state.StateAccess
-	fpsHsv         *diagnostic.FpsGauge
+	isRunning         bool
+	conf              *configuration.FreezeConfig
+	topCamera         *acquisition.TopCameraAcquisition
+	forwardCamera     *acquisition.ForwardCameraAcquisition
+	ballNarrow        *ball.NarrowHaesveBall
+	magentaNarrow     *magenta.NarrowHaesveMagenta
+	dummyNarrow       *dummy.NarrowHaesveDummy
+	goalpostHaesve    *goalpost.HaesveGoalpost
+	cyanNarrow        *cyan.NarrowHaesveCyan
+	state             *state.StateAccess
+	fpsHsv            *diagnostic.FpsGauge
+	fieldLineCircular *circular.FieldLineCircular
 
 	latestKnownBallDetection models.DetectionObject
 	latestKnownBallSet       bool
@@ -57,6 +59,7 @@ func NewWandaVision(conf *configuration.FreezeConfig, state *state.StateAccess) 
 // Harus diluar mainthread
 var hsvWin *gocv.Window
 var rawWin *gocv.Window
+var grayWin *gocv.Window
 
 var hsvForwardWin *gocv.Window
 var rawForwardWin *gocv.Window
@@ -72,6 +75,8 @@ func worker(w *WandaVision) {
 	topFrame := gocv.NewMat()
 	topHsvFrame := gocv.NewMat()
 	defer topHsvFrame.Close()
+	topGrayFrame := gocv.NewMat()
+	defer topGrayFrame.Close()
 
 	forFrame := gocv.NewMat()
 	forHsvFrame := gocv.NewMat()
@@ -81,6 +86,7 @@ func worker(w *WandaVision) {
 	for {
 		w.topCamera.Read(&topFrame)
 		w.topCamera.ReadHSV(&topHsvFrame)
+		w.topCamera.ReadGray(&topGrayFrame)
 		w.forwardCamera.Read(&forFrame)
 		w.forwardCamera.ReadHSV(&forHsvFrame)
 
@@ -111,6 +117,10 @@ func worker(w *WandaVision) {
 		// Forward Goalpost
 		wg.Add(1)
 		go detectForGoalpost(w, &wg, &forFrame, &forHsvFrame)
+
+		// Circular Line Field
+		wg.Add(1)
+		go detectLineFieldCircular(w, &wg, &topGrayFrame)
 
 		// Forward Ball
 		if found, result := w.ballNarrow.Detect(&forHsvFrame); found {
@@ -147,6 +157,12 @@ func worker(w *WandaVision) {
 				if keyPressed := hsvForwardWin.WaitKey(1); keyPressed == 'q' {
 					return
 				}
+
+				grayWin.IMShow(topGrayFrame)
+				if keyPressed := grayWin.WaitKey(1); keyPressed == 'q' {
+					return
+				}
+
 			})
 		}
 	}
@@ -156,6 +172,7 @@ func (w *WandaVision) Start() {
 	if hsvForwardWin == nil && w.conf.Diagnostic.ShowScreen {
 		hsvWin = gocv.NewWindow("HSV")
 		rawWin = gocv.NewWindow("Post Processed")
+		grayWin = gocv.NewWindow("Gray Win Processed")
 
 		hsvForwardWin = gocv.NewWindow("Forward HSV")
 		rawForwardWin = gocv.NewWindow("Forward Post Processed")
@@ -174,6 +191,7 @@ func (w *WandaVision) Start() {
 	w.dummyNarrow = dummy.NewNarrowHaesveDummy(w.conf)
 	w.cyanNarrow = cyan.NewNarrowHaesveCyan(w.conf)
 	w.goalpostHaesve = goalpost.NewHaesveGoalpost(w.conf)
+	w.fieldLineCircular = circular.NewFieldLineCircular(w.conf)
 
 	w.topCenter = image.Point{
 		w.conf.Camera.MidpointRad,
@@ -271,6 +289,12 @@ func detectForGoalpost(w *WandaVision, wg *sync.WaitGroup, forFrame *gocv.Mat, f
 		}
 
 	}
+	wg.Done()
+}
+
+func detectLineFieldCircular(w *WandaVision, wg *sync.WaitGroup, grayFrame *gocv.Mat) {
+	detecteds := w.fieldLineCircular.Detect(grayFrame)
+	w.state.UpdateCircularFieldLine(detecteds)
 	wg.Done()
 }
 
