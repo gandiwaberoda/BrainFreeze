@@ -50,7 +50,7 @@ func ParseLookatCommand(intercom models.Intercom, cmd string, conf *configuratio
 
 	parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, curstate)
 	if parseFulfilment == nil {
-		parseFulfilment = fulfillments.DefaultComplexFulfillment()
+		parseFulfilment = fulfillments.DefaultGlancedFulfillment(target, curstate, conf)
 	}
 	parsed := LookatCommand{
 		Target:      target,

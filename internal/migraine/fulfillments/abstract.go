@@ -20,6 +20,7 @@ var fulfillers []func(models.Intercom, string, *configuration.FreezeConfig, *sta
 	ParseLostballFulfillment,
 	ParsePositionFulfillment,
 	ParseHoldFulfillment,
+	ParseGlancedFulfillment,
 }
 
 func WhichFulfillment(intercom models.Intercom, conf *configuration.FreezeConfig, state *state.StateAccess) FulfillmentInterface {
