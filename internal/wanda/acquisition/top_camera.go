@@ -96,7 +96,7 @@ func (c *TopCameraAcquisition) read() {
 
 	// Gray Frame
 	gocv.CvtColor(c.postFrame, &c.postGrayFrame, gocv.ColorBGRToGray)
-	gocv.GaussianBlur(c.postGrayFrame, &c.postGrayFrame, image.Pt(3, 3), 0, 0, gocv.BorderDefault)
+	// gocv.GaussianBlur(c.postGrayFrame, &c.postGrayFrame, image.Pt(3, 3), 0, 0, gocv.BorderDefault)
 	gocv.EqualizeHist(c.postGrayFrame, &c.postGrayFrame)
 
 	c.firstFrame = true

@@ -1,7 +1,6 @@
 package circular
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -50,6 +49,6 @@ func (n *FieldLineCircular) Detect(grayFrame *gocv.Mat) (result []float64) {
 		}
 	}
 
-	fmt.Println(len(res))
+	// fmt.Println(len(res))
 	return res
 }
