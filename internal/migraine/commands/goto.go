@@ -56,7 +56,7 @@ func ParseGotoCommand(intercom models.Intercom, cmd string, conf *configuration.
 
 	parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, curstate)
 	if parseFulfilment == nil {
-		parseFulfilment = fulfillments.DefaultComplexFulfillment()
+		parseFulfilment = fulfillments.DefaultPositionFulfillment(tX, tY, conf, curstate)
 	}
 
 	parsed := GotoCommand{

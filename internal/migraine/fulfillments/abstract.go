@@ -16,6 +16,10 @@ type FulfillmentInterface interface {
 
 var fulfillers []func(models.Intercom, string, *configuration.FreezeConfig, *state.StateAccess) (bool, FulfillmentInterface) = []func(models.Intercom, string, *configuration.FreezeConfig, *state.StateAccess) (bool, FulfillmentInterface){
 	ParseDurationFulfillment,
+	ParseGotballFulfillment,
+	ParseLostballFulfillment,
+	ParsePositionFulfillment,
+	ParseHoldFulfillment,
 }
 
 func WhichFulfillment(intercom models.Intercom, conf *configuration.FreezeConfig, state *state.StateAccess) FulfillmentInterface {
