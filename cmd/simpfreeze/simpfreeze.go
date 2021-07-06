@@ -71,7 +71,7 @@ func main() {
 			// Wanda State
 			splitted := strings.Split(s[5:len(s)-1], ",")
 
-			fmt.Println(s[1:4], splitted)
+			// fmt.Println(s[1:4], splitted)
 
 			x, _ := strconv.ParseFloat(splitted[0], 64)
 			y, _ := strconv.ParseFloat(splitted[1], 64)
@@ -81,9 +81,9 @@ func main() {
 				RobYcm: models.Centimeter(y),
 				RobROT: models.Degree(rot),
 			}
-			fmt.Println(tr)
+			// fmt.Println(tr)
 			if strings.EqualFold(s[1:4], "BAL") {
-				fmt.Println("UUU")
+				// fmt.Println("UUU")
 				state.UpdateBallTransform(tr)
 			} else if strings.EqualFold(s[1:4], "EGP") {
 
