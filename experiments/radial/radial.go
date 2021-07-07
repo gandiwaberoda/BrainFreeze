@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 
 	"gocv.io/x/gocv"
@@ -22,6 +21,7 @@ func calcColor(color int) (red, green, blue, alpha int) {
 
 var win = gocv.NewWindow("HSV")
 var winRaw = gocv.NewWindow("RAW")
+var greenWin = gocv.NewWindow("GREENMASK")
 
 func main() {
 	frame := gocv.NewMat()
@@ -30,16 +30,22 @@ func main() {
 	hsvFrame := gocv.NewMat()
 	defer hsvFrame.Close()
 
+	grayFrame := gocv.NewMat()
+	defer grayFrame.Close()
+
+	greenMask := gocv.NewMat()
+	defer greenMask.Close()
+
 	config, _ := configuration.LoadStartupConfig()
 
 	topCamera := acquisition.CreateTopCameraAcquisition(&config)
 	topCamera.Start()
 
-	erodeMat := gocv.Ones(1, 1, gocv.MatTypeCV8UC1)
+	erodeMat := gocv.Ones(3, 3, gocv.MatTypeCV8UC1)
 	defer erodeMat.Close()
 
-	dilateMat := gocv.Ones(3, 3, gocv.MatTypeCV8UC1)
-	defer dilateMat.Close()
+	// dilateMat := gocv.Ones(3, 3, gocv.MatTypeCV8UC1)
+	// defer dilateMat.Close()
 
 	// rad := 100
 
@@ -47,32 +53,54 @@ func main() {
 	cBlue := color.RGBA{0, 0, 255, 0}
 	_ = cBlue
 
-	frameRead := gocv.IMRead("/Users/hariangr/Downloads/untitled.png", gocv.IMReadAnyColor)
+	// frameRead := gocv.IMRead("/Users/hariangr/Downloads/untitled.png", gocv.IMReadAnyColor)
 
 	// midX := 0
 	// midY := 0
 
+	greenUpper := gocv.NewScalar(87, 255, 255, 1)
+	greenLower := gocv.NewScalar(51, 0, 0, 0)
+
+	greenErode := gocv.Ones(11, 11, gocv.MatTypeCV8UC1)
+	defer greenErode.Close()
+	greenErode2 := gocv.Ones(9, 9, gocv.MatTypeCV8UC1)
+	defer greenErode2.Close()
+
+	greenDilate := gocv.Ones(17, 17, gocv.MatTypeCV8UC1)
+	defer greenDilate.Close()
+
+	hierarchyMat := gocv.NewMat()
+	defer hierarchyMat.Close()
+
+	var pointVecs gocv.PointsVector
+	defer pointVecs.Close()
+	// converHullMask := gocv.NewMat()
+
 	for {
-		frameRead.CopyTo(&frame)
+		// frameRead.CopyTo(&frame)
+		topCamera.Read(&frame)
 
-		gocv.CvtColor(frame, &hsvFrame, gocv.ColorBGRToGray)
-		gocv.Threshold(hsvFrame, &hsvFrame, 250, 255, gocv.ThresholdBinary)
+		topCamera.ReadHSV(&hsvFrame)
 
-		fmt.Println(hsvFrame.Type())
-		// gocv.Line(&frame, image.Point{midX, midY}, image.Point{midX + rad, midY}, cRed, 2)
+		topCamera.ReadGray(&grayFrame)
+		gocv.Threshold(grayFrame, &grayFrame, 253, 255, gocv.ThresholdBinary)
+		gocv.Erode(grayFrame, &grayFrame, erodeMat)
 
-		// for y := 0; y < frame.Rows(); y++ {
-		// 	for x := 0; x < frame.Cols(); x++ {
-		// 		px := hsvFrame.GetIntAt(y, x)
-
-		// 		r, g, b, a := calcColor(px)
-
-		// 		gocv.Circle(&frame)
-		// 	}
+		gocv.InRangeWithScalar(hsvFrame, greenLower, greenUpper, &greenMask)
+		gocv.Erode(greenMask, &greenMask, greenErode)
+		gocv.Dilate(greenMask, &greenMask, greenDilate)
+		gocv.Erode(greenMask, &greenMask, greenErode2)
+		pointVecs = gocv.FindContoursWithParams(greenMask, &hierarchyMat, gocv.RetrievalExternal, gocv.ChainApproxNone)
+		// for i := 0; i < pointVecs.Size(); i++ {
+		// 	it := pointVecs.At(i)
+		// 	gocv.ConvexHull(it, &converHullMask, true, false)
 		// }
+		gocv.DrawContours(&frame, pointVecs, -1, cBlue, 3)
 
-		win.IMShow(hsvFrame)
+		win.IMShow(grayFrame)
 		winRaw.IMShow(frame)
+		greenWin.IMShow(greenMask)
+
 		win.WaitKey(1)
 	}
 
