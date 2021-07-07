@@ -1,19 +1,20 @@
 robot:
-  name: Gandiwa
+  name: R1
   role: ATTACKER
   # A (Corner kiri gawang sendiri), B (Sisi kiri gawang), C (Tengah lapangan sebelah kiri), D (Tengah lapangan), H (Tengah gawang sendiri)
   # B atau F posisi start waktu lomba
   # WorldPosition (0,0) tu di posisi corner kiri gawang sendiri
   startPos: A
   startRot: 0 # 0 apabila start menghadap ke gawang musuh, 90 apabila menghadap ke kanan (Misal dari corner kiri belakang, menghadap ke gawang sendiri), pake -90 apabila startPos F, pake 90 apabila startPos B
+  color: MAGENTA # CYAN atau MAGENTA
 
 
 camera:
   src:
+    - 0
     - "/Users/hariangr/Documents/MyFiles/Developer/Robotec/Beroda/ng/assets/twocam/1Jul/Movie on 24-06-21 at 14.53.mov"
     - 2
     - "/Users/hariangr/Documents/MyFiles/Developer/Robotec/Beroda/ng/BrainDead/assets/captured/2021-04-23 14:50:34.157190 x 60.00024.1280.0.720.0.mp4"
-    - 1
     - "C:/Users/root/Documents/hariangr/temp.mp4"
   srcForward:
     - "/Users/hariangr/Documents/MyFiles/Developer/Robotec/Beroda/ng/assets/twocam/1Jul/Movie on 01-07-21 at 17.39.mov"
@@ -34,24 +35,33 @@ camera:
   # robFrontOffsetDeg: -90
 
   # Punya kemera TOP GANDIWA
-  # midpointX: 917
-  # midpointY: 597
+  # midpointX: 867
+  # midpointY: 570
   # midpointRad: 365
   # rawWidth: 1920
   # rawHeight: 1080
   # robFrontOffsetDeg: 90
 
   # Punya 1Jul Top
-  midpointX: 917
-  midpointY: 597
-  midpointRad: 365
-  rawWidth: 1616
-  rawHeight: 1076
+  # midpointX: 777
+  # midpointY: 597
+  # midpointRad: 415
+  # rawWidth: 1616
+  # rawHeight: 1076
+  # robFrontOffsetDeg: 90
+
+  # Punya robot 2019 TOP
+  midpointX: 923
+  midpointY: 563
+  midpointRad: 454
+  rawWidth: 1920
+  rawHeight: 1080
   robFrontOffsetDeg: 90
 
   useDshow: true
   postWidth: 640
   postHeight: 640
+  lfRadCircle: 230
 
 # Satuannya nanosecond guys
 expiration:
@@ -62,13 +72,13 @@ telepathy:
   # chitchatHost: "192.168.1.4:6901"
   chitchatHost: 
     - "localhost:6901"
-    - "10.211.55.6:6901"
     - "CONSOLE"
+    - "10.211.55.6:6901"
 
 serial:
   ports:
-    - "IGNORE"
     - "CONSOLE"
+    - "IGNORE"
     - "/dev/cu.usbmodem141101"
     - "COM10"
   commandHz: 60
@@ -82,7 +92,7 @@ diagnostic:
   showScreen: false
 
 wanda:
-  minimumHsvArea: 50
+  minimumHsvArea: 40
   maximumHsvArea: 10000 # Kadang kadang dia full frame di detek
   lerpValue: 0.1
 
@@ -101,10 +111,15 @@ commandParameter:
   lookatToleranceDeg: 10
   positionToleranceCm: 5
 
+  approachDistanceCm: 100
+
   handlingOnDist: 290
   # onlyOneDegreeMovement: true # Perlu di split antara Rotasi dan XY
 
   allowXYTogether: true
-  allowXYRotTogether: false
+  allowXYRotTogether: true
 
   rotToMoveDelay: 2000000000 # nanosecond
+
+simulator:
+  simpservPort: "localhost:9881"
