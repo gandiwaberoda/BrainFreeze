@@ -35,6 +35,7 @@ type WandaVision struct {
 	state             *state.StateAccess
 	fpsHsv            *diagnostic.FpsGauge
 	fieldLineCircular *circular.FieldLineCircular
+	goalpostCircular  *circular.GoalpostCircular
 
 	latestKnownBallDetection models.DetectionObject
 	latestKnownBallSet       bool
@@ -122,6 +123,10 @@ func worker(w *WandaVision) {
 		wg.Add(1)
 		go detectLineFieldCircular(w, &wg, &topGrayFrame)
 
+		// Circular Goalpost
+		wg.Add(1)
+		go detectGoalpostCircular(w, &wg, &topHsvFrame, &topGrayFrame)
+
 		// Forward Ball
 		if found, result := w.ballNarrow.Detect(&forHsvFrame); found {
 			if len(result) > 0 {
@@ -192,6 +197,7 @@ func (w *WandaVision) Start() {
 	w.cyanNarrow = cyan.NewNarrowHaesveCyan(w.conf)
 	w.goalpostHaesve = goalpost.NewHaesveGoalpost(w.conf)
 	w.fieldLineCircular = circular.NewFieldLineCircular(w.conf)
+	w.goalpostCircular = circular.NewGoalpostCircular(w.conf)
 
 	w.topCenter = image.Point{
 		w.conf.Camera.MidpointRad,
@@ -295,6 +301,14 @@ func detectForGoalpost(w *WandaVision, wg *sync.WaitGroup, forFrame *gocv.Mat, f
 func detectLineFieldCircular(w *WandaVision, wg *sync.WaitGroup, grayFrame *gocv.Mat) {
 	detecteds := w.fieldLineCircular.Detect(grayFrame)
 	w.state.UpdateCircularFieldLine(detecteds)
+	wg.Done()
+}
+
+func detectGoalpostCircular(w *WandaVision, wg *sync.WaitGroup, hsvFrame *gocv.Mat, grayFrame *gocv.Mat) {
+	detecteds := w.goalpostCircular.Detect(hsvFrame, grayFrame)
+	if len(detecteds) > 0 {
+		w.state.UpdateFriendGoalpost(detecteds[0])
+	}
 	wg.Done()
 }
 
