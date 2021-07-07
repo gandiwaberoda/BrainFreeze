@@ -36,7 +36,8 @@ type CameraConfig struct {
 	PostWidth         int      `yaml:"postWidth"`
 	PostHeight        int      `yaml:"postHeight"`
 	RobFrontOffsetDeg int      `yaml:"robFrontOffsetDeg"`
-	Midpoint          image.Point
+
+	Midpoint image.Point
 }
 
 type ExpirationConfig struct {
@@ -97,6 +98,8 @@ type WandaConfig struct {
 	MinimumHsvArea float64 `yaml:"minimumHsvArea"`
 	MaximumHsvArea float64 `yaml:"maximumHsvArea"`
 	LerpValue      float64 `yaml:"lerpValue"`
+	LfFovMin       int     `yaml:"lfFovMin"`
+	LfFovMax       int     `yaml:"lfFovMax"`
 }
 
 type FreezeConfig struct {

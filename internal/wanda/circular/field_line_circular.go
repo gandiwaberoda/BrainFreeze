@@ -19,8 +19,8 @@ type FieldLineCircular struct {
 
 func NewFieldLineCircular(conf *configuration.FreezeConfig) *FieldLineCircular {
 	return &FieldLineCircular{
-		FOVMin:    -120,
-		FOVMax:    120,
+		FOVMin:    float64(conf.Wanda.LfFovMin),
+		FOVMax:    float64(conf.Wanda.LfFovMax),
 		Threshold: 253,
 		Radius:    150,
 		conf:      conf,

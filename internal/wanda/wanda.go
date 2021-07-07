@@ -226,6 +226,7 @@ func (w *WandaVision) Stop() {
 // Helper
 
 func detectTopBall(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
+	defer wg.Done()
 	narrowBallFound, narrowBallRes := w.ballNarrow.Detect(topHsvFrame)
 	if narrowBallFound {
 		// TODO: Perlu lakukan classifier
@@ -256,33 +257,33 @@ func detectTopBall(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHs
 		// Pake yang wide ball
 		fmt.Println("loss")
 	}
-	wg.Done()
 }
 
 func detectMagenta(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
+	defer wg.Done()
 	narrowMagentaFound, narrowMagentaRes := w.magentaNarrow.Detect(topHsvFrame)
 	if narrowMagentaFound && len(narrowMagentaRes) > 0 {
 		obj := narrowMagentaRes[0]
 		w.state.UpdateMagentaTransform(obj.AsTransform(w.conf))
 		gocv.Circle(topFrame, obj.Midpoint, obj.OuterRad, w.warnaNewest, 2)
 	}
-	wg.Done()
 }
 
 func detectCyan(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
+	defer wg.Done()
 	narrowCyanFound, narrowCyanRes := w.cyanNarrow.Detect(topHsvFrame)
 	if narrowCyanFound && len(narrowCyanRes) > 0 {
 		w.state.UpdateCyanTransform(narrowCyanRes[0].AsTransform(w.conf))
 	}
-	wg.Done()
 }
 
 func detectDummy(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
+	defer wg.Done()
 	w.dummyNarrow.Detect(topHsvFrame)
-	wg.Done()
 }
 
 func detectForGoalpost(w *WandaVision, wg *sync.WaitGroup, forFrame *gocv.Mat, forHsvFrame *gocv.Mat) {
+	defer wg.Done()
 	if found, result := w.goalpostHaesve.Detect(forHsvFrame); found {
 		if len(result) > 0 {
 			// result[0].
@@ -295,21 +296,20 @@ func detectForGoalpost(w *WandaVision, wg *sync.WaitGroup, forFrame *gocv.Mat, f
 		}
 
 	}
-	wg.Done()
 }
 
 func detectLineFieldCircular(w *WandaVision, wg *sync.WaitGroup, grayFrame *gocv.Mat) {
+	defer wg.Done()
 	detecteds := w.fieldLineCircular.Detect(grayFrame)
 	w.state.UpdateCircularFieldLine(detecteds)
-	wg.Done()
 }
 
 func detectGoalpostCircular(w *WandaVision, wg *sync.WaitGroup, hsvFrame *gocv.Mat, grayFrame *gocv.Mat) {
+	defer wg.Done()
 	detecteds := w.goalpostCircular.Detect(hsvFrame, grayFrame)
 	if len(detecteds) > 0 {
 		w.state.UpdateFriendGoalpost(detecteds[0])
 	}
-	wg.Done()
 }
 
 // func detectMagenta(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
