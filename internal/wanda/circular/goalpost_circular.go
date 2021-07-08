@@ -74,12 +74,12 @@ func (n *GoalpostCircular) Detect(hsvFrame *gocv.Mat, grayFrame *gocv.Mat) (resu
 
 	lastOneWasWhite := true
 	sudutPutih := make([]float64, 0)
-	for i := -180.0; i <= 180.0; i++ {
+	for i := -179.0; i <= 180.0; i++ {
 		x := int(n.Radius*math.Cos(i*math.Pi/180.0)) + n.conf.Camera.PostWidth/2
 		y := int(n.Radius*math.Sin(i*math.Pi/180.0)) + n.conf.Camera.PostHeight/2
 
 		px := grayFrame.GetUCharAt(y, x)
-		if px > 253 {
+		if px > uint8(n.conf.Wanda.WhiteOnGrayVal) {
 			if !lastOneWasWhite {
 				gocv.Circle(hsvFrame, image.Point{X: x, Y: y}, 5, color.RGBA{uint8(i + 90), 0, 0, 0}, -1)
 				sudutPutih = append(sudutPutih, i)
@@ -106,6 +106,10 @@ func (n *GoalpostCircular) Detect(hsvFrame *gocv.Mat, grayFrame *gocv.Mat) (resu
 
 		for _, v := range detecteds {
 			sudut_merah := v.AsTransform(n.conf)
+			if int(sudut_merah.TopRpx) > (n.conf.Camera.PostHeight - 2) {
+				continue
+			}
+
 			if sudut_merah.RobROT < models.Degree(bigger) && sudut_merah.RobROT > models.Degree(smaller) {
 				gocv.Line(hsvFrame, image.Point{320, 320}, v.Midpoint, cBlue, 2)
 				res = append(res, sudut_merah)

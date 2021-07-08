@@ -100,6 +100,7 @@ type WandaConfig struct {
 	LerpValue      float64 `yaml:"lerpValue"`
 	LfFovMin       int     `yaml:"lfFovMin"`
 	LfFovMax       int     `yaml:"lfFovMax"`
+	WhiteOnGrayVal int     `yaml:"whiteOnGrayVal"`
 }
 
 type FreezeConfig struct {
