@@ -38,6 +38,7 @@ func (i KickCommand) GetName() string {
 
 func (i *KickCommand) Tick(force *models.Force, state *state.StateAccess) {
 	force.Kick()
+	force.EnableHandling()
 	i.fulfillment.Tick()
 }
 

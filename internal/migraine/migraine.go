@@ -36,6 +36,13 @@ func worker(m *Migraine) {
 
 		force := models.Force{}
 		m.CurrentObjective.Tick(&force, m.state)
+		// if !force.HandlingHaveChanged() && m.state.GetState().GutToBrain.IsDribbling {
+		// 	force.EnableHandling()
+		// }
+		// Selama bolanya deket, hidupin ja ball handling
+		if m.state.GetState().BallTransform.TopRpx <= models.Centimeter(m.config.CommandParameter.HandlingOnDist) {
+			force.EnableHandling()
+		}
 
 		if m.CurrentObjective.GetFulfillment().ShouldClear() {
 			m.ReplaceObjective(commands.DefaultIdleCommand())

@@ -8,6 +8,8 @@ type Force struct {
 	rot      float64
 	kick     float64
 	handling float64
+
+	handlingHaveChanged bool
 }
 
 func (f *Force) Idle() {
@@ -16,6 +18,7 @@ func (f *Force) Idle() {
 	f.rot = 0
 	f.kick = 0
 	f.handling = 0
+	f.handlingHaveChanged = true
 }
 
 //#region
@@ -30,15 +33,21 @@ func (f *Force) AddRot(_rot Degree) {
 	f.rot += float64(_rot)
 }
 func (f *Force) HandlingReverse() {
+	f.handlingHaveChanged = true
 	f.handling = -1.0
 }
 
 func (f *Force) EnableHandling() {
+	f.handlingHaveChanged = true
 	f.handling = 1.0
 }
 
 func (f *Force) DisableHandling() {
+	f.handlingHaveChanged = true
 	f.handling = 0.0
+}
+func (f *Force) HandlingHaveChanged() bool {
+	return f.handlingHaveChanged
 }
 
 func (f *Force) Kick() {
