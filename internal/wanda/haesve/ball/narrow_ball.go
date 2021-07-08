@@ -17,7 +17,7 @@ type NarrowHaesveBall struct {
 
 func NewNarrowHaesveBall(conf *configuration.FreezeConfig) *NarrowHaesveBall {
 	upper := gocv.NewScalar(37, 255, 255, 1)
-	lower := gocv.NewScalar(12, 69, 193, 0)
+	lower := gocv.NewScalar(0, 97, 193, 0)
 
 	return &NarrowHaesveBall{
 		conf:     conf,
