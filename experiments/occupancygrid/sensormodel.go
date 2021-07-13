@@ -69,7 +69,7 @@ func (rob *SensorModel) SenseFromImage(img image.Image, worldPos image.Point) {
 }
 
 func (rob *SensorModel) Polar2Cartesian(deg, rad float64) (x, y float64) {
-	radian := ((deg * -1) - 90) * math.Pi / 180
+	radian := (((deg - rob.WorldRot) * -1) - 90) * math.Pi / 180
 	x = rad * math.Cos(radian)
 	y = rad * math.Sin(radian)
 	return

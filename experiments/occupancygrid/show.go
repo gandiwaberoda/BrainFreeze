@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"math"
 
+	"github.com/eiannone/keyboard"
 	"github.com/go-p5/p5"
 )
 
@@ -12,7 +14,8 @@ var (
 	img   image.Image
 	robot = NewSensorModel()
 
-	realPosition image.Point
+	realPosition    image.Point
+	realOrientation float64
 )
 
 const (
@@ -20,7 +23,35 @@ const (
 	winH = 1020
 )
 
+func KeyboardListenerWorker() {
+	if err := keyboard.Open(); err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = keyboard.Close()
+	}()
+
+	fmt.Println("Press ESC to quit")
+	for {
+		char, key, err := keyboard.GetKey()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("You pressed: rune %q, key %X\r\n", char, key)
+		if key == keyboard.KeyEsc {
+			break
+		} else if key == keyboard.KeyArrowLeft {
+			robot.WorldRot -= 10
+			fmt.Println("Current orientation:", robot.WorldRot)
+		} else if key == keyboard.KeyArrowRight {
+			robot.WorldRot += 10
+			fmt.Println("Current orientation:", robot.WorldRot)
+		}
+	}
+}
+
 func main() {
+	go KeyboardListenerWorker()
 	p5.Run(setup, draw)
 }
 
@@ -36,11 +67,18 @@ func setup() {
 
 }
 
-func drawRobotSenses(reading map[float64]LidarReading, centerX, centerY float64) {
+func drawRobotSenses(reading map[float64]LidarReading, orientation, centerX, centerY float64) {
 	_x := 20.0
 	_y := 20.0
 
-	p5.Triangle(centerX-_x, centerY, centerX, centerY-_y, centerX+_x, centerY)
+	p5.Push()
+	p5.Translate(centerX, centerY)
+
+	p5.Rotate(-(orientation) * math.Pi / 180)
+	p5.Triangle(-_x, 0, 0, -_y, _x, 0)
+
+	p5.Pop()
+
 	for k, v := range robot.Reading {
 		x, y := robot.Polar2Cartesian(k, v.ClosestPoint)
 		p5.Line(centerX, centerY, x+centerX, y+centerY)
@@ -62,15 +100,16 @@ func draw() {
 	if p5.Event.Mouse.Pressed && p5.Event.Mouse.Buttons.Contain(p5.ButtonLeft) {
 		fmt.Println("pr")
 		realPosition = image.Point{int(p5.Event.Mouse.Position.X), int(p5.Event.Mouse.Position.Y)}
+		realOrientation = robot.WorldRot
 	}
 	robot.SenseFromImage(img, realPosition)
-	drawRobotSenses(robot.Reading, float64(realPosition.X), float64(realPosition.Y))
+	drawRobotSenses(robot.Reading, realOrientation, float64(realPosition.X), float64(realPosition.Y))
 	p5.Pop()
 
 	p5.Push()
 	p5.Stroke(color.RGBA{128, 128, 255, 255})
 	robot.SenseFromImage(img, image.Point{int(mouseX), int(mouseY)})
-	drawRobotSenses(robot.Reading, mouseX, mouseY)
+	drawRobotSenses(robot.Reading, robot.WorldRot, mouseX, mouseY)
 
 	p5.Stroke(color.RGBA{128, 128, 255, 255})
 	p5.Fill(color.Transparent)
