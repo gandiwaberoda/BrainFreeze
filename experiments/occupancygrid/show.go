@@ -16,11 +16,20 @@ var (
 
 	realPosition    image.Point
 	realOrientation float64
+
+	mcl = NewMonteCarlo(winW, winH)
 )
 
 const (
 	winW = 720
 	winH = 1020
+)
+
+// Untuk MCL
+var (
+	firstMclFrame       bool        = true
+	lastPositionReading image.Point = image.Point{}
+	lastRotationReading float64
 )
 
 func KeyboardListenerWorker() {
@@ -65,6 +74,12 @@ func setup() {
 	}
 	img = imgLd
 
+}
+
+func drawMclParticles() {
+	for _, v := range mcl.particles {
+		p5.Circle(float64(v.x), float64(v.y), 5)
+	}
 }
 
 func drawRobotSenses(reading map[float64]LidarReading, orientation, centerX, centerY float64) {
@@ -115,6 +130,30 @@ func draw() {
 	p5.Fill(color.Transparent)
 	p5.Circle(mouseX, mouseY, robot.maxDistance*2)
 	p5.Pop()
+
+	// MCL
+	p5.Push()
+	drawMclParticles()
+	p5.Pop()
+
+	if p5.Event.Mouse.Buttons.Contain(p5.ButtonRight) {
+		curPos := image.Point{int(mouseX), int(mouseY)}
+
+		if firstMclFrame {
+			lastPositionReading = curPos
+			lastRotationReading = realOrientation
+			firstMclFrame = false
+		}
+
+		delta := curPos.Sub(lastPositionReading)
+		deltaRot := realOrientation - lastRotationReading
+
+		// fmt.Println("Haloha", delta, deltaRot, lastFrameMcl)
+		mcl.Update(float64(delta.X), float64(delta.Y), deltaRot, nil)
+
+		lastPositionReading = curPos
+		lastRotationReading = realOrientation
+	}
 
 	// p5.StrokeWidth(2)
 	// p5.Fill(color.RGBA{R: 255, A: 208})
