@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/tarm/serial"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
@@ -12,8 +13,9 @@ import (
 
 type GutSerial struct {
 	Gut
-	Port *serial.Port
-	conf *configuration.FreezeConfig
+	Port   *serial.Port
+	conf   *configuration.FreezeConfig
+	toSend string
 }
 
 func CreateGutSerial(conf *configuration.FreezeConfig) *GutSerial {
@@ -22,7 +24,7 @@ func CreateGutSerial(conf *configuration.FreezeConfig) *GutSerial {
 	}
 }
 
-func worker(gut *GutSerial) {
+func workerReader(gut *GutSerial) {
 	scanner := bufio.NewScanner(gut.Port)
 	for scanner.Scan() {
 		str := scanner.Text()
@@ -46,6 +48,24 @@ func worker(gut *GutSerial) {
 	}
 }
 
+func workerWriter(gut *GutSerial) {
+	msDelay := int(time.Second) / gut.conf.Serial.CommandHz
+	for {
+		<-time.After(time.Duration(msDelay))
+		if gut.toSend == "" {
+			fmt.Println("EMPTY")
+		}
+
+		fmt.Println("SEND: ", gut.toSend)
+		// gut.Send(gut.toSend)
+
+		_, err := gut.Port.Write([]byte(gut.toSend))
+		if err != nil {
+			fmt.Println("FAILED SENDING GUT PORT")
+		}
+	}
+}
+
 func (g *GutSerial) Start() (bool, error) {
 	c := &serial.Config{Name: g.conf.Serial.Ports[0], Baud: 115200}
 
@@ -55,7 +75,8 @@ func (g *GutSerial) Start() (bool, error) {
 	}
 
 	g.Port = ser
-	go worker(g)
+	go workerReader(g)
+	go workerWriter(g)
 
 	return true, nil
 }
@@ -73,13 +94,15 @@ func (g *GutSerial) Send(msg string) (bool, error) {
 	if g.Port == nil {
 		return false, errors.New("port is not yet opened")
 	}
+	g.toSend = msg
+	return true, nil
 
-	_, err := g.Port.Write([]byte(msg))
-	if err != nil {
-		return false, err
-	} else {
-		return true, nil
-	}
+	// _, err := g.Port.Write([]byte(msg))
+	// if err != nil {
+	// 	return false, err
+	// } else {
+	// 	return true, nil
+	// }
 }
 
 func (g *GutSerial) RegisterHandler(handler func(string)) {
