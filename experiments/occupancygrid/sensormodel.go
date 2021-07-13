@@ -16,7 +16,10 @@ type LidarReading struct {
 	ClosestPoint float64
 }
 type SensorModel struct {
-	numSensor   int
+	numSensor int
+
+	WorldRot float64 // Rotasi robot terhadap world space (0 derajat menghadap gawang musuh)
+
 	minRotation float64
 	maxRotation float64
 	deadZoneRad float64
@@ -28,7 +31,7 @@ func NewSensorModel() SensorModel {
 	reading := make(map[float64]LidarReading)
 	min := -130.0
 	max := 130.0
-	num := 14
+	num := 18
 	sen_range := math.Abs(min) + math.Abs(max)
 	sen_step := sen_range / float64(num)
 
@@ -40,9 +43,10 @@ func NewSensorModel() SensorModel {
 		numSensor:   num,
 		minRotation: min,
 		maxRotation: max,
-		maxDistance: 320,
+		maxDistance: 125,
 		Reading:     reading,
 		deadZoneRad: 10,
+		WorldRot:    0,
 	}
 }
 
@@ -50,7 +54,7 @@ func (rob *SensorModel) SenseFromImage(img image.Image, worldPos image.Point) {
 	for k := range rob.Reading {
 		newReading := LidarReading{}
 		for r := rob.deadZoneRad; r <= rob.maxDistance; r++ {
-			endX, endY := Polar2Cartesian(k, r)
+			endX, endY := rob.Polar2Cartesian(k, r)
 			endX += float64(worldPos.X)
 			endY += float64(worldPos.Y)
 
@@ -64,7 +68,7 @@ func (rob *SensorModel) SenseFromImage(img image.Image, worldPos image.Point) {
 	}
 }
 
-func Polar2Cartesian(deg, rad float64) (x, y float64) {
+func (rob *SensorModel) Polar2Cartesian(deg, rad float64) (x, y float64) {
 	radian := ((deg * -1) - 90) * math.Pi / 180
 	x = rad * math.Cos(radian)
 	y = rad * math.Sin(radian)
