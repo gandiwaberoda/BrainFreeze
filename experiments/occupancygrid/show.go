@@ -71,6 +71,11 @@ func drawRobotSenses(reading map[float64]LidarReading, orientation, centerX, cen
 	_x := 20.0
 	_y := 20.0
 
+	for k, v := range robot.Reading {
+		x, y := robot.Polar2Cartesian(k, v.ClosestPoint)
+		p5.Line(centerX, centerY, x+centerX, y+centerY)
+	}
+
 	p5.Push()
 	p5.Translate(centerX, centerY)
 
@@ -79,10 +84,6 @@ func drawRobotSenses(reading map[float64]LidarReading, orientation, centerX, cen
 
 	p5.Pop()
 
-	for k, v := range robot.Reading {
-		x, y := robot.Polar2Cartesian(k, v.ClosestPoint)
-		p5.Line(centerX, centerY, x+centerX, y+centerY)
-	}
 }
 
 func draw() {
@@ -98,7 +99,6 @@ func draw() {
 	p5.Stroke(color.RGBA{255, 0, 0, 255})
 	p5.StrokeWidth(4)
 	if p5.Event.Mouse.Pressed && p5.Event.Mouse.Buttons.Contain(p5.ButtonLeft) {
-		fmt.Println("pr")
 		realPosition = image.Point{int(p5.Event.Mouse.Position.X), int(p5.Event.Mouse.Position.Y)}
 		realOrientation = robot.WorldRot
 	}
