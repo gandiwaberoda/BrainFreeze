@@ -45,7 +45,7 @@ func NewSensorModel() SensorModel {
 		maxRotation: max,
 		maxDistance: 250,
 		Reading:     reading,
-		deadZoneRad: 60,
+		deadZoneRad: 45,
 		WorldRot:    0,
 	}
 }

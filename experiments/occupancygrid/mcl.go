@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"gonum.org/v1/gonum/stat/distuv"
 )
 
@@ -98,7 +96,7 @@ func (mcl *MonteCarlo) Resample() {
 	}
 
 	if float64(lastFilledNewParticle) < float64(numParticle)*0.3 {
-		fmt.Println("ha", totWeight, lastFilledNewParticle, len(mcl.particles))
+		// fmt.Println("ha", totWeight, lastFilledNewParticle, len(mcl.particles))
 		newParticles = mcl.createUniformParticle()
 		// 	// wUniRandom := distuv.Uniform{Min: 0, Max: float64(w)}
 		// 	// hUniRandom := distuv.Uniform{Min: 0, Max: float64(h)}

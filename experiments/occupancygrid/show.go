@@ -83,7 +83,7 @@ func drawMclParticles() {
 		// 	continue
 		// }
 		if !v.use {
-			fmt.Println(v)
+			// fmt.Println(v)
 			continue
 		}
 		p5.Circle(float64(v.x), float64(v.y), 3+(v.weight*500))
@@ -104,6 +104,8 @@ func drawRobotSenses(reading map[float64]LidarReading, orientation, centerX, cen
 
 	p5.Rotate(-(orientation) * math.Pi / 180)
 	p5.Triangle(-_x, 0, 0, -_y, _x, 0)
+	p5.Fill(color.Transparent)
+	p5.Circle(0, 0, robot.deadZoneRad)
 
 	p5.Pop()
 
@@ -123,7 +125,10 @@ func draw() {
 	p5.StrokeWidth(4)
 	if p5.Event.Mouse.Pressed && p5.Event.Mouse.Buttons.Contain(p5.ButtonLeft) {
 		realPosition = image.Point{int(p5.Event.Mouse.Position.X), int(p5.Event.Mouse.Position.Y)}
+		cc := CanvasCordinate{int(p5.Event.Mouse.Position.X), int(p5.Event.Mouse.Position.Y)}
 		realOrientation = robot.WorldRot
+
+		fmt.Println("Canvas Pos:", cc, cc.AsWorldCordinate(), cc.AsWorldCordinate().AsCanvasCordinate())
 	}
 	robot.SenseFromImage(img, realPosition)
 	drawRobotSenses(robot.Reading, realOrientation, float64(realPosition.X), float64(realPosition.Y))
@@ -215,4 +220,19 @@ func draw() {
 	// p5.Stroke(color.Black)
 	// p5.StrokeWidth(5)
 	// p5.Arc(300, 100, 80, 20, 0, 1.5*math.Pi)
+}
+
+type WorldCordinate image.Point
+type CanvasCordinate image.Point
+
+func (c CanvasCordinate) AsWorldCordinate() WorldCordinate {
+	x := c.X - 60
+	y := 1020 - 60 - c.Y // WinH
+	return WorldCordinate{X: x, Y: y}
+}
+
+func (c WorldCordinate) AsCanvasCordinate() CanvasCordinate {
+	x := c.X + 60
+	y := 1020 - 60 - c.Y // WinH
+	return CanvasCordinate{X: x, Y: y}
 }
