@@ -5,7 +5,7 @@ import (
 )
 
 type Particle struct {
-	x, y     float64
+	worldPos WorldCordinate
 	worldRot float64
 	weight   float64
 	err      float64
@@ -13,8 +13,8 @@ type Particle struct {
 }
 
 func (p *Particle) Move(deltaX, deltaY, deltaRot float64) {
-	p.x += deltaX
-	p.y += deltaY
+	p.worldPos.X += deltaX
+	p.worldPos.Y += deltaY
 	p.worldRot += deltaRot
 }
 
@@ -33,7 +33,7 @@ func NewMonteCarlo(w, h int) MonteCarlo {
 		numParticle: numParticle,
 		width:       w,
 		height:      h,
-		stdDev:      1,
+		stdDev:      5,
 	}
 
 	particles := mcl.createUniformParticle()
@@ -52,14 +52,14 @@ func (mcl *MonteCarlo) EstimatePose() (x, y, rot float64) {
 
 	skipped := 0
 	for _, v := range mcl.particles {
-		if v.weight == 0 || !v.use || (v.x == 0 && v.y == 0 && v.worldRot == 0) {
+		if !v.use {
 			skipped++
-			continue
+			// continue
 		}
 		// fmt.Println("??11")
 		num++
-		xSum += v.x
-		ySum += v.y
+		xSum += v.worldPos.X
+		ySum += v.worldPos.Y
 		rotSum += v.worldRot
 	}
 	_x, _y, _rot := xSum/num, ySum/num, rotSum/num
@@ -75,8 +75,8 @@ func (mcl *MonteCarlo) Resample() {
 	lastFilledNewParticle := 0
 	totWeight := 0.0
 	for _, v := range mcl.particles {
-		wNormalRandom := distuv.Normal{Mu: v.x, Sigma: mcl.stdDev}
-		hNormalRandom := distuv.Normal{Mu: v.y, Sigma: mcl.stdDev}
+		wNormalRandom := distuv.Normal{Mu: v.worldPos.X, Sigma: mcl.stdDev}
+		hNormalRandom := distuv.Normal{Mu: v.worldPos.Y, Sigma: mcl.stdDev}
 		rotNormalRandom := distuv.Normal{Mu: v.worldRot, Sigma: mcl.stdDev}
 
 		nextGenNumParticle := int(v.weight * float64(numParticle))
@@ -85,8 +85,7 @@ func (mcl *MonteCarlo) Resample() {
 		for i := 0; i < nextGenNumParticle; i++ {
 			newParticles[lastFilledNewParticle] = Particle{
 				use:      true,
-				x:        wNormalRandom.Rand(),
-				y:        hNormalRandom.Rand(),
+				worldPos: WorldCordinate{wNormalRandom.Rand(), hNormalRandom.Rand()},
 				worldRot: rotNormalRandom.Rand(),
 				weight:   v.weight,
 			}
@@ -114,7 +113,7 @@ func (mcl *MonteCarlo) Resample() {
 	mcl.particles = newParticles
 }
 
-func (mcl *MonteCarlo) Update(deltaX, deltaY, deltaRot float64, errorFunction func(x, y, rot float64) float64) {
+func (mcl *MonteCarlo) Update(deltaX, deltaY, deltaRot float64, errorFunction func(worldPos WorldCordinate, rot float64) float64) {
 	biggestErr := 0.0
 	sumErr := 0.0
 
@@ -122,7 +121,7 @@ func (mcl *MonteCarlo) Update(deltaX, deltaY, deltaRot float64, errorFunction fu
 		mcl.particles[i].Move(deltaX, deltaY, deltaRot)
 
 		p := mcl.particles[i]
-		_err := errorFunction(p.x, p.y, p.worldRot)
+		_err := errorFunction(WorldCordinate{p.worldPos.X, p.worldPos.Y}, p.worldRot)
 		// fmt.Println("err", _err)
 		mcl.particles[i].err = _err
 		if _err > biggestErr {
@@ -159,8 +158,7 @@ func (mcl *MonteCarlo) createUniformParticle() []Particle {
 	weight := 1.0 / float64(numParticle)
 	for i := 0; i < numParticle; i++ {
 		particles[i] = Particle{
-			x:        wUniRandom.Rand(),
-			y:        hUniRandom.Rand(),
+			worldPos: WorldCordinate{wUniRandom.Rand(), hUniRandom.Rand()},
 			worldRot: rotUniRandom.Rand(),
 			weight:   weight,
 			use:      true,
