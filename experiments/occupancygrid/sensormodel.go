@@ -50,13 +50,15 @@ func NewSensorModel() SensorModel {
 	}
 }
 
-func (rob *SensorModel) SenseFromImage(img image.Image, worldPos image.Point) {
+func (rob *SensorModel) SenseFromImage(img image.Image, worldCor WorldCordinate) {
+	canvasPos := worldCor.AsCanvasCordinate()
+
 	for k := range rob.Reading {
 		newReading := LidarReading{}
 		for r := rob.deadZoneRad; r <= rob.maxDistance; r++ {
 			endX, endY := rob.Polar2Cartesian(k, r)
-			endX += float64(worldPos.X)
-			endY += float64(worldPos.Y)
+			endX += float64(canvasPos.X)
+			endY += float64(canvasPos.Y)
 
 			px := img.At(int(endX), int(endY))
 			if IsWhite(px) {

@@ -113,6 +113,7 @@ func drawRobotSenses(reading map[float64]LidarReading, orientation float64, pos 
 
 	p5.Pop()
 
+	p5.Push()
 	p5.Stroke(color.RGBA{128, 128, 255, 255})
 	p5.Fill(color.Transparent)
 	p5.Circle(centerX, centerY, robot.maxDistance*2)
@@ -122,12 +123,11 @@ func drawRobotSenses(reading map[float64]LidarReading, orientation float64, pos 
 func draw() {
 	p5.DrawImage(img, 0, 0)
 
-	mouseX := p5.Event.Mouse.Position.X
-	mouseY := p5.Event.Mouse.Position.Y
 	// if mouseX < 0 || mouseX > winW || mouseY < 0 || mouseY > winH {
 	// 	return
 	// }
 
+	// Real Robot Position
 	p5.Push()
 	p5.Stroke(color.RGBA{255, 0, 0, 255})
 	p5.StrokeWidth(4)
@@ -137,15 +137,18 @@ func draw() {
 
 		fmt.Println("Canvas Pos:", realPosition)
 	}
-	// robot.SenseFromImage(img, realPosition)
-	// drawRobotSenses(robot.Reading, realOrientation, float64(realPosition.X), float64(realPosition.Y))
+	robot.SenseFromImage(img, realPosition)
+	drawRobotSenses(robot.Reading, realOrientation, realPosition)
 	p5.Pop()
+
+	// Cursor Robot
+	cursorRobot := CanvasCordinate{int(p5.Event.Mouse.Position.X), int(p5.Event.Mouse.Position.Y)}.AsWorldCordinate()
 
 	// Gambar Robot Cursor
 	p5.Push()
 	p5.Stroke(color.RGBA{128, 128, 255, 255})
-	robot.SenseFromImage(img, image.Point{int(mouseX), int(mouseY)})
-	drawRobotSenses(robot.Reading, robot.WorldRot, CanvasCordinate{int(p5.Event.Mouse.Position.X), int(p5.Event.Mouse.Position.Y)}.AsWorldCordinate())
+	robot.SenseFromImage(img, cursorRobot)
+	drawRobotSenses(robot.Reading, robot.WorldRot, cursorRobot)
 
 	// MCL
 	// p5.Push()
