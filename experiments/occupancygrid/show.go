@@ -78,7 +78,15 @@ func setup() {
 
 func drawMclParticles() {
 	for _, v := range mcl.particles {
-		p5.Circle(float64(v.x), float64(v.y), 5)
+		// if v.weight == 0.0 {
+		// 	// fmt.Println("???")
+		// 	continue
+		// }
+		if !v.use {
+			fmt.Println(v)
+			continue
+		}
+		p5.Circle(float64(v.x), float64(v.y), 3+(v.weight*500))
 	}
 }
 
@@ -136,7 +144,7 @@ func draw() {
 	drawMclParticles()
 	p5.Pop()
 
-	if p5.Event.Mouse.Buttons.Contain(p5.ButtonRight) {
+	if p5.Event.Mouse.Buttons.Contain(p5.ButtonLeft) {
 		curPos := image.Point{int(mouseX), int(mouseY)}
 
 		if firstMclFrame {
@@ -149,10 +157,43 @@ func draw() {
 		deltaRot := realOrientation - lastRotationReading
 
 		// fmt.Println("Haloha", delta, deltaRot, lastFrameMcl)
-		mcl.Update(float64(delta.X), float64(delta.Y), deltaRot, nil)
+		mcl.Update(float64(delta.X), float64(delta.Y), deltaRot, func(x, y, rot float64) float64 {
+			robot.WorldRot = rot
+			robot.SenseFromImage(img, image.Point{int(x), int(y)})
+			atPredictedReading := make(map[float64]LidarReading)
+			for k, v := range robot.Reading {
+				atPredictedReading[k] = v
+			}
+
+			robot.WorldRot = realOrientation
+			robot.SenseFromImage(img, realPosition)
+			sensorReading := robot.Reading
+
+			// fmt.Println(atPredictedReading, sensorReading)
+
+			totalErr := 0.0
+			for k, _ := range atPredictedReading {
+				err := math.Sqrt(math.Pow(atPredictedReading[k].ClosestPoint-sensorReading[k].ClosestPoint, 2))
+				totalErr += err
+			}
+			// fmt.Println(totalErr)
+			return totalErr
+		})
+		mcl.Resample()
 
 		lastPositionReading = curPos
 		lastRotationReading = realOrientation
+	}
+
+	// MCL Estimated Pose
+	{
+		p5.Push()
+		// p5.Stroke(color.RGBA{0, 0, 255, 255})
+		x, y, _ := mcl.EstimatePose()
+		// fmt.Println(x, y)
+		p5.Fill(color.RGBA{255, 0, 0, 255})
+		p5.Circle(x, y, 20)
+		p5.Pop()
 	}
 
 	// p5.StrokeWidth(2)
