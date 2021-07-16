@@ -40,26 +40,34 @@ func (i ReceiveCommand) GetName() string {
 	return "RECEIVE"
 }
 
-func (i *ReceiveCommand) Tick(force *models.Force, state *state.StateAccess) {
+func (i *ReceiveCommand) Tick(force *models.Force, curstate *state.StateAccess) {
 	// _, target := state.GetTransformByKey(i.Target)
 	var target models.Transform
 
-	if !state.GetState().BallTransformExpired {
+	if !curstate.GetState().BallTransformExpired {
 		// Utamakan ngelihat ke bola
-		target = state.GetState().BallTransform
+		target = curstate.GetState().BallTransform
 	} else {
 		// Jika bolanya LOST, lihat ke temen
 		if i.conf.Robot.Color == configuration.CYAN {
-			target = state.GetState().MagentaTransform
+			target = curstate.GetState().MagentaTransform
 		} else if i.conf.Robot.Color == configuration.MAGENTA {
-			target = state.GetState().CyanTransform
+			target = curstate.GetState().CyanTransform
 		} else {
 			panic(i.conf.Robot.Color + " is not a valid robot color")
 		}
 	}
 
-	TockLookat(target, *i.conf, force, state)
+	TockLookat(target, *i.conf, force, curstate)
 	force.EnableHandling()
+
+	register := state.NewRegister()
+	if target.RobROT <= models.Degree(i.conf.CommandParameter.LookatToleranceDeg) {
+		register.ReadyReceive = 1.0
+	} else {
+		register.ReadyReceive = 0.0
+	}
+	curstate.UpdateRegisterState(register)
 
 	i.fulfillment.Tick()
 }

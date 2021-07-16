@@ -52,6 +52,10 @@ type RobotState struct {
 
 	CircularFieldLine []float64 // Untuk line follower
 
+	Register           registerState
+	RegisterLastUpdate time.Time
+	RegisterExpired    bool
+
 	gameState           GameState
 	GameStateLastUpdate time.Time
 	GameStateExpired    bool

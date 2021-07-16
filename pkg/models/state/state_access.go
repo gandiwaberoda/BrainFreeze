@@ -97,6 +97,11 @@ func (s *StateAccess) StartWatcher(config *configuration.FreezeConfig) {
 				s.myState.GutToBrainExpired = true
 			}
 
+			// Register Expiration
+			if time.Since(s.myState.RegisterLastUpdate) > config.Expiration.MyExpiration {
+				s.myState.RegisterExpired = true
+			}
+
 			// TODO: Friend, Enemy, Obstacle
 
 			s.lock.Unlock()
