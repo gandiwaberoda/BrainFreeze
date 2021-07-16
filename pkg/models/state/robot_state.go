@@ -52,11 +52,11 @@ type RobotState struct {
 
 	CircularFieldLine []float64 // Untuk line follower
 
-	Register           registerState
+	Register           registerState // Untuk komunikasi antar robot, dipake untuk Wait fulfillment
 	RegisterLastUpdate time.Time
 	RegisterExpired    bool
 
-	gameState           GameState
+	gameState           GameState // Private, kalau dibuat public nanti overwhelming telemetry yang dikirim
 	GameStateLastUpdate time.Time
 	GameStateExpired    bool
 }
