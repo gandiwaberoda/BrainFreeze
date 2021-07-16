@@ -3,6 +3,7 @@ package state
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -46,6 +47,7 @@ func (s *StateAccess) GetOtherRegisterByIdentifier(color_or_name string, key Reg
 	}
 
 	for _, v := range s.myState.gameState.RobotStates {
+		// fmt.Println("IDDD:", v)
 		if strings.EqualFold(v.MyColor, color_or_name) || strings.EqualFold(v.MyName, color_or_name) {
 			if v.RegisterExpired {
 				return 0, errors.New("register of the friend robot is expired")
@@ -58,5 +60,5 @@ func (s *StateAccess) GetOtherRegisterByIdentifier(color_or_name string, key Reg
 		}
 	}
 
-	return 0, errors.New("color/name (Identifier) not found")
+	return 0, errors.New(fmt.Sprint("color/name [", color_or_name, "] (Identifier) not found"))
 }

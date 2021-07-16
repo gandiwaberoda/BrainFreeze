@@ -8,6 +8,7 @@ import (
 
 	"harianugrah.com/brainfreeze/internal/gut"
 	"harianugrah.com/brainfreeze/internal/migraine/commands"
+	"harianugrah.com/brainfreeze/internal/migraine/helper"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -35,6 +36,10 @@ func worker(m *Migraine) {
 		// fmt.Println("Current objective:", m.CurrentObjective.GetName())
 
 		force := models.Force{}
+
+		register := state.NewRegister()
+		m.state.UpdateRegisterState(register)
+
 		m.CurrentObjective.Tick(&force, m.state)
 		// if !force.HandlingHaveChanged() && m.state.GetState().GutToBrain.IsDribbling {
 		// 	force.EnableHandling()
@@ -82,7 +87,8 @@ func (m *Migraine) ReplaceObjective(cmd commands.CommandInterface) {
 }
 
 func (m *Migraine) AddCommand(intercom models.Intercom) {
-	shouldListen := amIReceiver(intercom, m)
+	// shouldListen := amIReceiver(intercom, m)
+	shouldListen := helper.AmIReceiver(string(intercom.Receiver), m.config)
 	if !shouldListen {
 		fmt.Println("I am not a receiver for the command")
 		return
@@ -107,21 +113,6 @@ func (m *Migraine) AddCommand(intercom models.Intercom) {
 	} else {
 		fmt.Println("No handler for command")
 	}
-}
-
-//HELPER
-func amIReceiver(intercom models.Intercom, m *Migraine) bool {
-	_amIReceiver := false
-
-	myReceiverTag := []string{string(models.ALL), string(m.config.Robot.Name), string(m.config.Robot.Role), string(m.config.Robot.Color)}
-
-	for _, v := range myReceiverTag {
-		// Case insensitive
-		if strings.EqualFold(string(intercom.Receiver), v) {
-			_amIReceiver = true
-		}
-	}
-	return _amIReceiver
 }
 
 // =========== Basic Command Shorthand ==========

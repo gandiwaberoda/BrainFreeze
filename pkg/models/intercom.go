@@ -36,6 +36,10 @@ type Intercom struct {
 // Parse json string ke Intercom struct
 // json itu case insensitive
 func ParseIntercom(raw string) (Intercom, error) {
+	if len(raw) == 0 {
+		return Intercom{}, errors.New("invalid intercom")
+	}
+
 	var parsed Intercom
 
 	// TODO: Sanitized input later

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
+	"harianugrah.com/brainfreeze/internal/migraine/helper"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -61,22 +62,27 @@ func (i *PlannedCommand) NextObjective() (finished bool) {
 		// Sudah command terakhir
 		return true
 	}
-	nextup := i.subcommands_str[0]
+	nextup := strings.TrimSpace(i.subcommands_str[0])
 	fmt.Println("Next obj", nextup)
 	i.subcommands_str = removeIndex(i.subcommands_str, 0)
 
-	splitted := strings.Split(string(nextup), ";")
+	// splitted := strings.Split(string(nextup), ";")
+	// fmt.Println("SPLITTED: ", splitted)
+	if colonIndex := strings.Index(nextup, ":"); colonIndex != -1 {
+		// Kalau ada tanda : di subcmd, berarti hanya robot tertentu yang perlu denger
+		receiver := strings.TrimSpace(nextup[0:colonIndex])
+		nextup = strings.TrimSpace(nextup[colonIndex+1:])
+
+		if !helper.AmIReceiver(receiver, i.conf) {
+			fmt.Println("Skipped one command (", nextup, ") for [", receiver, "] as it is not me")
+			return i.NextObjective()
+		}
+	}
 
 	// inkom_content := string(i.intercom.Kind) + "/"
 	inkom_content := ""
 
-	if len(splitted) == 0 {
-		panic("...wthat")
-	} else if len(splitted) == 1 {
-		inkom_content += strings.TrimSpace(splitted[0])
-	} else if len(splitted) == 2 {
-		inkom_content += strings.TrimSpace(splitted[0]) + "/" + strings.TrimSpace(splitted[1])
-	}
+	inkom_content += strings.TrimSpace(nextup)
 
 	inkom := models.Intercom{
 		Kind:     i.intercom.Kind,
