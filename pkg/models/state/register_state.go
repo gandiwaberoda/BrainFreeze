@@ -8,6 +8,12 @@ type registerState struct {
 	ReadyReceive float64
 }
 
+type RegisterKey string
+
+const (
+	READY_RECEIVED RegisterKey = "ReadyReceived"
+)
+
 func (s *StateAccess) UpdateRegisterState(gs registerState) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
