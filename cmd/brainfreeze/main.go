@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -35,9 +36,9 @@ func main() {
 
 	// Local State
 	globalWaitGroup.Add(1)
-	state := state.CreateStateAccess(&config)
-	state.StartWatcher(&config)
-	defer state.StopWatcher()
+	curstate := state.CreateStateAccess(&config)
+	curstate.StartWatcher(&config)
+	defer curstate.StopWatcher()
 
 	// Gut
 	var gutTalk gut.GutInterface
@@ -55,7 +56,7 @@ func main() {
 			log.Println("wrong gtb", err)
 			return
 		}
-		state.UpdateGutToBrain(gtb)
+		curstate.UpdateGutToBrain(gtb)
 
 		t := models.Transform{
 			EncXcm: gtb.AbsX,
@@ -63,7 +64,7 @@ func main() {
 			EncROT: gtb.Gyro,
 		}
 		t.InjectWorldTransfromFromEncTransform(&config)
-		state.UpdateMyTransform(t)
+		curstate.UpdateMyTransform(t)
 	})
 	_, errGut := gutTalk.Start()
 	if errGut != nil {
@@ -72,7 +73,7 @@ func main() {
 	defer gutTalk.Stop()
 
 	// Artificial Intellegence
-	migraine := migraine.CreateMigraine(&config, gutTalk, state)
+	migraine := migraine.CreateMigraine(&config, gutTalk, curstate)
 	migraine.Start()
 	defer migraine.Stop()
 
@@ -96,6 +97,11 @@ func main() {
 		if intercom.Kind == models.COMMAND {
 			// Bawa ke migraine
 			migraine.AddCommand(intercom)
+		} else if intercom.Kind == models.GAMESTATE {
+			// Bawa ke robot state
+			gs := state.GameState{}
+			json.Unmarshal([]byte(intercom.Content), &gs)
+			curstate.UpdateGameState(gs)
 		}
 	})
 	_, errTelepathy := telepathyChannel.Start()
@@ -106,7 +112,7 @@ func main() {
 
 	// Telemetry
 	globalWaitGroup.Add(1)
-	telemetry := diagnostic.CreateNewTelemetry(telepathyChannel, &config, state)
+	telemetry := diagnostic.CreateNewTelemetry(telepathyChannel, &config, curstate)
 	telemetry.Start()
 	defer telemetry.Stop()
 
@@ -118,7 +124,7 @@ func main() {
 	// Wanda Vision
 	// Harus dijalankan paling terakhir, kalau mau nampilin Window di Macos karena bersifat blocking
 	globalWaitGroup.Add(1)
-	vision := wanda.NewWandaVision(&config, state)
+	vision := wanda.NewWandaVision(&config, curstate)
 	vision.Start()
 
 	globalWaitGroup.Wait()

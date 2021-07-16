@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -38,9 +39,9 @@ func main() {
 
 	// Local State
 	globalWaitGroup.Add(1)
-	state := state.CreateStateAccess(&config)
-	state.StartWatcher(&config)
-	defer state.StopWatcher()
+	curstate := state.CreateStateAccess(&config)
+	curstate.StartWatcher(&config)
+	defer curstate.StopWatcher()
 
 	globalWaitGroup.Add(1)
 	simpse := simpserv.CreateSimpWs(&config)
@@ -56,7 +57,7 @@ func main() {
 				log.Println("wrong gtb", err)
 				return
 			}
-			state.UpdateGutToBrain(gtb)
+			curstate.UpdateGutToBrain(gtb)
 
 			t := models.Transform{
 				EncXcm: gtb.AbsX,
@@ -64,7 +65,7 @@ func main() {
 				EncROT: gtb.Gyro,
 			}
 			t.InjectWorldTransfromFromEncTransform(&config)
-			state.UpdateMyTransform(t)
+			curstate.UpdateMyTransform(t)
 		}
 
 		if s[0] == 'b' {
@@ -85,15 +86,15 @@ func main() {
 			// fmt.Println(tr)
 			if strings.EqualFold(s[1:4], "BAL") {
 				// fmt.Println("UUU")
-				state.UpdateBallTransform(tr)
+				curstate.UpdateBallTransform(tr)
 			} else if strings.EqualFold(s[1:4], "EGP") {
 				// panic("Not implemented yet")
 			} else if strings.EqualFold(s[1:4], "FGP") {
-				state.UpdateFriendGoalpostTransform(tr)
+				curstate.UpdateFriendGoalpostTransform(tr)
 			} else if strings.EqualFold(s[1:4], "MAG") {
-				state.UpdateMagentaTransform(tr)
+				curstate.UpdateMagentaTransform(tr)
 			} else if strings.EqualFold(s[1:4], "CYN") {
-				state.UpdateCyanTransform(tr)
+				curstate.UpdateCyanTransform(tr)
 			}
 		}
 	})
@@ -144,7 +145,7 @@ func main() {
 	// defer gutTalk.Stop()
 
 	// Artificial Intellegence
-	migraine := migraine.CreateMigraine(&config, gutTalk, state)
+	migraine := migraine.CreateMigraine(&config, gutTalk, curstate)
 	migraine.Start()
 	defer migraine.Stop()
 
@@ -168,6 +169,11 @@ func main() {
 		if intercom.Kind == models.COMMAND {
 			// Bawa ke migraine
 			migraine.AddCommand(intercom)
+		} else if intercom.Kind == models.GAMESTATE {
+			// Bawa ke robot state
+			gs := state.GameState{}
+			json.Unmarshal([]byte(intercom.Content), &gs)
+			curstate.UpdateGameState(gs)
 		}
 	})
 	_, errTelepathy := telepathyChannel.Start()
@@ -178,7 +184,7 @@ func main() {
 
 	// Telemetry
 	globalWaitGroup.Add(1)
-	telemetry := diagnostic.CreateNewTelemetry(telepathyChannel, &config, state)
+	telemetry := diagnostic.CreateNewTelemetry(telepathyChannel, &config, curstate)
 	telemetry.Start()
 	defer telemetry.Stop()
 

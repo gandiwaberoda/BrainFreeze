@@ -51,4 +51,8 @@ type RobotState struct {
 	ObstacleGoalPostTransformExpired bool
 
 	CircularFieldLine []float64 // Untuk line follower
+
+	gameState           GameState
+	GameStateLastUpdate time.Time
+	GameStateExpired    bool
 }

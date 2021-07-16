@@ -12,6 +12,7 @@ type MessageType string
 
 const (
 	TELEMETRY MessageType = "TELEMETRY"
+	GAMESTATE MessageType = "GAMESTATE"
 	COMMAND   MessageType = "COMMAND"
 	REPLY     MessageType = "REPLY"
 )
