@@ -43,12 +43,19 @@ func (i ReceiveCommand) GetName() string {
 func (i *ReceiveCommand) Tick(force *models.Force, state *state.StateAccess) {
 	// _, target := state.GetTransformByKey(i.Target)
 	var target models.Transform
-	if i.conf.Robot.Color == configuration.CYAN {
-		target = state.GetState().MagentaTransform
-	} else if i.conf.Robot.Color == configuration.MAGENTA {
-		target = state.GetState().CyanTransform
+
+	if !state.GetState().BallTransformExpired {
+		// Utamakan ngelihat ke bola
+		target = state.GetState().BallTransform
 	} else {
-		panic(i.conf.Robot.Color + " is not a valid robot color")
+		// Jika bolanya LOST, lihat ke temen
+		if i.conf.Robot.Color == configuration.CYAN {
+			target = state.GetState().MagentaTransform
+		} else if i.conf.Robot.Color == configuration.MAGENTA {
+			target = state.GetState().CyanTransform
+		} else {
+			panic(i.conf.Robot.Color + " is not a valid robot color")
+		}
 	}
 
 	TockLookat(target, *i.conf, force, state)
