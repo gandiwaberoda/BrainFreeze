@@ -87,9 +87,9 @@ func main() {
 				// fmt.Println("UUU")
 				state.UpdateBallTransform(tr)
 			} else if strings.EqualFold(s[1:4], "EGP") {
-
+				// panic("Not implemented yet")
 			} else if strings.EqualFold(s[1:4], "FGP") {
-
+				state.UpdateFriendGoalpostTransform(tr)
 			} else if strings.EqualFold(s[1:4], "MAG") {
 				state.UpdateMagentaTransform(tr)
 			} else if strings.EqualFold(s[1:4], "CYN") {

@@ -82,7 +82,22 @@ func (s *StateAccess) StartWatcher(config *configuration.FreezeConfig) {
 				s.myState.MyTransformExpired = true
 			}
 
-			// TODO: Friend, EGP, FGP, Enemy
+			// FGP Expiration
+			if time.Since(s.myState.FriendGoalPostTransformLastUpdate) > config.Expiration.MyExpiration {
+				s.myState.FriendGoalPostTransformExpired = true
+			}
+
+			// EGP Expiration
+			if time.Since(s.myState.EnemyGoalPostTransformLastUpdate) > config.Expiration.MyExpiration {
+				s.myState.EnemyGoalPostTransformExpired = true
+			}
+
+			// GutToBrain Expiration
+			if time.Since(s.myState.GutToBrainLastUpdate) > config.Expiration.MyExpiration {
+				s.myState.GutToBrainExpired = true
+			}
+
+			// TODO: Friend, Enemy, Obstacle
 
 			s.lock.Unlock()
 		}
