@@ -16,12 +16,12 @@ import (
 type PositionFuilfillment struct {
 	state       *state.StateAccess
 	conf        *configuration.FreezeConfig
-	targetX     int
-	targetY     int
+	targetX     float64
+	targetY     float64
 	shouldClear bool
 }
 
-func DefaultPositionFulfillment(xTarget, yTarget int, conf *configuration.FreezeConfig, state *state.StateAccess) FulfillmentInterface {
+func DefaultPositionFulfillment(xTarget, yTarget float64, conf *configuration.FreezeConfig, state *state.StateAccess) FulfillmentInterface {
 	return &PositionFuilfillment{state: state, conf: conf, targetX: xTarget, targetY: yTarget}
 }
 
@@ -34,11 +34,11 @@ func ParsePositionFulfillment(fullcmd bfvid.CommandSPOK, conf *configuration.Fre
 		return true, nil, errors.New("position fulfilment require exactly 2 parameter")
 	}
 
-	tX, errX := strconv.Atoi(fullcmd.Parameter[0])
+	tX, errX := strconv.ParseFloat(fullcmd.Parameter[0], 64)
 	if errX != nil {
 		return true, nil, errors.New("failed to parse targetX of Position fulfilment")
 	}
-	tY, errY := strconv.Atoi(fullcmd.Parameter[1])
+	tY, errY := strconv.ParseFloat(fullcmd.Parameter[1], 64)
 	if errY != nil {
 		return true, nil, errors.New("failed to parse targetY of Position fulfilment")
 	}
@@ -53,6 +53,7 @@ func (f PositionFuilfillment) AsString() string {
 func (f *PositionFuilfillment) Tick() {
 	xErr := math.Abs(float64(f.state.GetState().MyTransform.WorldXcm - models.Centimeter(f.targetX)))
 	yErr := math.Abs(float64(f.state.GetState().MyTransform.WorldYcm - models.Centimeter(f.targetY)))
+	fmt.Println("xErr", xErr, "\t", "yErr", yErr)
 
 	if xErr > float64(f.conf.CommandParameter.PositionToleranceCm) || yErr > float64(f.conf.CommandParameter.PositionToleranceCm) {
 		f.shouldClear = false

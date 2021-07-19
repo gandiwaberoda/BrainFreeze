@@ -72,11 +72,11 @@ func (i WatchatCommand) GetName() string {
 }
 
 func (i *WatchatCommand) Tick(force *models.Force, state *state.StateAccess) {
+	i.fulfillment.Tick()
+
 	_, target := state.GetTransformByKey(i.Target)
 
 	TockLookat(target, *i.conf, force, state)
-
-	i.fulfillment.Tick()
 }
 
 func (i WatchatCommand) GetFulfillment() fulfillments.FulfillmentInterface {

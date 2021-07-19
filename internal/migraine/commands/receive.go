@@ -54,6 +54,8 @@ func (i ReceiveCommand) GetName() string {
 }
 
 func (i *ReceiveCommand) Tick(force *models.Force, curstate *state.StateAccess) {
+	i.fulfillment.Tick()
+
 	// _, target := state.GetTransformByKey(i.Target)
 
 	var target models.Transform
@@ -87,8 +89,6 @@ func (i *ReceiveCommand) Tick(force *models.Force, curstate *state.StateAccess) 
 		register.ReadyReceive = 0.0
 	}
 	curstate.UpdateRegisterState(register)
-
-	i.fulfillment.Tick()
 }
 
 func (i ReceiveCommand) GetFulfillment() fulfillments.FulfillmentInterface {

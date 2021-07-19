@@ -123,6 +123,8 @@ func (i PlannedCommand) GetName() string {
 }
 
 func (i *PlannedCommand) Tick(force *models.Force, state *state.StateAccess) {
+	i.fulfillment.Tick()
+
 	if i.current_obj == nil {
 		fmt.Println("nilll")
 		if i.NextObjective() {
@@ -138,8 +140,6 @@ func (i *PlannedCommand) Tick(force *models.Force, state *state.StateAccess) {
 			i.fulfillment.(*fulfillments.ComplexFuilfillment).Fulfilled()
 		}
 	}
-
-	i.fulfillment.Tick()
 }
 
 func (i PlannedCommand) ShouldClear() bool {

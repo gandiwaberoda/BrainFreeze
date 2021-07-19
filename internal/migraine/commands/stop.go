@@ -55,8 +55,8 @@ func (i StopCommand) GetName() string {
 }
 
 func (i *StopCommand) Tick(force *models.Force, state *state.StateAccess) {
-	force.Idle()
 	i.fulfillment.Tick()
+	force.Idle()
 }
 
 func (i StopCommand) ShouldClear() bool {

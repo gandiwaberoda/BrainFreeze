@@ -128,8 +128,8 @@ func TockWasd(dir WasdDirection, conf configuration.FreezeConfig, force *models.
 }
 
 func (i *WasdCommand) Tick(force *models.Force, state *state.StateAccess) {
-	TockWasd(i.Direction, *i.conf, force, state)
 	i.fulfillment.Tick()
+	TockWasd(i.Direction, *i.conf, force, state)
 }
 
 func (i WasdCommand) GetFulfillment() fulfillments.FulfillmentInterface {

@@ -54,6 +54,7 @@ func (i PlaylfCommand) GetName() string {
 
 func (i *PlaylfCommand) Tick(force *models.Force, state *state.StateAccess) {
 	i.fulfillment.Tick()
+
 	circles := state.GetState().CircularFieldLine
 
 	if len(circles) < 1 {

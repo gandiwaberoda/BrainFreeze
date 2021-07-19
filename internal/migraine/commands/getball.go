@@ -115,12 +115,12 @@ func TockGetball(lastRotTime time.Time, conf configuration.FreezeConfig, force *
 }
 
 func (i *GetballCommand) Tick(force *models.Force, state *state.StateAccess) {
+	i.fulfillment.Tick()
+
 	shouldUpdateLastRotTime := TockGetball(i.lastRotationTime, *i.conf, force, state)
 	if shouldUpdateLastRotTime {
 		i.lastRotationTime = time.Now()
 	}
-
-	i.fulfillment.Tick()
 
 	// if state.GetState().GutToBrain.IsDribbling {
 	// 	// i.shouldClear = true

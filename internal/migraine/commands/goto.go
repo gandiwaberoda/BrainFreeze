@@ -15,8 +15,8 @@ import (
 )
 
 type GotoCommand struct {
-	TargetX     int
-	TargetY     int
+	TargetX     float64
+	TargetY     float64
 	conf        *configuration.FreezeConfig
 	fulfillment fulfillments.FulfillmentInterface
 	shouldClear bool
@@ -51,12 +51,12 @@ func ParseGotoCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, c
 		return true, nil, errors.New("goto command require exactly 2 parameter")
 	}
 
-	tX, err := strconv.Atoi(cmd.Parameter[0])
+	tX, err := strconv.ParseFloat(cmd.Parameter[0], 64)
 	if err != nil {
 		return true, nil, errors.New("failed parse target X")
 	}
 
-	tY, err := strconv.Atoi(cmd.Parameter[1])
+	tY, err := strconv.ParseFloat(cmd.Parameter[1], 64)
 	if err != nil {
 		return true, nil, errors.New("failed parse target Y")
 	}
@@ -86,11 +86,11 @@ func (i GotoCommand) GetName() string {
 	return "GOTO (" + fmt.Sprint(i.TargetX) + ", " + fmt.Sprint(i.TargetY) + "):"
 }
 
-func TockGoto(targetX int, targetY int, conf *configuration.FreezeConfig, force *models.Force, state *state.StateAccess) {
+func TockGoto(targetX float64, targetY float64, conf *configuration.FreezeConfig, force *models.Force, state *state.StateAccess) {
 	my := state.GetState().MyTransform
 
-	yError := float64(targetY - int(my.WorldYcm))
-	xError := float64(targetX - int(my.WorldXcm))
+	yError := targetY - float64(my.WorldYcm)
+	xError := targetX - float64(my.WorldXcm)
 
 	sud4YRad := (my.WorldROT).AsRadian()
 	yErrorRob := xError*math.Sin(float64(sud4YRad)) + yError*math.Cos(float64(sud4YRad))
@@ -101,26 +101,28 @@ func TockGoto(targetX int, targetY int, conf *configuration.FreezeConfig, force 
 	// fmt.Println("robX: " + fmt.Sprint(xErrorRob) + ";; robY: " + fmt.Sprint(yErrorRob))
 
 	if conf.CommandParameter.AllowXYTogether {
-		if int(math.Abs(yErrorRob)) > conf.CommandParameter.PositionToleranceCm {
+		if math.Abs(yErrorRob) > float64(conf.CommandParameter.PositionToleranceCm) {
 			force.AddY(yErrorRob)
 		}
 
-		if int(math.Abs(xErrorRob)) > conf.CommandParameter.PositionToleranceCm {
+		if math.Abs(xErrorRob) > float64(conf.CommandParameter.PositionToleranceCm) {
 			force.AddX(xErrorRob)
 		}
 	} else {
-		if int(math.Abs(yErrorRob)) > conf.CommandParameter.PositionToleranceCm {
+		if math.Abs(yErrorRob) > float64(conf.CommandParameter.PositionToleranceCm) {
 			force.AddY(yErrorRob)
 			return
 		}
 
-		if int(math.Abs(xErrorRob)) > conf.CommandParameter.PositionToleranceCm {
+		if math.Abs(xErrorRob) > float64(conf.CommandParameter.PositionToleranceCm) {
 			force.AddX(xErrorRob)
 		}
 	}
 }
 
 func (i *GotoCommand) Tick(force *models.Force, state *state.StateAccess) {
+	i.fulfillment.Tick()
+
 	TockGoto(i.TargetX, i.TargetY, i.conf, force, state)
 
 	conf := i.conf
@@ -129,14 +131,12 @@ func (i *GotoCommand) Tick(force *models.Force, state *state.StateAccess) {
 	targetY := i.TargetY
 
 	my := state.GetState().MyTransform
-	yError := float64(targetY - int(my.WorldYcm))
-	xError := float64(targetX - int(my.WorldXcm))
+	yError := targetY - float64(my.WorldYcm)
+	xError := targetX - float64(my.WorldXcm)
 	// FIXME: Ini juga
 	if math.Abs(yError) < float64(conf.CommandParameter.PositionToleranceCm) && math.Abs(float64(xError)) < float64(conf.CommandParameter.PositionToleranceCm) {
 		i.shouldClear = true
 	}
-
-	i.fulfillment.Tick()
 }
 
 // func (i GotoCommand) ShouldClear() bool {

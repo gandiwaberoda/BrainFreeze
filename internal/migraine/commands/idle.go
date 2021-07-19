@@ -48,8 +48,8 @@ func (i IdleCommand) GetName() string {
 }
 
 func (i *IdleCommand) Tick(force *models.Force, state *state.StateAccess) {
-	force.Idle()
 	i.fulfillment.Tick()
+	force.Idle()
 }
 
 func (i IdleCommand) ShouldClear() bool {

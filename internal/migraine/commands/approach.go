@@ -83,11 +83,11 @@ func TockApproach(target models.Transform, conf configuration.FreezeConfig, forc
 }
 
 func (i *ApproachCommand) Tick(force *models.Force, state *state.StateAccess) {
+	i.fulfillment.Tick()
+
 	_, target := state.GetTransformByKey(i.Target)
 
 	TockApproach(target, *i.conf, force, state)
-
-	i.fulfillment.Tick()
 }
 
 func (i ApproachCommand) GetFulfillment() fulfillments.FulfillmentInterface {

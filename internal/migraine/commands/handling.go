@@ -52,8 +52,8 @@ func (i HandlingCommand) GetName() string {
 }
 
 func (i *HandlingCommand) Tick(force *models.Force, state *state.StateAccess) {
-	force.EnableHandling()
 	i.fulfillment.Tick()
+	force.EnableHandling()
 }
 
 func (i HandlingCommand) ShouldClear() bool {

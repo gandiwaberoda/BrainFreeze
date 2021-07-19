@@ -50,9 +50,9 @@ func (i KickCommand) GetName() string {
 }
 
 func (i *KickCommand) Tick(force *models.Force, state *state.StateAccess) {
+	i.fulfillment.Tick()
 	force.Kick()
 	force.EnableHandling()
-	i.fulfillment.Tick()
 }
 
 func (i KickCommand) GetFulfillment() fulfillments.FulfillmentInterface {

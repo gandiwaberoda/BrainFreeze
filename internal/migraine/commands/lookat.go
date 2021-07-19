@@ -90,6 +90,7 @@ func TockLookat(target models.Transform, conf configuration.FreezeConfig, force 
 }
 
 func (i *LookatCommand) Tick(force *models.Force, state *state.StateAccess) {
+	i.fulfillment.Tick()
 	_, target := state.GetTransformByKey(i.Target)
 
 	TockLookat(target, *i.conf, force, state)
@@ -97,7 +98,6 @@ func (i *LookatCommand) Tick(force *models.Force, state *state.StateAccess) {
 	if math.Abs(float64(target.RobROT)) < float64(i.conf.CommandParameter.LookatToleranceDeg) {
 		i.shouldClear = true
 	}
-	i.fulfillment.Tick()
 }
 
 func (i LookatCommand) GetFulfillment() fulfillments.FulfillmentInterface {
