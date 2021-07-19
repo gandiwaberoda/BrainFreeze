@@ -104,7 +104,11 @@ func ParseCommandSPOK(cmd string) (*CommandSPOK, error) {
 	}
 
 	if !foundOpeningBracket {
-		verb = s[verbStart:]
+		if level0FulfilmentOpening == -1 {
+			verb = s[verbStart:]
+		} else {
+			verb = s[verbStart : level0FulfilmentOpening-1]
+		}
 	}
 
 	if level0FulfilmentOpening != -1 {
