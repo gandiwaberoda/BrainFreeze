@@ -7,37 +7,38 @@ import (
 )
 
 func main() {
-	cmd := `
-		all:planned(
-			cyan:receive,
-			magenta:getball,
-			magenta:approach(cyan),
-			magenta:lookat(cyan),
-			magenta:getball,
-			magenta:idle@dur(2500),
-			Magenta:passing,
-			magenta:approach(fgp),
-			magenta:receive,
-			cyan:lookat(magenta),
-			Cyan:passing,
-			cyan:dribble(
-				approach(fgp),
-				lookat(magenta),
-				kick
-			)@complex,
-			magenta:getball,
-			cyan:receive,
-			magenta:lookat(cyan),
-			magenta:getball,
-			magenta:idle@dur(2500),
-			Magenta:passing,
-			cyan:approach(fgp),
-			cyan:lookat(fgp),
-			cyan:kick
-		)@and(
-			glanced(fgp), lostball,dist(fgp,300)
-		)
-		`
+	// cmd := `
+	// 	all:planned(
+	// 		cyan:receive,
+	// 		magenta:getball,
+	// 		magenta:approach(cyan),
+	// 		magenta:lookat(cyan),
+	// 		magenta:getball,
+	// 		magenta:idle@dur(2500),
+	// 		Magenta:passing,
+	// 		magenta:approach(fgp),
+	// 		magenta:receive,
+	// 		cyan:lookat(magenta),
+	// 		Cyan:passing,
+	// 		cyan:dribble(
+	// 			approach(fgp),
+	// 			lookat(magenta),
+	// 			kick
+	// 		)@complex,
+	// 		magenta:getball,
+	// 		cyan:receive,
+	// 		magenta:lookat(cyan),
+	// 		magenta:getball,
+	// 		magenta:idle@dur(2500),
+	// 		Magenta:passing,
+	// 		cyan:approach(fgp),
+	// 		cyan:lookat(fgp),
+	// 		cyan:kick
+	// 	)@and(
+	// 		glanced(fgp), lostball,dist(fgp,300)
+	// 	)
+	// 	`
+	cmd := "all:idle@hold"
 
 	parsed, err := bfvid.ParseCommandSPOK(cmd)
 	if err != nil {

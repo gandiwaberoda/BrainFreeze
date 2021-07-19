@@ -3,7 +3,7 @@ package fulfillments
 import (
 	"strings"
 
-	"harianugrah.com/brainfreeze/pkg/models"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
 )
@@ -16,12 +16,12 @@ func DefaultGotballFulfillment(state *state.StateAccess) FulfillmentInterface {
 	return &GotballFuilfillment{state: state}
 }
 
-func ParseGotballFulfillment(intercom models.Intercom, fil string, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, FulfillmentInterface) {
-	if len(fil) < 7 || !strings.EqualFold(fil[:7], "GOTBALL") {
-		return false, nil
+func ParseGotballFulfillment(fullcmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, FulfillmentInterface, error) {
+	if !strings.EqualFold(fullcmd.Fulfilment, "GOTBALL") {
+		return false, nil, nil
 	}
 
-	return true, &GotballFuilfillment{state: state}
+	return true, &GotballFuilfillment{state: state}, nil
 }
 
 func (f GotballFuilfillment) AsString() string {

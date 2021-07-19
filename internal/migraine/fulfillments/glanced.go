@@ -1,12 +1,11 @@
 package fulfillments
 
 import (
-	"fmt"
+	"errors"
 	"math"
-	"regexp"
 	"strings"
 
-	"harianugrah.com/brainfreeze/pkg/models"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
 )
@@ -26,27 +25,22 @@ func DefaultGlancedFulfillment(target string, state *state.StateAccess, conf *co
 	}
 }
 
-func ParseGlancedFulfillment(intercom models.Intercom, fil string, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, FulfillmentInterface) {
-	if !strings.EqualFold(fil[:7], "GLANCED") {
-		return false, nil
+func ParseGlancedFulfillment(fullcmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, FulfillmentInterface, error) {
+	if !strings.EqualFold(fullcmd.Fulfilment, "GLANCED") {
+		return false, nil, nil
 	}
 
-	re, _ := regexp.Compile("(.)+")
-	foundParam := re.FindString(fil)
-
-	if foundParam != "" {
-		if found, _ := state.GetTransformByKey(foundParam); !found {
-			fmt.Println("Target key is not recognizeable")
-			return false, nil
+	if len(fullcmd.FulfilmentParameter) == 1 {
+		if found, _ := state.GetTransformByKey(fullcmd.FulfilmentParameter[0]); !found {
+			return true, nil, errors.New("glance fulfilment target key is not recognizeable")
 		}
 	} else {
-		fmt.Println("No glance argument found")
-		return false, nil
+		return true, nil, errors.New("glance fulfilment require exactly 1 parameter")
 	}
 
 	return true, &GlancedFuilfillment{
-		targetKey: foundParam,
-	}
+		targetKey: fullcmd.FulfilmentParameter[0],
+	}, nil
 }
 
 func (f GlancedFuilfillment) AsString() string {

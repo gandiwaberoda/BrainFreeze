@@ -1,13 +1,13 @@
 package fulfillments
 
 import (
+	"errors"
 	"fmt"
 	"math"
-	"regexp"
 	"strconv"
 	"strings"
 
-	"harianugrah.com/brainfreeze/pkg/models"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
 )
@@ -27,24 +27,25 @@ func DefaultDistanceFulfillment(target string, dist int, state *state.StateAcces
 	}
 }
 
-func ParseDistanceFulfillment(intercom models.Intercom, fil string, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, FulfillmentInterface) {
-	if len(fil) < 4 || !strings.EqualFold(fil[:4], "DIST") {
-		return false, nil
+func ParseDistanceFulfillment(fullcmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, FulfillmentInterface, error) {
+	if !strings.EqualFold(fullcmd.Fulfilment, "DIST") {
+		return false, nil, nil
 	}
 
-	re, _ := regexp.Compile(`\((.+),?([0-9]+)?\)`)
-	foundParam := re.FindStringSubmatch(fil)
-	if len(foundParam) < 2 {
-		fmt.Println("Format fulfilment DIST(target, opsional rob dist)")
-		return false, nil
-	}
+	// re, _ := regexp.Compile(`\((.+),?([0-9]+)?\)`)
+	// foundParam := re.FindStringSubmatch(fil)
+	// if len(foundParam) < 2 {
+	// 	fmt.Println("Format fulfilment DIST(target, opsional rob dist)")
+	// 	return false, nil
+	// }
 
-	fmt.Println(foundParam)
-	for _, v := range foundParam {
-		fmt.Println("x: " + v)
-	}
+	// fmt.Println(foundParam)
+	// for _, v := range foundParam {
+	// 	fmt.Println("x: " + v)
+	// }
 
-	arg := strings.Split(foundParam[1], ",")
+	// arg := strings.Split(foundParam[1], ",")
+	arg := fullcmd.FulfilmentParameter
 
 	defaultApproachDist := conf.CommandParameter.ApproachDistanceCm
 
@@ -58,22 +59,27 @@ func ParseDistanceFulfillment(intercom models.Intercom, fil string, conf *config
 		target = strings.ToUpper(arg[0])
 
 		if _parsed, err := strconv.Atoi(arg[1]); err == nil {
-			fmt.Println("C")
 			if _parsed == 0 {
 				dist = defaultApproachDist
 			} else {
 				dist = _parsed
 			}
 		} else {
-			dist = defaultApproachDist
+			return true, nil, errors.New(fmt.Sprint("distance fulfilment second parameter of (", arg[1], ") is failed to int"))
 		}
+	} else {
+		return true, nil, errors.New("distance fulfilment require either 1 or 2 parameter")
+	}
+
+	if !state.GetTransformKeyAcceptable(target) {
+		return true, nil, errors.New(fmt.Sprint("Target of (", target, ") is not recognizeable"))
 	}
 
 	return true, &DistanceFuilfillment{
 		targetKey: target,
 		dist:      dist,
-		state:     state,
-	}
+		state:     curstate,
+	}, nil
 }
 
 func (f DistanceFuilfillment) AsString() string {
@@ -82,6 +88,9 @@ func (f DistanceFuilfillment) AsString() string {
 
 func (f *DistanceFuilfillment) Tick() {
 	_, obj := f.state.GetTransformByKey(f.targetKey)
+
+	// FIXME: Pake value dari expired, kalau expired berarti belum terpenuhi
+
 	if math.Abs(float64(obj.RobRcm)) < float64(f.dist) {
 		f.shouldClear = true
 	}

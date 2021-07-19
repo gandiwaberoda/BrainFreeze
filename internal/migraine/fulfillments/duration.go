@@ -1,12 +1,13 @@
 package fulfillments
 
 import (
+	"errors"
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -26,31 +27,31 @@ func DefaultDurationFulfillment() FulfillmentInterface {
 	}
 }
 
-func ParseDurationFulfillment(intercom models.Intercom, fil string, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, FulfillmentInterface) {
-	if len(fil) < 3 || !strings.EqualFold(fil[:3], "DUR") {
-		return false, nil
+func ParseDurationFulfillment(fullcmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, FulfillmentInterface, error) {
+	if !strings.EqualFold(fullcmd.Fulfilment, "DUR") {
+		return false, nil, nil
 	}
 
-	re, _ := regexp.Compile("([0-9]+)")
-	foundParam := re.FindString(fil)
+	fmt.Println(fullcmd)
 
 	var milis models.Miliseconds
-	if foundParam != "" {
-		i, err := strconv.Atoi(foundParam)
+	if len(fullcmd.FulfilmentParameter) == 1 {
+		i, err := strconv.Atoi(fullcmd.Fulfilment)
 		if err != nil {
-			fmt.Println("Failed parsing ATOI:", err)
-			milis = models.Miliseconds(conf.Fulfillment.DefaultDurationMs)
-		} else {
 			milis = models.Miliseconds(i)
+		} else {
+			return true, nil, errors.New("failed to parse parameter of duration fulfilment")
 		}
-	} else {
+	} else if len(fullcmd.FulfilmentParameter) == 0 {
 		milis = models.Miliseconds(conf.Fulfillment.DefaultDurationMs)
+	} else {
+		return true, nil, errors.New("duration fulfilment require either 1 or none parameter")
 	}
 
 	return true, &DurationFuilfillment{
 		StartTime: time.Now(),
 		Milis:     models.Miliseconds(milis),
-	}
+	}, nil
 }
 
 func (f DurationFuilfillment) AsString() string {

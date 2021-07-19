@@ -1,12 +1,13 @@
 package fulfillments
 
 import (
+	"errors"
 	"fmt"
 	"math"
-	"regexp"
 	"strconv"
 	"strings"
 
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -24,30 +25,25 @@ func DefaultPositionFulfillment(xTarget, yTarget int, conf *configuration.Freeze
 	return &PositionFuilfillment{state: state, conf: conf, targetX: xTarget, targetY: yTarget}
 }
 
-func ParsePositionFulfillment(intercom models.Intercom, fil string, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, FulfillmentInterface) {
-	if len(fil) < 3 || !strings.EqualFold(fil[:3], "POS") {
-		return false, nil
+func ParsePositionFulfillment(fullcmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, FulfillmentInterface, error) {
+	if !strings.EqualFold(fullcmd.Fulfilment, "POS") {
+		return false, nil, nil
 	}
 
-	re, _ := regexp.Compile(`([0-9-]+),([0-9-]+)`)
-	foundParam := re.FindStringSubmatch(fil)
-	if len(foundParam) < 3 {
-		fmt.Println("Nilai targetX dan targetY diperlukan")
-		return false, nil
+	if len(fullcmd.Parameter) != 2 {
+		return true, nil, errors.New("position fulfilment require exactly 2 parameter")
 	}
 
-	tX, errX := strconv.Atoi(foundParam[1])
+	tX, errX := strconv.Atoi(fullcmd.Parameter[0])
 	if errX != nil {
-		fmt.Println("Failed parse target X")
-		return false, nil
+		return true, nil, errors.New("failed to parse targetX of Position fulfilment")
 	}
-	tY, errY := strconv.Atoi(foundParam[2])
+	tY, errY := strconv.Atoi(fullcmd.Parameter[1])
 	if errY != nil {
-		fmt.Println("Failed parse target Y")
-		return false, nil
+		return true, nil, errors.New("failed to parse targetY of Position fulfilment")
 	}
 
-	return true, &PositionFuilfillment{state: state, conf: conf, targetX: tX, targetY: tY}
+	return true, &PositionFuilfillment{state: state, conf: conf, targetX: tX, targetY: tY}, nil
 }
 
 func (f PositionFuilfillment) AsString() string {
