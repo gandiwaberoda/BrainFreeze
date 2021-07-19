@@ -24,6 +24,7 @@ var fulfillers []func(bfvid.CommandSPOK, *configuration.FreezeConfig, *state.Sta
 	ParsePositionFulfillment,
 	ParseGlancedFulfillment,
 	ParseDistanceFulfillment,
+	ParseDeltaposFulfillment,
 }
 
 func WhichFulfillment(fullbfvid string, conf *configuration.FreezeConfig, state *state.StateAccess) (FulfillmentInterface, error) {
