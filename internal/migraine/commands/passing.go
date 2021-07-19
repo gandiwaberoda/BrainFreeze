@@ -4,6 +4,7 @@ package commands
 // TODO: Bolehkan ngoper ke robot lain, tambahkan parameter Target
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -28,13 +29,20 @@ func ParsePassingCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig
 		return false, nil, nil
 	}
 
-	parseFulfilment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
-	if parseFulfilment == nil {
-		parseFulfilment = fulfillments.DefaultLostballFulfillment(curstate)
+	var parsedFulfilment fulfillments.FulfillmentInterface
+	if cmd.Fulfilment == "" {
+		parsedFulfilment = fulfillments.DefaultLostballFulfillment(curstate)
+	} else {
+		filment, err := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
+		if err != nil {
+			return true, nil, errors.New(fmt.Sprint("non default fulfilment error:", err))
+		}
+		parsedFulfilment = filment
 	}
+
 	parsed := PassingCommand{
 		conf:        conf,
-		fulfillment: parseFulfilment,
+		fulfillment: parsedFulfilment,
 	}
 
 	return true, &parsed, nil

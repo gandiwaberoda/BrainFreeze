@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
@@ -27,13 +29,19 @@ func ParseHandlingCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfi
 		return false, nil, nil
 	}
 
-	parsedFulfillment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
-	if parsedFulfillment == nil {
-		parsedFulfillment = fulfillments.DefaultHoldFulfillment()
+	var parsedFulfilment fulfillments.FulfillmentInterface
+	if cmd.Fulfilment == "" {
+		parsedFulfilment = fulfillments.DefaultHoldFulfillment()
+	} else {
+		filment, err := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
+		if err != nil {
+			return true, nil, errors.New(fmt.Sprint("non default fulfilment error:", err))
+		}
+		parsedFulfilment = filment
 	}
 
 	parsed := HandlingCommand{
-		fulfillment: parsedFulfillment,
+		fulfillment: parsedFulfilment,
 	}
 
 	return true, &parsed, nil

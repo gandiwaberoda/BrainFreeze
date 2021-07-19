@@ -2,6 +2,7 @@ package commands
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"strings"
 
@@ -51,14 +52,21 @@ func ParseLookatCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig,
 		return true, nil, errors.New("lookat target key is not acceptable")
 	}
 
-	parseFulfilment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
-	if parseFulfilment == nil {
-		parseFulfilment = fulfillments.DefaultGlancedFulfillment(target, curstate, conf)
+	var parsedFulfilment fulfillments.FulfillmentInterface
+	if cmd.Fulfilment == "" {
+		parsedFulfilment = fulfillments.DefaultGlancedFulfillment(target, curstate, conf)
+	} else {
+		filment, err := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
+		if err != nil {
+			return true, nil, errors.New(fmt.Sprint("non default fulfilment error:", err))
+		}
+		parsedFulfilment = filment
 	}
+
 	parsed := LookatCommand{
 		Target:      target,
 		conf:        conf,
-		fulfillment: parseFulfilment,
+		fulfillment: parsedFulfilment,
 	}
 
 	return true, &parsed, nil

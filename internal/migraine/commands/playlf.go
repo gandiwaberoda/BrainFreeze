@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"errors"
+	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -26,13 +28,19 @@ func ParsePlaylfCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig,
 		return false, nil, nil
 	}
 
-	parsedFulfillment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
-	if parsedFulfillment == nil {
-		parsedFulfillment = fulfillments.DefaultHoldFulfillment()
+	var parsedFulfilment fulfillments.FulfillmentInterface
+	if cmd.Fulfilment == "" {
+		parsedFulfilment = fulfillments.DefaultHoldFulfillment()
+	} else {
+		filment, err := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
+		if err != nil {
+			return true, nil, errors.New(fmt.Sprint("non default fulfilment error:", err))
+		}
+		parsedFulfilment = filment
 	}
 
 	parsed := PlaylfCommand{
-		fulfillment:      parsedFulfillment,
+		fulfillment:      parsedFulfilment,
 		conf:             conf,
 		lastRotationTime: time.Now(),
 	}

@@ -61,16 +61,22 @@ func ParseGotoCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, c
 		return true, nil, errors.New("failed parse target Y")
 	}
 
-	parseFulfilment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
-	if parseFulfilment == nil {
-		parseFulfilment = fulfillments.DefaultPositionFulfillment(tX, tY, conf, curstate)
+	var parsedFulfilment fulfillments.FulfillmentInterface
+	if cmd.Fulfilment == "" {
+		parsedFulfilment = fulfillments.DefaultPositionFulfillment(tX, tY, conf, curstate)
+	} else {
+		filment, err := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
+		if err != nil {
+			return true, nil, errors.New(fmt.Sprint("non default fulfilment error:", err))
+		}
+		parsedFulfilment = filment
 	}
 
 	parsed := GotoCommand{
 		TargetX:     tX,
 		TargetY:     tY,
 		conf:        conf,
-		fulfillment: parseFulfilment,
+		fulfillment: parsedFulfilment,
 	}
 
 	return true, &parsed, nil

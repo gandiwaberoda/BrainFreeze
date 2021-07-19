@@ -47,14 +47,21 @@ func ParseWatchatCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig
 		return true, nil, errors.New("watchat target key not acceptable")
 	}
 
-	parseFulfilment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
-	if parseFulfilment == nil {
-		parseFulfilment = fulfillments.DefaultHoldFulfillment()
+	var parsedFulfilment fulfillments.FulfillmentInterface
+	if cmd.Fulfilment == "" {
+		parsedFulfilment = fulfillments.DefaultHoldFulfillment()
+	} else {
+		filment, err := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
+		if err != nil {
+			return true, nil, errors.New(fmt.Sprint("non default fulfilment error:", err))
+		}
+		parsedFulfilment = filment
 	}
+
 	parsed := WatchatCommand{
 		Target:      target,
 		conf:        conf,
-		fulfillment: parseFulfilment,
+		fulfillment: parsedFulfilment,
 	}
 
 	return true, &parsed, nil

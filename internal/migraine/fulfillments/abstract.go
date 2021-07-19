@@ -1,6 +1,7 @@
 package fulfillments
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -25,23 +26,22 @@ var fulfillers []func(bfvid.CommandSPOK, *configuration.FreezeConfig, *state.Sta
 	// ParseDistanceFulfillment,
 }
 
-func WhichFulfillment(fullbfvid string, conf *configuration.FreezeConfig, state *state.StateAccess) FulfillmentInterface {
+func WhichFulfillment(fullbfvid string, conf *configuration.FreezeConfig, state *state.StateAccess) (FulfillmentInterface, error) {
 	parsed, err := bfvid.ParseCommandSPOK(fullbfvid)
 	if err != nil {
-		fmt.Println("failed to parse command:", err)
-		return nil
+		return nil, errors.New(fmt.Sprint("failed to parse command:", err))
 	}
 
 	if strings.EqualFold(parsed.Fulfilment, "") {
-		return nil
+		return nil, errors.New(fmt.Sprint("Fulfilment can't be of length 0"))
 	}
 
 	for _, isThis := range fulfillers {
 		thisIs, fulfiller := isThis(*parsed, conf, state)
 		if thisIs {
-			return fulfiller
+			return fulfiller, nil
 		}
 	}
 
-	return nil
+	return nil, errors.New(fmt.Sprint("fulfilment not found:", fullbfvid))
 }

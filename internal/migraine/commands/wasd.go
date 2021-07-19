@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
@@ -59,22 +61,27 @@ var (
 )
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParseWasdCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, CommandInterface, error) {
+func ParseWasdCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
 	// FIXME: Fix API interface
 	dir := strings.ToUpper(strings.TrimSpace(cmd.Verb))
 
 	for _, v := range acceptedDir {
 		if strings.EqualFold(dir, string(v)) {
-			parseFulfilment := fulfillments.WhichFulfillment(cmd.Raw, conf, state)
-
-			if parseFulfilment == nil {
-				parseFulfilment = fulfillments.DefaultDurationFulfillment()
+			var parsedFulfilment fulfillments.FulfillmentInterface
+			if cmd.Fulfilment == "" {
+				parsedFulfilment = fulfillments.DefaultDurationFulfillment()
+			} else {
+				filment, err := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
+				if err != nil {
+					return true, nil, errors.New(fmt.Sprint("non default fulfilment error:", err))
+				}
+				parsedFulfilment = filment
 			}
 
 			return true, &WasdCommand{
 				Direction:   WasdDirection(dir),
 				conf:        conf,
-				fulfillment: parseFulfilment,
+				fulfillment: parsedFulfilment,
 			}, nil
 		}
 	}

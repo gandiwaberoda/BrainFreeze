@@ -46,14 +46,21 @@ func ParseApproachCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfi
 		return true, nil, errors.New("key is not acceptable")
 	}
 
-	parseFulfilment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
-	if parseFulfilment == nil {
-		parseFulfilment = fulfillments.DefaultDistanceFulfillment(target, conf.CommandParameter.ApproachDistanceCm, curstate, conf)
+	var parsedFulfilment fulfillments.FulfillmentInterface
+	if cmd.Fulfilment == "" {
+		parsedFulfilment = fulfillments.DefaultDistanceFulfillment(target, conf.CommandParameter.ApproachDistanceCm, curstate, conf)
+	} else {
+		filment, err := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
+		if err != nil {
+			return true, nil, errors.New(fmt.Sprint("non default fulfilment error:", err))
+		}
+		parsedFulfilment = filment
 	}
+
 	parsed := ApproachCommand{
 		Target:      target,
 		conf:        conf,
-		fulfillment: parseFulfilment,
+		fulfillment: parsedFulfilment,
 	}
 
 	return true, &parsed, nil
