@@ -100,49 +100,11 @@ func main() {
 	})
 	simpse.Start()
 
-	// selfCheck := diagnostic.ConfigValidate(config)
-	// if selfCheck != nil {
-	// 	fmt.Println(selfCheck)
-	// 	return
-	// }
-	fmt.Println("Self check finished")
-
-	// // Mulai Proses
+	fmt.Println("Skipped self check finished")
 
 	// Gut
 	globalWaitGroup.Add(1)
 	gutTalk := gut.CreateGutSim(&config, simpse)
-
-	// var gutTalk gut.GutInterface
-	// if strings.ToUpper(config.Serial.Ports[0]) == "CONSOLE" {
-	// 	gutTalk = gut.CreateGutConsole()
-	// } else if strings.ToUpper(config.Serial.Ports[0]) == "IGNORE" {
-	// 	gutTalk = gut.CreateIgnoreConsole()
-	// } else {
-	// 	gutTalk = gut.CreateGutSerial(&config)
-	// }
-	// globalWaitGroup.Add(1)
-	// gutTalk.RegisterHandler(func(s string) {
-	// 	gtb, err := gutmodel.ParseGutToBrain(s)
-	// 	if err != nil {
-	// 		log.Println("wrong gtb", err)
-	// 		return
-	// 	}
-	// 	state.UpdateGutToBrain(gtb)
-
-	// 	t := models.Transform{
-	// 		EncXcm: gtb.AbsX,
-	// 		EncYcm: gtb.AbsY,
-	// 		EncROT: gtb.Gyro,
-	// 	}
-	// 	t.InjectWorldTransfromFromEncTransform(&config)
-	// 	state.UpdateMyTransform(t)
-	// })
-	// _, errGut := gutTalk.Start()
-	// if errGut != nil {
-	// 	log.Panicln("Gut not yet opened:", errGut.Error())
-	// }
-	// defer gutTalk.Stop()
 
 	// Artificial Intellegence
 	migraine := migraine.CreateMigraine(&config, gutTalk, curstate)
@@ -187,10 +149,6 @@ func main() {
 	telemetry := diagnostic.CreateNewTelemetry(telepathyChannel, &config, curstate)
 	telemetry.Start()
 	defer telemetry.Stop()
-
-	// globalWaitGroup.Add(1)
-	// vision := wanda.NewWandaVision(&config, state)
-	// vision.Start()
 
 	globalWaitGroup.Wait()
 }
