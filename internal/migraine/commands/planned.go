@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -23,42 +24,36 @@ type PlannedCommand struct {
 	state *state.StateAccess
 }
 
-func ParsePlannedCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
-	// if len(cmd) < 7 {
-	// 	return false, nil
-	// }
+func ValidateSubcmds(copied PlannedCommand) error {
+	// Cek Apakah sub cmd valid semua
+	for _, sub := range copied.subcommands_str {
+		_subcmd, _err := WhichCommand(sub, copied.conf, copied.state)
+		if _subcmd == nil {
+			return errors.New(fmt.Sprint("planned subcommand not found:", sub))
+		}
+		if _err != nil {
+			return errors.New(fmt.Sprint("planned subcommand are't valid:", _err))
+		}
+	}
 
-	// if !strings.EqualFold(cmd[:7], "PLANNED") {
-	// 	return false, nil
-	// }
+	return nil
+}
+
+func ParsePlannedCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
 	if !strings.EqualFold(cmd.Verb, "PLANNED") {
 		return false, nil, nil
 	}
 
 	parsed := PlannedCommand{}
-	// parsed.subcommand_raw_str = cmd
-	// parsed.intercom = intercom
 	parsed.conf = conf
 	parsed.fulfillment = fulfillments.DefaultComplexFulfillment()
 	parsed.state = curstate
 	parsed.subcommands_str = cmd.Parameter
 
-	// TODO: Lakukan cek semua subcmd valid
-
-	// re, _ := regexp.Compile(`\((.+)\)`)
-	// foundParam := re.FindStringSubmatch(cmd)
-	// if len(foundParam) < 1 {
-	// 	return false, nil
-	// }
-
-	// subcmd := foundParam[0]
-	// subcmd = subcmd[1 : len(subcmd)-1]
-	// subcmd = strings.ReplaceAll(subcmd, "@", "/")
-
-	// fmt.Println("FP:", foundParam, "--", subcmd)
-
-	// parsed.subcommands_str = strings.Split(subcmd, ";")
-	// parsed.NextObjective()
+	// Lakukan cek semua subcmd valid
+	if err := ValidateSubcmds(parsed); err != nil {
+		return true, nil, err
+	}
 
 	return true, &parsed, nil
 }

@@ -92,6 +92,7 @@ func (m *Migraine) AddCommand(fullbfvid string) {
 	parsed, err := bfvid.ParseCommandSPOK(fullbfvid)
 	if err != nil {
 		fmt.Println("failed to parse command:", err)
+		return
 	}
 
 	if parsed.Receiver != "" {

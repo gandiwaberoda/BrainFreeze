@@ -18,21 +18,25 @@ type CommandInterface interface {
 	GetFulfillment() fulfillments.FulfillmentInterface
 }
 
-var handlers []func(bfvid.CommandSPOK, *configuration.FreezeConfig, *state.StateAccess) (bool, CommandInterface, error) = []func(bfvid.CommandSPOK, *configuration.FreezeConfig, *state.StateAccess) (bool, CommandInterface, error){
-	ParseIdleCommand,
-	ParseWasdCommand,
-	ParseLookatCommand,
-	ParseHandlingCommand,
-	ParseWatchatCommand,
-	ParseGetballCommand,
-	ParseGotoCommand,
-	ParsePlannedCommand,
-	ParseReceiveCommand,
-	ParseKickCommand,
-	ParseApproachCommand,
-	ParsePlaylfCommand,
-	ParseStopCommand,
-	ParsePassingCommand,
+var handlers []func(bfvid.CommandSPOK, *configuration.FreezeConfig, *state.StateAccess) (bool, CommandInterface, error)
+
+func init() {
+	handlers = []func(bfvid.CommandSPOK, *configuration.FreezeConfig, *state.StateAccess) (bool, CommandInterface, error){
+		ParseIdleCommand,
+		ParseWasdCommand,
+		ParseLookatCommand,
+		ParseHandlingCommand,
+		ParseWatchatCommand,
+		ParseGetballCommand,
+		ParseGotoCommand,
+		ParsePlannedCommand,
+		ParseReceiveCommand,
+		ParseKickCommand,
+		ParseApproachCommand,
+		ParsePlaylfCommand,
+		ParseStopCommand,
+		ParsePassingCommand,
+	}
 }
 
 func WhichCommand(fullbfvid string, conf *configuration.FreezeConfig, state *state.StateAccess) (CommandInterface, error) {
