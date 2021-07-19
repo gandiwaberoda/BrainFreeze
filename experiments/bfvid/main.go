@@ -38,7 +38,22 @@ func main() {
 	// 		glanced(fgp), lostball,dist(fgp,300)
 	// 	)
 	// 	`
-	cmd := "all:idle@hold"
+	// cmd := "all:idle@hold"
+	cmd := `
+planned(
+	planned(
+		cyan:getball,
+		magenta:receive,
+		cyan:passing
+	), #Lakukan operan#
+
+	magenta:planned(
+		approach(fgp),
+		lookat(fgp),
+		kick
+	) #Cari lokasi tendang dan tendang#
+)
+	`
 
 	parsed, err := bfvid.ParseCommandSPOK(cmd)
 	if err != nil {
