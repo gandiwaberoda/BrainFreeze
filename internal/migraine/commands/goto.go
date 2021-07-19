@@ -1,13 +1,14 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 	"math"
-	"regexp"
 	"strconv"
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -22,39 +23,45 @@ type GotoCommand struct {
 }
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParseGotoCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
-	if len(cmd) < 4 {
-		return false, nil
+func ParseGotoCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
+	// if len(cmd) < 4 {
+	// 	return false, nil
+	// }
+
+	// if !strings.EqualFold(cmd[:4], "GOTO") {
+	// 	return false, nil
+	// }
+	if !strings.EqualFold(cmd.Verb, "GOTO") {
+		return false, nil, nil
 	}
 
-	if !strings.EqualFold(cmd[:4], "GOTO") {
-		return false, nil
+	// re, _ := regexp.Compile(`([0-9-]+),([0-9-]+)`)
+	// foundParam := re.FindStringSubmatch(cmd)
+	// if len(foundParam) < 3 {
+	// 	fmt.Println("Nilai targetX dan targetY diperlukan")
+	// 	return false, nil
+	// }
+
+	fmt.Println("GOTO PARAM::", cmd.Parameter)
+	for _, v := range cmd.Parameter {
+		fmt.Println("zzzz: " + v)
 	}
 
-	re, _ := regexp.Compile(`([0-9-]+),([0-9-]+)`)
-	foundParam := re.FindStringSubmatch(cmd)
-	if len(foundParam) < 3 {
-		fmt.Println("Nilai targetX dan targetY diperlukan")
-		return false, nil
+	if len(cmd.Parameter) != 2 {
+		return true, nil, errors.New("goto command require exactly 2 parameter")
 	}
 
-	fmt.Println(foundParam)
-	for _, v := range foundParam {
-		fmt.Println("x: " + v)
+	tX, err := strconv.Atoi(cmd.Parameter[0])
+	if err != nil {
+		return true, nil, errors.New("failed parse target X")
 	}
 
-	tX, errX := strconv.Atoi(foundParam[1])
-	if errX != nil {
-		fmt.Println("Failed parse target X")
-		return false, nil
-	}
-	tY, errY := strconv.Atoi(foundParam[2])
-	if errY != nil {
-		fmt.Println("Failed parse target Y")
-		return false, nil
+	tY, err := strconv.Atoi(cmd.Parameter[1])
+	if err != nil {
+		return true, nil, errors.New("failed parse target Y")
 	}
 
-	parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, curstate)
+	parseFulfilment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
 	if parseFulfilment == nil {
 		parseFulfilment = fulfillments.DefaultPositionFulfillment(tX, tY, conf, curstate)
 	}
@@ -66,7 +73,7 @@ func ParseGotoCommand(intercom models.Intercom, cmd string, conf *configuration.
 		fulfillment: parseFulfilment,
 	}
 
-	return true, &parsed
+	return true, &parsed, nil
 }
 
 func (i GotoCommand) GetName() string {

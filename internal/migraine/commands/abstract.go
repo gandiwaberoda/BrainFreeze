@@ -1,10 +1,11 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
-	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -17,7 +18,7 @@ type CommandInterface interface {
 	GetFulfillment() fulfillments.FulfillmentInterface
 }
 
-var handlers []func(models.Intercom, string, *configuration.FreezeConfig, *state.StateAccess) (bool, CommandInterface) = []func(models.Intercom, string, *configuration.FreezeConfig, *state.StateAccess) (bool, CommandInterface){
+var handlers []func(bfvid.CommandSPOK, *configuration.FreezeConfig, *state.StateAccess) (bool, CommandInterface, error) = []func(bfvid.CommandSPOK, *configuration.FreezeConfig, *state.StateAccess) (bool, CommandInterface, error){
 	ParseIdleCommand,
 	ParseWasdCommand,
 	ParseLookatCommand,
@@ -34,26 +35,33 @@ var handlers []func(models.Intercom, string, *configuration.FreezeConfig, *state
 	ParsePassingCommand,
 }
 
-func WhichCommand(intercom models.Intercom, conf *configuration.FreezeConfig, state *state.StateAccess) CommandInterface {
-	splitted := strings.Split(intercom.Content, "/")
-
-	if len(splitted) < 1 {
-		return nil
+func WhichCommand(fullbfvid string, conf *configuration.FreezeConfig, state *state.StateAccess) (CommandInterface, error) {
+	// splitted := strings.Split(intercom.Content, "/")
+	parsed, err := bfvid.ParseCommandSPOK(fullbfvid)
+	if err != nil {
+		return nil, errors.New(fmt.Sprint("failed to parse command:", err))
 	}
 
-	// CMD berisi commandnya (GETBALL, WATCHAT) dan juga argumen, tanpa RECEIVER, tanpa FULFILLMENT
-	// Misal
-	// all/goto(300,400)/dur(5000)
-	cmd := strings.ToUpper(splitted[0])
-	cmd = strings.ReplaceAll(cmd, "\n", " ")
+	// if len(splitted) < 1 {
+	// 	return nil
+	// }
+
+	// // CMD berisi commandnya (GETBALL, WATCHAT) dan juga argumen, tanpa RECEIVER, tanpa FULFILLMENT
+	// // Misal
+	// // all/goto(300,400)/dur(5000)
+	// cmd := strings.ToUpper(splitted[0])
+	// cmd = strings.ReplaceAll(cmd, "\n", " ")
 
 	for _, isThis := range handlers {
-		thisIs, cmd := isThis(intercom, cmd, conf, state)
+		thisIs, cmd, err := isThis(*parsed, conf, state)
 		if thisIs {
-			return cmd
+			if err != nil {
+				return nil, err
+			}
+
+			return cmd, nil
 		}
 	}
 
-	fmt.Println("Gak ketemu:", cmd)
-	return nil
+	return nil, errors.New(fmt.Sprint("command not found:", fullbfvid))
 }

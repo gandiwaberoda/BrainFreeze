@@ -2,13 +2,12 @@ package migraine
 
 import (
 	"fmt"
-	"regexp"
-	"strings"
 	"time"
 
 	"harianugrah.com/brainfreeze/internal/gut"
 	"harianugrah.com/brainfreeze/internal/migraine/commands"
 	"harianugrah.com/brainfreeze/internal/migraine/helper"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -80,38 +79,52 @@ func (m *Migraine) Stop() {
 }
 
 func (m *Migraine) ReplaceObjective(cmd commands.CommandInterface) {
+	fmt.Println("Replace Objective:", cmd.GetName())
 	m.CurrentObjective = cmd
 
 	str_obj := m.CurrentObjective.GetName() + " -> " + m.CurrentObjective.GetFulfillment().AsString()
 	m.state.UpdateCurrentObjective(str_obj)
 }
 
-func (m *Migraine) AddCommand(intercom models.Intercom) {
-	// shouldListen := amIReceiver(intercom, m)
-	shouldListen := helper.AmIReceiver(string(intercom.Receiver), m.config)
-	if !shouldListen {
-		fmt.Println("I am not a receiver for the command")
-		return
+func (m *Migraine) AddCommand(fullbfvid string) {
+	fmt.Println("ADD COMMAND:", fullbfvid)
+
+	parsed, err := bfvid.ParseCommandSPOK(fullbfvid)
+	if err != nil {
+		fmt.Println("failed to parse command:", err)
 	}
 
-	if len(intercom.Content) >= 3 && strings.EqualFold(intercom.Content[:3], "FWD") {
-		// TODO: Command khusus untuk mengforward data serial
-
-		re, _ := regexp.Compile(`\((.+)\)`)
-		foundParam := re.FindString(intercom.Content)
-		foundParam = strings.ReplaceAll(foundParam, "(", "")
-		foundParam = strings.ReplaceAll(foundParam, ")", "")
-		m.gut.Send(foundParam)
-		m.Idle()
-		return
+	if parsed.Receiver != "" {
+		shouldListen := helper.AmIReceiver(string(parsed.Receiver), m.config)
+		if !shouldListen {
+			fmt.Println("I am not a receiver for the command")
+			return
+		}
 	}
 
-	cmd := commands.WhichCommand(intercom, m.config, m.state)
+	// if len(intercom.Content) >= 3 && strings.EqualFold(intercom.Content[:3], "FWD") {
+	// 	// TODO: Command khusus untuk mengforward data serial
+
+	// 	re, _ := regexp.Compile(`\((.+)\)`)
+	// 	foundParam := re.FindString(intercom.Content)
+	// 	foundParam = strings.ReplaceAll(foundParam, "(", "")
+	// 	foundParam = strings.ReplaceAll(foundParam, ")", "")
+	// 	m.gut.Send(foundParam)
+	// 	m.Idle()
+	// 	return
+	// }
+
+	cmd, err := commands.WhichCommand(fullbfvid, m.config, m.state)
+	if err != nil {
+		fmt.Println("MIGRAINE ERROR:", err)
+		return
+	}
 
 	if cmd != nil {
 		m.ReplaceObjective(cmd)
 	} else {
 		fmt.Println("No handler for command")
+		// TODO: Kirim log ke basestation
 	}
 }
 

@@ -5,7 +5,6 @@ package models
 import (
 	"encoding/json"
 	"errors"
-	"strings"
 )
 
 type MessageType string
@@ -37,7 +36,7 @@ type Intercom struct {
 // json itu case insensitive
 func ParseIntercom(raw string) (Intercom, error) {
 	if len(raw) == 0 {
-		return Intercom{}, errors.New("invalid intercom")
+		return Intercom{}, errors.New("intercom can't be 0 in length")
 	}
 
 	var parsed Intercom
@@ -54,6 +53,8 @@ func ParseIntercom(raw string) (Intercom, error) {
 		return parsed, nil
 	}
 
+	return Intercom{}, errors.New("not a json object")
+
 	// command dari websocket client
 
 	// Contoh command (Case insensitive)
@@ -62,24 +63,24 @@ func ParseIntercom(raw string) (Intercom, error) {
 	// aTTacKer kick
 	// deFFenDER plannED(goto(10,30) dur(3000))
 
-	splitted := strings.Split(sanitized, "/")
-	if len(splitted) < 2 {
-		return Intercom{}, errors.New("wrong command format")
-	}
+	// splitted := strings.Split(sanitized, "/")
+	// if len(splitted) < 2 {
+	// 	return Intercom{}, errors.New("wrong command format")
+	// }
 
-	// Parse KIND, asumsikan semua yang formatnya manusiawi adalah COMMAND
-	parsed.Kind = COMMAND
+	// // Parse KIND, asumsikan semua yang formatnya manusiawi adalah COMMAND
+	// parsed.Kind = COMMAND
 
-	// Parse receiver
-	receiverUpper := strings.ToUpper(splitted[0])
-	parsed.Receiver = MessageReceiver(receiverUpper)
+	// // Parse receiver
+	// receiverUpper := strings.ToUpper(splitted[0])
+	// parsed.Receiver = MessageReceiver(receiverUpper)
 
-	// Parse content (Content adalah sisa setelah 2 tadi)
-	contentSubs := sanitized[len(receiverUpper):]
-	contentNoDelim := contentSubs[1:]
-	contentTrimmed := strings.TrimSpace(contentNoDelim)
-	parsed.Content = contentTrimmed
-	return parsed, nil
+	// // Parse content (Content adalah sisa setelah 2 tadi)
+	// contentSubs := sanitized[len(receiverUpper):]
+	// contentNoDelim := contentSubs[1:]
+	// contentTrimmed := strings.TrimSpace(contentNoDelim)
+	// parsed.Content = contentTrimmed
+	// return parsed, nil
 }
 
 func (s Intercom) AsBytes() ([]byte, error) {

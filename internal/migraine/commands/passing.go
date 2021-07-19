@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -19,12 +20,15 @@ type PassingCommand struct {
 }
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParsePassingCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
-	if len(cmd) < 7 || !strings.EqualFold(cmd[:7], "PASSING") {
-		return false, nil
+func ParsePassingCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
+	// if len(cmd) < 7 || !strings.EqualFold(cmd[:7], "PASSING") {
+	// 	return false, nil
+	// }
+	if !strings.EqualFold(cmd.Verb, "PASSING") {
+		return false, nil, nil
 	}
 
-	parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, curstate)
+	parseFulfilment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
 	if parseFulfilment == nil {
 		parseFulfilment = fulfillments.DefaultLostballFulfillment(curstate)
 	}
@@ -33,7 +37,7 @@ func ParsePassingCommand(intercom models.Intercom, cmd string, conf *configurati
 		fulfillment: parseFulfilment,
 	}
 
-	return true, &parsed
+	return true, &parsed, nil
 }
 
 func (i PassingCommand) GetName() string {

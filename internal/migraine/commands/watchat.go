@@ -1,11 +1,12 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
-	"regexp"
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -18,32 +19,35 @@ type WatchatCommand struct {
 }
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParseWatchatCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
-	if len(cmd) < 7 {
-		return false, nil
+func ParseWatchatCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
+	// if len(cmd) < 7 {
+	// 	return false, nil
+	// }
+
+	// if !strings.EqualFold(cmd[:7], "WATCHAT") {
+	// 	return false, nil
+	// }
+	if !strings.EqualFold(cmd.Verb, "WATCHAT") {
+		return false, nil, nil
 	}
 
-	if !strings.EqualFold(cmd[:7], "WATCHAT") {
-		return false, nil
-	}
-
-	re, _ := regexp.Compile(`\(([A-Za-z0-9]+)\)`)
-	foundParam := re.FindString(cmd)
-	foundParam = strings.ReplaceAll(foundParam, "(", "")
-	foundParam = strings.ReplaceAll(foundParam, ")", "")
+	// re, _ := regexp.Compile(`\(([A-Za-z0-9]+)\)`)
+	// foundParam := re.FindString(cmd)
+	// foundParam = strings.ReplaceAll(foundParam, "(", "")
+	// foundParam = strings.ReplaceAll(foundParam, ")", "")
 
 	target := "BALL"
-	if foundParam != "" {
-		fmt.Println(foundParam)
-		target = foundParam
+	if cmd.Parameter[0] != "" {
+		fmt.Println(cmd.Parameter[0])
+		target = cmd.Parameter[0]
 	}
 
 	isKeyAcceptable := state.GetTransformKeyAcceptable(target)
 	if !isKeyAcceptable {
-		return false, nil
+		return true, nil, errors.New("watchat target key not acceptable")
 	}
 
-	parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, curstate)
+	parseFulfilment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
 	if parseFulfilment == nil {
 		parseFulfilment = fulfillments.DefaultHoldFulfillment()
 	}
@@ -53,7 +57,7 @@ func ParseWatchatCommand(intercom models.Intercom, cmd string, conf *configurati
 		fulfillment: parseFulfilment,
 	}
 
-	return true, &parsed
+	return true, &parsed, nil
 }
 
 func (i WatchatCommand) GetName() string {

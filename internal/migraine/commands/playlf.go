@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -17,12 +18,15 @@ type PlaylfCommand struct {
 	lastRotationTime time.Time
 }
 
-func ParsePlaylfCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
-	if len(cmd) < 6 || strings.ToUpper(cmd[:6]) != "PLAYLF" {
-		return false, &PlaylfCommand{}
+func ParsePlaylfCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
+	// if len(cmd) < 6 || strings.ToUpper(cmd[:6]) != "PLAYLF" {
+	// 	return false, &PlaylfCommand{}
+	// }
+	if !strings.EqualFold(cmd.Verb, "PLAYLF") {
+		return false, nil, nil
 	}
 
-	parsedFulfillment := fulfillments.WhichFulfillment(intercom, conf, curstate)
+	parsedFulfillment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
 	if parsedFulfillment == nil {
 		parsedFulfillment = fulfillments.DefaultHoldFulfillment()
 	}
@@ -33,7 +37,7 @@ func ParsePlaylfCommand(intercom models.Intercom, cmd string, conf *configuratio
 		lastRotationTime: time.Now(),
 	}
 
-	return true, &parsed
+	return true, &parsed, nil
 }
 
 func (i PlaylfCommand) GetName() string {

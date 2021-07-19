@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -14,16 +15,19 @@ type HandlingCommand struct {
 	shouldClear bool
 }
 
-func ParseHandlingCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
-	if len(cmd) < 8 {
-		return false, nil
+func ParseHandlingCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
+	// if len(cmd) < 8 {
+	// 	return false, nil
+	// }
+
+	// if strings.ToUpper(cmd[:8]) != "HANDLING" {
+	// 	return false, &HandlingCommand{}
+	// }
+	if !strings.EqualFold(cmd.Verb, "HANDLING") {
+		return false, nil, nil
 	}
 
-	if strings.ToUpper(cmd[:8]) != "HANDLING" {
-		return false, &HandlingCommand{}
-	}
-
-	parsedFulfillment := fulfillments.WhichFulfillment(intercom, conf, curstate)
+	parsedFulfillment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
 	if parsedFulfillment == nil {
 		parsedFulfillment = fulfillments.DefaultHoldFulfillment()
 	}
@@ -32,7 +36,7 @@ func ParseHandlingCommand(intercom models.Intercom, cmd string, conf *configurat
 		fulfillment: parsedFulfillment,
 	}
 
-	return true, &parsed
+	return true, &parsed, nil
 }
 
 func (i HandlingCommand) GetName() string {

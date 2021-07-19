@@ -2,59 +2,65 @@ package commands
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
 	"harianugrah.com/brainfreeze/internal/migraine/helper"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
 )
 
 type PlannedCommand struct {
-	fulfillment        fulfillments.FulfillmentInterface
-	subcommand_raw_str string
-	subcommands_str    []string // Sudah di ubah spasi menjadi / juga, delimeternya ;
-	current_obj        CommandInterface
-	intercom           models.Intercom
-	conf               *configuration.FreezeConfig
+	fulfillment fulfillments.FulfillmentInterface
+	// subcommand_raw_str string
+	subcommands_str []string // Sudah di ubah spasi menjadi / juga, delimeternya ;
+	current_obj     CommandInterface
+	// intercom           models.Intercom
+	conf *configuration.FreezeConfig
 	// shouldClear        bool
 	state *state.StateAccess
 }
 
-func ParsePlannedCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
-	if len(cmd) < 7 {
-		return false, nil
-	}
+func ParsePlannedCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
+	// if len(cmd) < 7 {
+	// 	return false, nil
+	// }
 
-	if !strings.EqualFold(cmd[:7], "PLANNED") {
-		return false, nil
+	// if !strings.EqualFold(cmd[:7], "PLANNED") {
+	// 	return false, nil
+	// }
+	if !strings.EqualFold(cmd.Verb, "PLANNED") {
+		return false, nil, nil
 	}
 
 	parsed := PlannedCommand{}
-	parsed.subcommand_raw_str = cmd
-	parsed.intercom = intercom
+	// parsed.subcommand_raw_str = cmd
+	// parsed.intercom = intercom
 	parsed.conf = conf
 	parsed.fulfillment = fulfillments.DefaultComplexFulfillment()
 	parsed.state = curstate
+	parsed.subcommands_str = cmd.Parameter
 
-	re, _ := regexp.Compile(`\((.+)\)`)
-	foundParam := re.FindStringSubmatch(cmd)
-	if len(foundParam) < 1 {
-		return false, nil
-	}
+	// TODO: Lakukan cek semua subcmd valid
 
-	subcmd := foundParam[0]
-	subcmd = subcmd[1 : len(subcmd)-1]
-	subcmd = strings.ReplaceAll(subcmd, "@", "/")
+	// re, _ := regexp.Compile(`\((.+)\)`)
+	// foundParam := re.FindStringSubmatch(cmd)
+	// if len(foundParam) < 1 {
+	// 	return false, nil
+	// }
 
-	fmt.Println("FP:", foundParam, "--", subcmd)
+	// subcmd := foundParam[0]
+	// subcmd = subcmd[1 : len(subcmd)-1]
+	// subcmd = strings.ReplaceAll(subcmd, "@", "/")
 
-	parsed.subcommands_str = strings.Split(subcmd, ";")
+	// fmt.Println("FP:", foundParam, "--", subcmd)
+
+	// parsed.subcommands_str = strings.Split(subcmd, ";")
 	// parsed.NextObjective()
 
-	return true, &parsed
+	return true, &parsed, nil
 }
 
 func (i *PlannedCommand) NextObjective() (finished bool) {
@@ -62,38 +68,48 @@ func (i *PlannedCommand) NextObjective() (finished bool) {
 		// Sudah command terakhir
 		return true
 	}
-	nextup := strings.TrimSpace(i.subcommands_str[0])
-	fmt.Println("Next obj", nextup)
+	// nextup := strings.TrimSpace(i.subcommands_str[0])
+	nextup, err := bfvid.ParseCommandSPOK(i.subcommands_str[0])
+	if err != nil {
+		panic("it should be handled on parsing")
+	}
+	// fmt.Println("Next obj", nextup)
 	i.subcommands_str = removeIndex(i.subcommands_str, 0)
 
-	// splitted := strings.Split(string(nextup), ";")
-	// fmt.Println("SPLITTED: ", splitted)
-	if colonIndex := strings.Index(nextup, ":"); colonIndex != -1 {
-		// Kalau ada tanda : di subcmd, berarti hanya robot tertentu yang perlu denger
-		receiver := strings.TrimSpace(nextup[0:colonIndex])
-		nextup = strings.TrimSpace(nextup[colonIndex+1:])
-
-		if !helper.AmIReceiver(receiver, i.conf) {
-			fmt.Println("Skipped one command (", nextup, ") for [", receiver, "] as it is not me")
+	if nextup.Receiver != "" {
+		if !helper.AmIReceiver(nextup.Receiver, i.conf) {
+			fmt.Println("Skipped one command (", nextup, ") for [", nextup.Receiver, "] as it is not me")
 			return i.NextObjective()
 		}
 	}
 
+	// splitted := strings.Split(string(nextup), ";")
+	// fmt.Println("SPLITTED: ", splitted)
+	// if colonIndex := strings.Index(nextup, ":"); colonIndex != -1 {
+	// 	// Kalau ada tanda : di subcmd, berarti hanya robot tertentu yang perlu denger
+	// 	receiver := strings.TrimSpace(nextup[0:colonIndex])
+	// 	nextup = strings.TrimSpace(nextup[colonIndex+1:])
+
+	// }
+
 	// inkom_content := string(i.intercom.Kind) + "/"
-	inkom_content := ""
+	// inkom_content := ""
 
-	inkom_content += strings.TrimSpace(nextup)
+	// inkom_content += strings.TrimSpace(nextup)
 
-	inkom := models.Intercom{
-		Kind:     i.intercom.Kind,
-		Receiver: i.intercom.Receiver,
-		Content:  inkom_content,
+	// inkom := models.Intercom{
+	// 	Kind:     i.intercom.Kind,
+	// 	Receiver: i.intercom.Receiver,
+	// 	Content:  inkom_content,
+	// }
+
+	nextcmd, err := WhichCommand(nextup.Raw, i.conf, i.state)
+	if nextcmd == nil {
+		panic("INVALID SUBCMD: " + nextup.Raw) // FIXME: Handle pas parse pertama
 	}
 
-	nextcmd := WhichCommand(inkom, i.conf, i.state)
-	if nextcmd == nil {
-		fmt.Println("INVALID SUBCMD: " + nextup)
-		return i.NextObjective()
+	if err != nil {
+		panic("ERROR Parsing Subcmd: " + nextup.Raw) // FIXME: Handle pas parse pertama
 	}
 
 	i.current_obj = nextcmd

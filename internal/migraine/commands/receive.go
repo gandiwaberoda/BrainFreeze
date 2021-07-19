@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -15,16 +16,19 @@ type ReceiveCommand struct {
 }
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParseReceiveCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
-	if len(cmd) < 7 {
-		return false, nil
+func ParseReceiveCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
+	// if len(cmd) < 7 {
+	// 	return false, nil
+	// }
+
+	// if !strings.EqualFold(cmd[:7], "RECEIVE") {
+	// 	return false, nil
+	// }
+	if !strings.EqualFold(cmd.Verb, "RECEIVE") {
+		return false, nil, nil
 	}
 
-	if !strings.EqualFold(cmd[:7], "RECEIVE") {
-		return false, nil
-	}
-
-	parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, curstate)
+	parseFulfilment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
 	if parseFulfilment == nil {
 		parseFulfilment = fulfillments.DefaultGotballFulfillment(curstate)
 	}
@@ -33,7 +37,7 @@ func ParseReceiveCommand(intercom models.Intercom, cmd string, conf *configurati
 		fulfillment: parseFulfilment,
 	}
 
-	return true, &parsed
+	return true, &parsed, nil
 }
 
 func (i ReceiveCommand) GetName() string {

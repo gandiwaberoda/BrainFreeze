@@ -96,7 +96,7 @@ func main() {
 
 		if intercom.Kind == models.COMMAND {
 			// Bawa ke migraine
-			migraine.AddCommand(intercom)
+			migraine.AddCommand(intercom.Content)
 		} else if intercom.Kind == models.GAMESTATE {
 			// Bawa ke robot state
 			gs := state.GameState{}

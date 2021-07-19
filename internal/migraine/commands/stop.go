@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -19,23 +20,26 @@ func DefaultStopCommand() CommandInterface {
 	}
 }
 
-func ParseStopCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
-	if len(cmd) < 4 {
-		return false, nil
+func ParseStopCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
+	// if len(cmd) < 4 {
+	// 	return false, nil
+	// }
+
+	// if strings.ToUpper(cmd[:4]) != "STOP" {
+	// 	return false, nil
+	// }
+	if !strings.EqualFold(cmd.Verb, "STOP") {
+		return false, nil, nil
 	}
 
-	if strings.ToUpper(cmd[:4]) != "STOP" {
-		return false, nil
-	}
-
-	parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, curstate)
+	parseFulfilment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
 	if parseFulfilment == nil {
 		parseFulfilment = fulfillments.DefaultHoldFulfillment()
 	}
 
-	return true, &IdleCommand{
+	return true, &StopCommand{
 		fulfillment: parseFulfilment,
-	}
+	}, nil
 }
 
 func (i StopCommand) GetName() string {

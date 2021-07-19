@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -15,12 +16,15 @@ type KickCommand struct {
 }
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParseKickCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
-	if len(cmd) < 4 || !strings.EqualFold(cmd[:4], "KICK") {
-		return false, nil
+func ParseKickCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
+	// if len(cmd) < 4 || !strings.EqualFold(cmd[:4], "KICK") {
+	// 	return false, nil
+	// }
+	if !strings.EqualFold(cmd.Verb, "KICK") {
+		return false, nil, nil
 	}
 
-	parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, curstate)
+	parseFulfilment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
 	if parseFulfilment == nil {
 		parseFulfilment = fulfillments.DefaultLostballFulfillment(curstate)
 	}
@@ -29,7 +33,7 @@ func ParseKickCommand(intercom models.Intercom, cmd string, conf *configuration.
 		fulfillment: parseFulfilment,
 	}
 
-	return true, &parsed
+	return true, &parsed, nil
 }
 
 func (i KickCommand) GetName() string {

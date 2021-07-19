@@ -1,11 +1,12 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
-	"regexp"
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -18,27 +19,34 @@ type ApproachCommand struct {
 }
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParseApproachCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
-	if len(cmd) < 8 || !strings.EqualFold(cmd[:8], "APPROACH") {
-		return false, nil
+func ParseApproachCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
+	// if len(cmd) < 8 || !strings.EqualFold(cmd[:8], "APPROACH") {
+	// 	return false, nil
+	// }
+	if !strings.EqualFold(cmd.Verb, "APPROACH") {
+		return false, nil, nil
 	}
 
-	re, _ := regexp.Compile(`\((.+)\)`)
-	foundParam := re.FindStringSubmatch(cmd)
-	if len(foundParam) < 1 {
-		fmt.Println("Target diperlukan")
-		return false, nil
+	// re, _ := regexp.Compile(`\((.+)\)`)
+	// foundParam := re.FindStringSubmatch(cmd)
+	// if len(foundParam) < 1 {
+	// 	fmt.Println("Target diperlukan")
+	// 	return false, nil
+	// }
+	// fmt.Println(foundParam)
+	// target := strings.ToUpper(foundParam[1])
+	if len(cmd.Parameter) != 1 {
+		return true, nil, errors.New("approach only accept one parameter")
 	}
-	fmt.Println(foundParam)
-	target := strings.ToUpper(foundParam[1])
+	target := cmd.Parameter[0]
 
 	isKeyAcceptable := state.GetTransformKeyAcceptable(target)
 	if !isKeyAcceptable {
 		fmt.Println("Target key not acceptable")
-		return false, nil
+		return true, nil, errors.New("key is not acceptable")
 	}
 
-	parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, curstate)
+	parseFulfilment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
 	if parseFulfilment == nil {
 		parseFulfilment = fulfillments.DefaultDistanceFulfillment(target, conf.CommandParameter.ApproachDistanceCm, curstate, conf)
 	}
@@ -48,7 +56,7 @@ func ParseApproachCommand(intercom models.Intercom, cmd string, conf *configurat
 		fulfillment: parseFulfilment,
 	}
 
-	return true, &parsed
+	return true, &parsed, nil
 }
 
 func (i ApproachCommand) GetName() string {

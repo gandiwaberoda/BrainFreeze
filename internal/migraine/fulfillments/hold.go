@@ -3,7 +3,7 @@ package fulfillments
 import (
 	"strings"
 
-	"harianugrah.com/brainfreeze/pkg/models"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
 )
@@ -15,8 +15,8 @@ func DefaultHoldFulfillment() FulfillmentInterface {
 	return &HoldFuilfillment{}
 }
 
-func ParseHoldFulfillment(intercom models.Intercom, fil string, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, FulfillmentInterface) {
-	if len(fil) < 4 || !strings.EqualFold(fil[:4], "HOLD") {
+func ParseHoldFulfillment(fullcmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, FulfillmentInterface) {
+	if !strings.EqualFold(fullcmd.Fulfilment, "HOLD") {
 		return false, nil
 	}
 
@@ -28,7 +28,6 @@ func (f HoldFuilfillment) AsString() string {
 }
 
 func (f *HoldFuilfillment) Tick() {
-	// return false
 }
 
 func (f HoldFuilfillment) ShouldClear() bool {

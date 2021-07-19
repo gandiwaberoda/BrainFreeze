@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -59,12 +60,13 @@ var (
 )
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParseWasdCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, CommandInterface) {
-	dir := strings.ToUpper(strings.TrimSpace(cmd))
+func ParseWasdCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, state *state.StateAccess) (bool, CommandInterface, error) {
+	// FIXME: Fix API interface
+	dir := strings.ToUpper(strings.TrimSpace(cmd.Verb))
 
 	for _, v := range acceptedDir {
-		if dir == string(v) {
-			parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, state)
+		if strings.EqualFold(dir, string(v)) {
+			parseFulfilment := fulfillments.WhichFulfillment(cmd.Raw, conf, state)
 
 			if parseFulfilment == nil {
 				parseFulfilment = fulfillments.DefaultDurationFulfillment()
@@ -74,11 +76,11 @@ func ParseWasdCommand(intercom models.Intercom, cmd string, conf *configuration.
 				Direction:   WasdDirection(dir),
 				conf:        conf,
 				fulfillment: parseFulfilment,
-			}
+			}, nil
 		}
 	}
 
-	return false, nil
+	return false, nil, nil
 }
 
 func (i WasdCommand) GetName() string {

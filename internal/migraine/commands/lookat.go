@@ -1,12 +1,12 @@
 package commands
 
 import (
-	"fmt"
+	"errors"
 	"math"
-	"regexp"
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -20,34 +20,38 @@ type LookatCommand struct {
 }
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParseLookatCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
-	if len(cmd) < 6 {
-		return false, nil
+func ParseLookatCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
+	// if len(cmd) < 6 {
+	// 	return false, nil
+	// }
+
+	// if len(cmd) < 6 || !strings.EqualFold(cmd[:6], "LOOKAT") {
+	// 	return false, nil
+	// }
+	if !strings.EqualFold(cmd.Verb, "LOOKAT") {
+		return false, nil, nil
 	}
 
-	if len(cmd) < 6 || !strings.EqualFold(cmd[:6], "LOOKAT") {
-		return false, nil
-	}
+	// re, _ := regexp.Compile(`\(([A-Za-z0-9]+)\)`)
+	// foundParam := re.FindString(cmd)
+	// foundParam = strings.ReplaceAll(foundParam, "(", "")
+	// foundParam = strings.ReplaceAll(foundParam, ")", "")
 
-	re, _ := regexp.Compile(`\(([A-Za-z0-9]+)\)`)
-	foundParam := re.FindString(cmd)
-	foundParam = strings.ReplaceAll(foundParam, "(", "")
-	foundParam = strings.ReplaceAll(foundParam, ")", "")
-
-	fmt.Println("zzz", foundParam)
+	// fmt.Println("zzz", foundParam)
 
 	target := "BALL"
-	if foundParam != "" {
-		fmt.Println(foundParam)
-		target = foundParam
+	if len(cmd.Parameter) == 1 && cmd.Parameter[0] != "" {
+		target = cmd.Parameter[0]
+	} else if len(cmd.Parameter) > 1 {
+		return true, nil, errors.New("lookat command require either NONE or 1 parameter")
 	}
 
 	isKeyAcceptable := state.GetTransformKeyAcceptable(target)
 	if !isKeyAcceptable {
-		return false, nil
+		return true, nil, errors.New("lookat target key is not acceptable")
 	}
 
-	parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, curstate)
+	parseFulfilment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
 	if parseFulfilment == nil {
 		parseFulfilment = fulfillments.DefaultGlancedFulfillment(target, curstate, conf)
 	}
@@ -57,7 +61,7 @@ func ParseLookatCommand(intercom models.Intercom, cmd string, conf *configuratio
 		fulfillment: parseFulfilment,
 	}
 
-	return true, &parsed
+	return true, &parsed, nil
 }
 
 func (i LookatCommand) GetName() string {

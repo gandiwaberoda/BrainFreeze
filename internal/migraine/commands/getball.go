@@ -1,12 +1,12 @@
 package commands
 
 import (
-	"fmt"
 	"math"
 	"strings"
 	"time"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
+	"harianugrah.com/brainfreeze/pkg/bfvid"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -21,18 +21,19 @@ type GetballCommand struct {
 }
 
 // WasdCommand memiliki fulfillment default yaitu DefaultDurationFulfillment
-func ParseGetballCommand(intercom models.Intercom, cmd string, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface) {
-	fmt.Println(cmd)
+func ParseGetballCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
+	// if len(cmd) < 7 {
+	// 	return false, nil
+	// }
 
-	if len(cmd) < 7 {
-		return false, nil
+	// if !strings.EqualFold(cmd[:7], "GETBALL") {
+	// 	return false, nil
+	// }
+	if !strings.EqualFold(cmd.Verb, "GETBALL") {
+		return false, nil, nil
 	}
 
-	if !strings.EqualFold(cmd[:7], "GETBALL") {
-		return false, nil
-	}
-
-	parseFulfilment := fulfillments.WhichFulfillment(intercom, conf, curstate)
+	parseFulfilment := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
 	if parseFulfilment == nil {
 		parseFulfilment = fulfillments.DefaultGotballFulfillment(curstate)
 	}
@@ -43,7 +44,7 @@ func ParseGetballCommand(intercom models.Intercom, cmd string, conf *configurati
 		lastRotationTime: time.Now(),
 	}
 
-	return true, &parsed
+	return true, &parsed, nil
 }
 
 func (i GetballCommand) GetName() string {
