@@ -6,6 +6,7 @@ package commands
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
@@ -68,7 +69,7 @@ func (i *PassingCommand) Tick(force *models.Force, curstate *state.StateAccess) 
 	}
 
 	TockLookat(target, *i.conf, force, curstate)
-	if target.RobROT > models.Degree(i.conf.CommandParameter.LookatToleranceDeg) {
+	if math.Abs(float64(target.RobROT)) > float64(i.conf.CommandParameter.LookatToleranceDeg) {
 		return
 	}
 
@@ -83,6 +84,7 @@ func (i *PassingCommand) Tick(force *models.Force, curstate *state.StateAccess) 
 		force.Kick()
 		force.EnableHandling()
 	}
+
 }
 
 func (i PassingCommand) GetFulfillment() fulfillments.FulfillmentInterface {

@@ -55,27 +55,33 @@ func (i ReceiveCommand) GetName() string {
 
 func (i *ReceiveCommand) Tick(force *models.Force, curstate *state.StateAccess) {
 	// _, target := state.GetTransformByKey(i.Target)
+
 	var target models.Transform
+	var partner models.Transform
+
+	// Jika bolanya LOST, lihat ke temen
+	if i.conf.Robot.Color == configuration.CYAN {
+		partner = curstate.GetState().MagentaTransform
+	} else if i.conf.Robot.Color == configuration.MAGENTA {
+		partner = curstate.GetState().CyanTransform
+	} else {
+		panic(i.conf.Robot.Color + " is not a valid robot color")
+	}
 
 	if !curstate.GetState().BallTransformExpired {
 		// Utamakan ngelihat ke bola
 		target = curstate.GetState().BallTransform
 	} else {
-		// Jika bolanya LOST, lihat ke temen
-		if i.conf.Robot.Color == configuration.CYAN {
-			target = curstate.GetState().MagentaTransform
-		} else if i.conf.Robot.Color == configuration.MAGENTA {
-			target = curstate.GetState().CyanTransform
-		} else {
-			panic(i.conf.Robot.Color + " is not a valid robot color")
-		}
+		target = partner
 	}
 
 	TockLookat(target, *i.conf, force, curstate)
 	force.EnableHandling()
 
 	register := state.NewRegister()
-	if target.RobROT <= models.Degree(i.conf.CommandParameter.LookatToleranceDeg) {
+	// Register ReadyReceive berfungsi untuk mengatakan kepada partner bahwa aku siap nerima bola
+	// So, targetnya bukan bola, tapi sedang melihat partner yang akan ngoper
+	if partner.RobROT <= models.Degree(i.conf.CommandParameter.LookatToleranceDeg) {
 		register.ReadyReceive = 1.0
 	} else {
 		register.ReadyReceive = 0.0
