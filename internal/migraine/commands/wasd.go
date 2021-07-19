@@ -35,7 +35,6 @@ type WasdCommand struct {
 	Direction   WasdDirection
 	conf        *configuration.FreezeConfig
 	fulfillment fulfillments.FulfillmentInterface
-	shouldClear bool
 }
 
 var (
