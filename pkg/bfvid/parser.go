@@ -20,14 +20,51 @@ type CommandSPOK struct {
 
 func ParseCommandSPOK(cmd string) (*CommandSPOK, error) {
 	s := cmd
+
 	s = strings.ReplaceAll(s, "\n", "")
 	s = strings.ReplaceAll(s, "\t", "")
 	s = strings.ReplaceAll(s, " ", "")
 
-	if strings.Contains(s, ",)") {
-		return nil, errors.New("parameter contain \",)\" character")
+	if inv := strings.Index(s, ",)"); inv != -1 {
+		return nil, errors.New(fmt.Sprint("parameter contain \",)\" character at ", inv))
 	}
 
+	// Pastikan comment symbol jumlahnya genap (Balance, hash buka dan hash tutup)
+	if hashCount := strings.Count(s, "#"); hashCount%2 != 0 {
+		return nil, errors.New("hash count not balance")
+	}
+
+	// Remove comment
+	{
+		// Cari semua simbol comment dan pasangannya
+		startEndCmd := make([][]int, 0)
+		startComment := -1
+		for i, v := range s {
+			if v == '#' {
+				if startComment == -1 {
+					// Start comment
+					startComment = i
+
+				} else if startComment != -1 {
+					// End comment
+					startEndCmd = append(startEndCmd, []int{startComment, i})
+					startComment = -1
+				}
+			}
+		}
+
+		// Lakukan penghapusan
+		removedCommentLetterCount := 0
+		for _, v := range startEndCmd {
+			_start := v[0]
+			_end := v[1]
+
+			s = s[0:_start-removedCommentLetterCount] + s[_end+1-removedCommentLetterCount:]
+			removedCommentLetterCount += (_end + 1 - _start)
+		}
+	}
+
+	// Lakukan parsing
 	level := -1
 	level0BracketOpening := -1
 	lastParameterPointer := -1
