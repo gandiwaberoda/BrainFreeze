@@ -48,14 +48,11 @@ func worker(m *Migraine) {
 			force.EnableHandling()
 		}
 
-		if m.CurrentObjective.GetFulfillment().ShouldClear() {
-			m.ReplaceObjective(commands.DefaultIdleCommand())
-		}
-
 		m.gut.Send(force.AsGutCommandString())
 
 		if m.CurrentObjective.GetFulfillment().ShouldClear() {
-			m.Idle()
+			fmt.Println("Fulfilled, now idling")
+			m.ReplaceObjective(commands.DefaultIdleCommand())
 		}
 
 	}
@@ -122,6 +119,7 @@ func (m *Migraine) AddCommand(fullbfvid string) {
 	}
 
 	if cmd != nil {
+		fmt.Println("New Objective Understood")
 		m.ReplaceObjective(cmd)
 	} else {
 		fmt.Println("No handler for command")
