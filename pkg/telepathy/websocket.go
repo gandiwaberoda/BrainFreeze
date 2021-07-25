@@ -83,7 +83,7 @@ func (c *WebsocketTelepathy) Send(s string) (bool, error) {
 		return false, errors.New("websocket is not running")
 	}
 
-	err := c.ws.WriteMessage(websocket.TextMessage, []byte(s))
+	err := c.ws.WriteMessage(websocket.BinaryMessage, []byte(s))
 	if err != nil {
 		fmt.Println("Error ngirim data ke ws, reconnecting...", err)
 		// c.Connect()

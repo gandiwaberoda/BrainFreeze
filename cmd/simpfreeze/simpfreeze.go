@@ -83,6 +83,7 @@ func main() {
 				RobROT: models.Degree(rot),
 				RobRcm: models.Centimeter(models.EucDistance(x, y)),
 			}
+			tr.InjectWorldTransfromFromRobotTransform(curstate.GetState().MyTransform)
 			// fmt.Println(tr)
 			if strings.EqualFold(s[1:4], "BAL") {
 				// fmt.Println("UUU")

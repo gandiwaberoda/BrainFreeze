@@ -72,6 +72,16 @@ type Transform struct {
 	TopROT Degree
 }
 
+func (t *Transform) InjectWorldTransfromFromRobotTransform(myTransform Transform) {
+	rad := float64(Degree((myTransform.WorldROT + t.RobROT - 90) * -1).AsRadian())
+	x := Centimeter(math.Cos(rad) * float64(t.RobRcm))
+	y := Centimeter(math.Sin(rad) * float64(t.RobRcm))
+
+	t.WorldXcm = myTransform.WorldXcm + x
+	t.WorldYcm = myTransform.WorldYcm + y
+	// t.WorldRcm = t.RobRcm
+}
+
 func (t *Transform) InjectWorldTransfromFromEncTransform(conf *configuration.FreezeConfig) {
 	startRot := conf.Robot.StartRot
 	t.WorldROT = t.EncROT + Degree(startRot)
