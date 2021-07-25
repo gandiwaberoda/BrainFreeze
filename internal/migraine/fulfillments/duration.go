@@ -2,7 +2,6 @@ package fulfillments
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -32,16 +31,13 @@ func ParseDurationFulfillment(fullcmd bfvid.CommandSPOK, conf *configuration.Fre
 		return false, nil, nil
 	}
 
-	fmt.Println(fullcmd)
-
 	var milis models.Miliseconds
 	if len(fullcmd.FulfilmentParameter) == 1 {
-		i, err := strconv.Atoi(fullcmd.Fulfilment)
+		i, err := strconv.Atoi(fullcmd.FulfilmentParameter[0])
 		if err != nil {
-			milis = models.Miliseconds(i)
-		} else {
-			return true, nil, errors.New("failed to parse parameter of duration fulfilment")
+			return true, nil, errors.New("failed to parse parameter of duration fulfilment: " + fullcmd.FulfilmentParameter[0])
 		}
+		milis = models.Miliseconds(i)
 	} else if len(fullcmd.FulfilmentParameter) == 0 {
 		milis = models.Miliseconds(conf.Fulfillment.DefaultDurationMs)
 	} else {
