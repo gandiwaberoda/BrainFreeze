@@ -37,8 +37,8 @@ func ParseWatchatCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig
 	// foundParam = strings.ReplaceAll(foundParam, ")", "")
 
 	target := "BALL"
-	if cmd.Parameter[0] != "" {
-		fmt.Println(cmd.Parameter[0])
+	if len(cmd.Parameter) == 1 && cmd.Parameter[0] != "" {
+		fmt.Println("Watching at:", cmd.Parameter[0])
 		target = cmd.Parameter[0]
 	}
 
