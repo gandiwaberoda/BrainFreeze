@@ -84,5 +84,5 @@ func (f Force) AsGutCommandString() string {
 	rotStr := fmt.Sprintf("%.2f", f.GetRot())
 	xStr := fmt.Sprintf("%.2f", f.GetX())
 	yStr := fmt.Sprintf("%.2f", f.GetY())
-	return fmt.Sprint("*a,", xStr, ",", yStr, ",", rotStr, ",", f.GetKick(), ",", f.GetHandling(), "#")
+	return fmt.Sprint("*", xStr, ",", yStr, ",", rotStr, ",", f.GetKick(), ",", f.GetHandling(), "#")
 }
