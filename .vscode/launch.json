@@ -5,11 +5,24 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Package",
+            "name": "Debug brainfreeze",
             "type": "go",
             "request": "launch",
-            "mode": "auto",
-            "program": "${workspaceRoot}/cmd/brainfreeze"
+            "mode": "debug",
+            "program": "${workspaceRoot}/cmd/brainfreeze/main.go",
+            "args": [
+                "${workspaceRoot}/config.yaml"
+            ]
+        },
+        {
+            "name": "Camera Src",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceRoot}/cmd/camerasrc/camerasrc.go",
+            "args": [
+                "${workspaceRoot}/config.yaml"
+            ]
         }
     ]
 }
