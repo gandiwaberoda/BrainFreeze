@@ -264,9 +264,10 @@ func detectMagenta(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHs
 	defer wg.Done()
 	narrowMagentaFound, narrowMagentaRes := w.magentaNarrow.Detect(topHsvFrame)
 	if narrowMagentaFound && len(narrowMagentaRes) > 0 {
-		obj := narrowMagentaRes[0]
-		w.state.UpdateMagentaTransform(obj.AsTransform(w.conf))
-		gocv.Circle(topFrame, obj.Midpoint, obj.OuterRad, w.warnaNewest, 2)
+		t := narrowMagentaRes[0].AsTransform(w.conf)
+		t.InjectWorldTransfromFromRobotTransform(w.state.GetState().MyTransform)
+		w.state.UpdateMagentaTransform(t)
+		// gocv.Circle(topFrame, obj.Midpoint, obj.OuterRad, w.warnaNewest, 2)
 	}
 }
 
@@ -274,7 +275,9 @@ func detectCyan(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFr
 	defer wg.Done()
 	narrowCyanFound, narrowCyanRes := w.cyanNarrow.Detect(topHsvFrame)
 	if narrowCyanFound && len(narrowCyanRes) > 0 {
-		w.state.UpdateCyanTransform(narrowCyanRes[0].AsTransform(w.conf))
+		t := narrowCyanRes[0].AsTransform(w.conf)
+		t.InjectWorldTransfromFromRobotTransform(w.state.GetState().MyTransform)
+		w.state.UpdateCyanTransform(t)
 	}
 }
 
