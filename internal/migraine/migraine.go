@@ -40,13 +40,6 @@ func worker(m *Migraine) {
 		m.state.UpdateRegisterState(register)
 
 		m.CurrentObjective.Tick(&force, m.state)
-		// if !force.HandlingHaveChanged() && m.state.GetState().GutToBrain.IsDribbling {
-		// 	force.EnableHandling()
-		// }
-		// Selama bolanya deket, hidupin ja ball handling
-		if m.state.GetState().BallTransform.TopRpx <= models.Centimeter(m.config.CommandParameter.HandlingOnDist) {
-			force.EnableHandling()
-		}
 
 		m.gut.Send(force.AsGutCommandString())
 
