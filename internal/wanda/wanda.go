@@ -242,6 +242,7 @@ func detectTopBall(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHs
 			obj := w.latestKnownBallDetection.Lerp(newer, w.conf.Wanda.LerpValue)
 
 			transform := obj.AsTransform(w.conf)
+			transform.InjectWorldTransfromFromRobotTransform(w.state.GetState().MyTransform)
 
 			gocv.Rectangle(topFrame, narrowBallRes[0].Bbox, w.warnaNewest, 3)
 			gocv.Circle(topFrame, obj.Midpoint, obj.OuterRad, w.warnaNewest, 2)

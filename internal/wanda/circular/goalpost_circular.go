@@ -27,7 +27,7 @@ func NewGoalpostCircular(conf *configuration.FreezeConfig) *GoalpostCircular {
 		conf:      conf,
 		upperRed:  gocv.NewScalar(179, 255, 255, 1),
 		lowerRed:  gocv.NewScalar(165, 56, 167, 0),
-		erodeMat:  gocv.Ones(9, 9, gocv.MatTypeCV8UC1),
+		erodeMat:  gocv.Ones(3, 3, gocv.MatTypeCV8UC1),
 	}
 }
 
