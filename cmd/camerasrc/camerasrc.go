@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"log"
+	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -14,7 +16,20 @@ import (
 )
 
 func main() {
-	conf, _ := configuration.LoadStartupConfig()
+	argsWithoutProg := os.Args[1:]
+	var (
+		err  error
+		conf configuration.FreezeConfig
+	)
+	if len(argsWithoutProg) >= 1 {
+		fmt.Println("Loading custom config file:", argsWithoutProg[0])
+		conf, err = configuration.LoadStartupConfigByFile(argsWithoutProg[0])
+	} else if len(argsWithoutProg) == 0 {
+		conf, err = configuration.LoadStartupConfig()
+	}
+	if err != nil {
+		log.Fatalln("Gagal meload config", err)
+	}
 
 	var errVc error
 	var vc1, vc2 *gocv.VideoCapture
