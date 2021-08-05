@@ -45,7 +45,7 @@ func (n *GoalpostCircular) Detect(hsvFrame *gocv.Mat, grayFrame *gocv.Mat) (resu
 	defer hsvRed.Close()
 
 	gocv.InRangeWithScalar(*hsvFrame, n.lowerRed, n.upperRed, &hsvRed)
-	gocv.Erode(hsvRed, &hsvRed, n.erodeMat)
+	// gocv.Erode(hsvRed, &hsvRed, n.erodeMat)
 
 	hierarchyMat := gocv.NewMat()
 	defer hierarchyMat.Close()
