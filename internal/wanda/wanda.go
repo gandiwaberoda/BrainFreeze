@@ -306,10 +306,15 @@ func detectLineFieldCircular(w *WandaVision, wg *sync.WaitGroup, grayFrame *gocv
 }
 
 func detectGoalpostCircular(w *WandaVision, wg *sync.WaitGroup, hsvFrame *gocv.Mat, grayFrame *gocv.Mat) {
+	cBlue := color.RGBA{0, 128, 255, 0}
+
 	defer wg.Done()
 	detecteds := w.goalpostCircular.Detect(hsvFrame, grayFrame)
 	if len(detecteds) > 0 {
-		t := detecteds[0]
+		obj := detecteds[0]
+		gocv.Line(hsvFrame, image.Point{320, 320}, obj.Midpoint, cBlue, 2)
+
+		t := obj.AsTransform(w.conf)
 		t.InjectWorldTransfromFromRobotTransform(w.state.GetState().MyTransform)
 		w.state.UpdateFriendGoalpostTransform(t)
 	}

@@ -26,13 +26,13 @@ func NewGoalpostCircular(conf *configuration.FreezeConfig) *GoalpostCircular {
 		Radius:    300,
 		conf:      conf,
 		upperRed:  gocv.NewScalar(179, 255, 255, 1),
-		lowerRed:  gocv.NewScalar(165, 56, 167, 0),
-		erodeMat:  gocv.Ones(3, 3, gocv.MatTypeCV8UC1),
+		lowerRed:  gocv.NewScalar(165, 56, 220, 0),
+		erodeMat:  gocv.Ones(5, 5, gocv.MatTypeCV8UC1),
 	}
 }
 
-func (n *GoalpostCircular) Detect(hsvFrame *gocv.Mat, grayFrame *gocv.Mat) (result []models.Transform) {
-	res := []models.Transform{}
+func (n *GoalpostCircular) Detect(hsvFrame *gocv.Mat, grayFrame *gocv.Mat) (result []models.DetectionObject) {
+	res := []models.DetectionObject{}
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -40,8 +40,6 @@ func (n *GoalpostCircular) Detect(hsvFrame *gocv.Mat, grayFrame *gocv.Mat) (resu
 			result = res
 		}
 	}()
-
-	cBlue := color.RGBA{0, 255, 255, 0}
 
 	hsvRed := gocv.NewMat()
 	defer hsvRed.Close()
@@ -69,6 +67,10 @@ func (n *GoalpostCircular) Detect(hsvFrame *gocv.Mat, grayFrame *gocv.Mat) (resu
 		// gocv.Rectangle(&frame, rect, cRed, 2)
 
 		d := models.NewDetectionObject(rect)
+		dist := models.EucDistance(float64(d.Midpoint.X), float64(d.Midpoint.Y))
+		if dist < 600 {
+			continue
+		}
 		detecteds = append(detecteds, d)
 	}
 
@@ -81,7 +83,7 @@ func (n *GoalpostCircular) Detect(hsvFrame *gocv.Mat, grayFrame *gocv.Mat) (resu
 		px := grayFrame.GetUCharAt(y, x)
 		if px > uint8(n.conf.Wanda.WhiteOnGrayVal) {
 			if !lastOneWasWhite {
-				gocv.Circle(hsvFrame, image.Point{X: x, Y: y}, 5, color.RGBA{uint8(i + 90), 0, 0, 0}, -1)
+				gocv.Circle(hsvFrame, image.Point{X: x, Y: y}, 5, color.RGBA{0, 0, 0, 0}, -1)
 				sudutPutih = append(sudutPutih, i)
 				lastOneWasWhite = true
 			}
@@ -111,8 +113,7 @@ func (n *GoalpostCircular) Detect(hsvFrame *gocv.Mat, grayFrame *gocv.Mat) (resu
 			}
 
 			if sudut_merah.RobROT < models.Degree(bigger) && sudut_merah.RobROT > models.Degree(smaller) {
-				gocv.Line(hsvFrame, image.Point{320, 320}, v.Midpoint, cBlue, 2)
-				res = append(res, sudut_merah)
+				res = append(res, v)
 			}
 		}
 
