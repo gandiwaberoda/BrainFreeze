@@ -309,7 +309,9 @@ func detectGoalpostCircular(w *WandaVision, wg *sync.WaitGroup, hsvFrame *gocv.M
 	defer wg.Done()
 	detecteds := w.goalpostCircular.Detect(hsvFrame, grayFrame)
 	if len(detecteds) > 0 {
-		w.state.UpdateFriendGoalpostTransform(detecteds[0])
+		t := detecteds[0]
+		t.InjectWorldTransfromFromRobotTransform(w.state.GetState().MyTransform)
+		w.state.UpdateFriendGoalpostTransform(t)
 	}
 }
 
