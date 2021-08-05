@@ -40,6 +40,9 @@ type WandaVision struct {
 	latestKnownBallDetection models.DetectionObject
 	latestKnownBallSet       bool
 
+	latestKnownCyanDetection models.DetectionObject
+	latestKnownCyanSet       bool
+
 	topCenter image.Point
 
 	warnaNewest    color.RGBA
@@ -275,9 +278,19 @@ func detectCyan(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFr
 	defer wg.Done()
 	narrowCyanFound, narrowCyanRes := w.cyanNarrow.Detect(topHsvFrame)
 	if narrowCyanFound && len(narrowCyanRes) > 0 {
-		t := narrowCyanRes[0].AsTransform(w.conf)
+		if !w.latestKnownCyanSet {
+			w.latestKnownCyanDetection = narrowCyanRes[0]
+			w.latestKnownCyanSet = true
+		}
+		sortedByDist := models.SortDetectionsObjectByDistanceToPoint(w.latestKnownCyanDetection.Midpoint, narrowCyanRes)
+		newer := sortedByDist[0]
+		obj := w.latestKnownCyanDetection.Lerp(newer, w.conf.Wanda.LerpValue)
+
+		t := obj.AsTransform(w.conf)
 		t.InjectWorldTransfromFromRobotTransform(w.state.GetState().MyTransform)
 		w.state.UpdateCyanTransform(t)
+
+		gocv.Line(topHsvFrame, image.Point{320, 320}, obj.Midpoint, color.RGBA{255, 0, 0, 1}, 2)
 	}
 }
 

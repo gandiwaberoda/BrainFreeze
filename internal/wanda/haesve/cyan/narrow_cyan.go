@@ -16,8 +16,8 @@ type NarrowHaesveCyan struct {
 }
 
 func NewNarrowHaesveCyan(conf *configuration.FreezeConfig) *NarrowHaesveCyan {
-	upper := gocv.NewScalar(113, 255, 255, 1)
-	lower := gocv.NewScalar(95, 88, 65, 0)
+	upper := gocv.NewScalar(114, 255, 255, 1)
+	lower := gocv.NewScalar(88, 83, 203, 0)
 
 	return &NarrowHaesveCyan{
 		conf:     conf,
