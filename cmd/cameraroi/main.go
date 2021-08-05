@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"os"
 	"strconv"
 	"time"
 
@@ -27,7 +28,17 @@ func captioner() {
 }
 
 func main() {
-	config, err := configuration.LoadStartupConfig()
+	argsWithoutProg := os.Args[1:]
+	var (
+		err    error
+		config configuration.FreezeConfig
+	)
+	if len(argsWithoutProg) >= 1 {
+		fmt.Println("Loading custom config file:", argsWithoutProg[0])
+		config, err = configuration.LoadStartupConfigByFile(argsWithoutProg[0])
+	} else if len(argsWithoutProg) == 0 {
+		config, err = configuration.LoadStartupConfig()
+	}
 	if err != nil {
 		log.Fatalln("Gagal meload config", err)
 	}
