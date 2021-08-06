@@ -55,9 +55,9 @@ func (n *HaesveGoalpost) Detect(hsvFrame *gocv.Mat) (found bool, result []models
 	// defer dilateMat.Close()
 	// gocv.Dilate(filtered, &filtered, dilateMat)
 
-	erodeMat := gocv.Ones(35, 35, gocv.MatTypeCV8UC1)
-	defer erodeMat.Close()
-	gocv.Erode(filtered, &filtered, erodeMat)
+	// erodeMat := gocv.Ones(35, 35, gocv.MatTypeCV8UC1)
+	// defer erodeMat.Close()
+	// gocv.Erode(filtered, &filtered, erodeMat)
 
 	c := color.RGBA{128, 0, 128, 0}
 

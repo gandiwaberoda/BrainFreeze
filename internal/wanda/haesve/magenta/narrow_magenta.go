@@ -52,9 +52,9 @@ func (n *NarrowHaesveMagenta) Detect(hsvFrame *gocv.Mat) (found bool, result []m
 
 	gocv.InRangeWithScalar(*hsvFrame, n.lowerHsv, n.upperHsv, &filtered)
 
-	erodeMat := gocv.Ones(4, 4, gocv.MatTypeCV8UC1)
-	defer erodeMat.Close()
-	gocv.Erode(filtered, &filtered, erodeMat)
+	// erodeMat := gocv.Ones(4, 4, gocv.MatTypeCV8UC1)
+	// defer erodeMat.Close()
+	// gocv.Erode(filtered, &filtered, erodeMat)
 
 	// dilateMat := gocv.Ones(17, 17, gocv.MatTypeCV8UC1)
 	// defer dilateMat.Close()
