@@ -56,7 +56,7 @@ func workerWriter(gut *GutSerial) {
 			fmt.Println("EMPTY")
 		}
 
-		fmt.Println("SEND: ", gut.toSend)
+		// fmt.Println("SEND: ", gut.toSend)
 		// gut.Send(gut.toSend)
 
 		_, err := gut.Port.Write([]byte(gut.toSend))
