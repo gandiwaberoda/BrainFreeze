@@ -46,10 +46,6 @@ type RobotState struct {
 	EnemyGoalPostTransformLastUpdate time.Time
 	EnemyGoalPostTransformExpired    bool
 
-	ObstacleTransform                []models.Transform
-	ObstacleTransformLastUpdate      time.Time
-	ObstacleGoalPostTransformExpired bool
-
 	CircularFieldLine []float64 // Untuk line follower
 
 	Register           registerState // Untuk komunikasi antar robot, dipake untuk Wait fulfillment
@@ -59,4 +55,8 @@ type RobotState struct {
 	gameState           GameState // Private, kalau dibuat public nanti overwhelming telemetry yang dikirim
 	GameStateLastUpdate time.Time
 	GameStateExpired    bool
+
+	ObstacleTransform           []models.Transform
+	ObstacleTransformLastUpdate time.Time
+	ObstacleTransformExpired    bool
 }

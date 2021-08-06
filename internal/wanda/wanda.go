@@ -317,6 +317,14 @@ func detectDummy(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvF
 		return
 	}
 
+	ts := []models.Transform{}
+	for _, v := range res {
+		t := v.AsTransform(w.conf)
+
+		t.InjectWorldTransfromFromRobotTransform(w.state.GetState().MyTransform)
+		ts = append(ts, t)
+	}
+	w.state.UpdateObstaclesTransform(ts)
 }
 
 func detectForGoalpost(w *WandaVision, wg *sync.WaitGroup, forFrame *gocv.Mat, forHsvFrame *gocv.Mat) {
