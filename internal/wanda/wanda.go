@@ -273,6 +273,11 @@ func detectTopBall(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHs
 
 func detectMagenta(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
 	defer wg.Done()
+
+	if w.conf.Wanda.DisableMagentaDetection {
+		return
+	}
+
 	narrowMagentaFound, narrowMagentaRes := w.magentaNarrow.Detect(topHsvFrame)
 	if narrowMagentaFound && len(narrowMagentaRes) > 0 {
 		t := narrowMagentaRes[0].AsTransform(w.conf)
@@ -284,6 +289,11 @@ func detectMagenta(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHs
 
 func detectCyan(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
 	defer wg.Done()
+
+	if w.conf.Wanda.DisableCyanDetection {
+		return
+	}
+
 	narrowCyanFound, narrowCyanRes := w.cyanNarrow.Detect(topHsvFrame)
 	if narrowCyanFound && len(narrowCyanRes) > 0 {
 		if !w.latestKnownCyanSet {

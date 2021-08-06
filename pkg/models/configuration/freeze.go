@@ -95,6 +95,9 @@ type TelepathyConfig struct {
 }
 
 type WandaConfig struct {
+	DisableMagentaDetection bool `yaml:"disableMagentaDetection"`
+	DisableCyanDetection    bool `yaml:"disableCyanDetection"`
+
 	MinimumHsvArea float64 `yaml:"minimumHsvArea"`
 	MaximumHsvArea float64 `yaml:"maximumHsvArea"`
 	LerpValue      float64 `yaml:"lerpValue"`
