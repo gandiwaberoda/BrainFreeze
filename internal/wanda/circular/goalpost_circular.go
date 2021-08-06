@@ -24,7 +24,7 @@ type GoalpostCircular struct {
 func NewGoalpostCircular(conf *configuration.FreezeConfig) *GoalpostCircular {
 	return &GoalpostCircular{
 		Threshold: 253,
-		Radius:    300,
+		Radius:    285,
 		conf:      conf,
 		upperRed:  bfconst.DummyUpper,
 		lowerRed:  bfconst.DummyLower,
