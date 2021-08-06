@@ -5,6 +5,7 @@ import (
 	"image/color"
 
 	"gocv.io/x/gocv"
+	"harianugrah.com/brainfreeze/internal/bfconst"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 )
@@ -16,8 +17,8 @@ type NarrowHaesveDummy struct {
 }
 
 func NewNarrowHaesveDummy(conf *configuration.FreezeConfig) *NarrowHaesveDummy {
-	upper := gocv.NewScalar(179, 255, 255, 1)
-	lower := gocv.NewScalar(166, 85, 69, 0)
+	upper := bfconst.DummyUpper
+	lower := bfconst.DummyLower
 
 	return &NarrowHaesveDummy{
 		conf:     conf,
@@ -84,7 +85,7 @@ func (n *NarrowHaesveDummy) Detect(hsvFrame *gocv.Mat) (found bool, result []mod
 		}
 
 		rect := gocv.BoundingRect(it)
-		gocv.Rectangle(hsvFrame, rect, c, 2)
+		// gocv.Rectangle(hsvFrame, rect, c, 2)
 		gocv.PutText(hsvFrame, "Dummy", rect.Min, gocv.FontHersheyPlain, 1.2, c, 2)
 
 		d := models.NewDetectionObject(rect)

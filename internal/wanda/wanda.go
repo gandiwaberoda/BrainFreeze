@@ -352,6 +352,7 @@ func detectGoalpostCircular(w *WandaVision, wg *sync.WaitGroup, hsvFrame *gocv.M
 		}
 		sortedByDist := models.SortDetectionsObjectByDistanceToPoint(w.latestKnownFGPDetection.Midpoint, detecteds)
 		newer := sortedByDist[0]
+		// newer := detecteds[0]
 		obj := w.latestKnownFGPDetection.Lerp(newer, w.conf.Wanda.LerpValue)
 		w.latestKnownFGPDetection = obj
 

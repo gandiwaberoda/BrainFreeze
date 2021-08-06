@@ -5,8 +5,10 @@ import (
 	"image"
 	"image/color"
 	"math"
+	"sort"
 
 	"gocv.io/x/gocv"
+	"harianugrah.com/brainfreeze/internal/bfconst"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 )
@@ -25,8 +27,8 @@ func NewGoalpostCircular(conf *configuration.FreezeConfig) *GoalpostCircular {
 		Threshold: 253,
 		Radius:    300,
 		conf:      conf,
-		upperRed:  gocv.NewScalar(179, 255, 255, 1),
-		lowerRed:  gocv.NewScalar(165, 56, 220, 0),
+		upperRed:  bfconst.DummyUpper,
+		lowerRed:  bfconst.DummyLower,
 		erodeMat:  gocv.Ones(5, 5, gocv.MatTypeCV8UC1),
 	}
 }
@@ -58,19 +60,20 @@ func (n *GoalpostCircular) Detect(hsvFrame *gocv.Mat, grayFrame *gocv.Mat) (resu
 		it := pointVecs.At(i)
 		area := gocv.ContourArea(it)
 
-		if area < n.conf.Wanda.MinimumHsvArea {
+		if area < 300 {
 			// Skip kalau ukurannya kekecilan
 			continue
 		}
 
 		rect := gocv.BoundingRect(it)
-		// gocv.Rectangle(&frame, rect, cRed, 2)
-
 		d := models.NewDetectionObject(rect)
-		dist := models.EucDistance(float64(d.Midpoint.X), float64(d.Midpoint.Y))
-		if dist < 600 {
+		dist := models.EucDistance(float64(d.Midpoint.X)-320, float64(d.Midpoint.Y)-320)
+		fmt.Println("dist", dist)
+		if dist < 70 {
 			continue
 		}
+		gocv.Rectangle(hsvFrame, rect, color.RGBA{0, 0, 0, 1}, 2)
+
 		detecteds = append(detecteds, d)
 	}
 
@@ -113,11 +116,17 @@ func (n *GoalpostCircular) Detect(hsvFrame *gocv.Mat, grayFrame *gocv.Mat) (resu
 			}
 
 			if sudut_merah.RobROT < models.Degree(bigger) && sudut_merah.RobROT > models.Degree(smaller) {
+
+				v.BboxArea = float64((v.Bbox.Max.X - v.Bbox.Min.X) * (v.Bbox.Max.Y - v.Bbox.Min.Y))
 				res = append(res, v)
 			}
 		}
 
 	}
+
+	sort.Slice(res, func(i, j int) bool {
+		return res[i].BboxArea > res[j].BboxArea
+	})
 
 	return res
 }
