@@ -56,7 +56,7 @@ func (n *NarrowHaesveDummy) Detect(hsvFrame *gocv.Mat) (found bool, result []mod
 	// defer erodeMat.Close()
 	// gocv.Erode(filtered, &filtered, erodeMat)
 
-	// dilateMat := gocv.Ones(21, 21, gocv.MatTypeCV8UC1)
+	// dilateMat := gocv.Ones(7, 7, gocv.MatTypeCV8UC1)
 	// defer dilateMat.Close()
 	// gocv.Dilate(filtered, &filtered, dilateMat)
 
@@ -76,16 +76,13 @@ func (n *NarrowHaesveDummy) Detect(hsvFrame *gocv.Mat) (found bool, result []mod
 		it := pointVecs.At(i)
 		area := gocv.ContourArea(it)
 
-		if area < n.conf.Wanda.MinimumHsvArea {
+		if area < 300 {
 			// Skip kalau ukurannya kekecilan
-			continue
-		}
-		if area > n.conf.Wanda.MaximumHsvArea {
 			continue
 		}
 
 		rect := gocv.BoundingRect(it)
-		// gocv.Rectangle(hsvFrame, rect, c, 2)
+		gocv.Rectangle(hsvFrame, rect, c, 2)
 		gocv.PutText(hsvFrame, "Dummy", rect.Min, gocv.FontHersheyPlain, 1.2, c, 2)
 
 		d := models.NewDetectionObject(rect)

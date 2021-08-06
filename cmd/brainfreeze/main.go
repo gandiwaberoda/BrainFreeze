@@ -57,6 +57,9 @@ func main() {
 		gutTalk = gut.CreateGutConsole()
 	} else if strings.ToUpper(config.Serial.Ports[0]) == "IGNORE" {
 		gutTalk = gut.CreateIgnoreConsole()
+		t := models.Transform{}
+		t.InjectWorldTransfromFromEncTransform(&config)
+		curstate.UpdateMyTransform(t)
 	} else {
 		gutTalk = gut.CreateGutSerial(&config)
 	}
