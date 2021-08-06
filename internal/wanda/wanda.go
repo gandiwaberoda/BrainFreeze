@@ -312,7 +312,11 @@ func detectCyan(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFr
 
 func detectDummy(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
 	defer wg.Done()
-	w.dummyNarrow.Detect(topHsvFrame)
+	found, res := w.dummyNarrow.Detect(topHsvFrame)
+	if !found {
+		return
+	}
+
 }
 
 func detectForGoalpost(w *WandaVision, wg *sync.WaitGroup, forFrame *gocv.Mat, forHsvFrame *gocv.Mat) {
