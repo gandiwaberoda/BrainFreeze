@@ -245,6 +245,11 @@ func detectTopBall(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHs
 			}
 			sortedByDist := models.SortDetectionsObjectByDistanceToPoint(w.topCenter, narrowBallRes)
 			newer := sortedByDist[0]
+
+			// Kadang kadang ada bbox yang gak valid, skip aja
+			if newer.Bbox.Min.X == 0 && newer.Bbox.Max.X == 640 && newer.BboxArea == 0 {
+				return
+			}
 			obj := w.latestKnownBallDetection.Lerp(newer, w.conf.Wanda.LerpValue)
 
 			transform := obj.AsTransform(w.conf)
