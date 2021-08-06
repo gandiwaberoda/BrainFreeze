@@ -43,9 +43,6 @@ type WandaVision struct {
 	latestKnownCyanDetection models.DetectionObject
 	latestKnownCyanSet       bool
 
-	latestKnownFGPDetection models.DetectionObject
-	latestKnownFGPSet       bool
-
 	topCenter image.Point
 
 	warnaNewest    color.RGBA
@@ -346,15 +343,7 @@ func detectGoalpostCircular(w *WandaVision, wg *sync.WaitGroup, hsvFrame *gocv.M
 	defer wg.Done()
 	detecteds := w.goalpostCircular.Detect(hsvFrame, grayFrame)
 	if len(detecteds) > 0 {
-		if !w.latestKnownFGPSet {
-			w.latestKnownFGPDetection = detecteds[0]
-			w.latestKnownFGPSet = true
-		}
-		sortedByDist := models.SortDetectionsObjectByDistanceToPoint(w.latestKnownFGPDetection.Midpoint, detecteds)
-		newer := sortedByDist[0]
-		// newer := detecteds[0]
-		obj := w.latestKnownFGPDetection.Lerp(newer, w.conf.Wanda.LerpValue)
-		w.latestKnownFGPDetection = obj
+		obj := detecteds[0]
 
 		gocv.Line(hsvFrame, image.Point{320, 320}, obj.Midpoint, cBlue, 2)
 

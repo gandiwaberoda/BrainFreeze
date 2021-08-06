@@ -19,7 +19,6 @@ type GoalpostCircular struct {
 	conf      *configuration.FreezeConfig
 	upperRed  gocv.Scalar
 	lowerRed  gocv.Scalar
-	erodeMat  gocv.Mat
 }
 
 func NewGoalpostCircular(conf *configuration.FreezeConfig) *GoalpostCircular {
@@ -29,7 +28,6 @@ func NewGoalpostCircular(conf *configuration.FreezeConfig) *GoalpostCircular {
 		conf:      conf,
 		upperRed:  bfconst.DummyUpper,
 		lowerRed:  bfconst.DummyLower,
-		erodeMat:  gocv.Ones(5, 5, gocv.MatTypeCV8UC1),
 	}
 }
 
@@ -47,7 +45,10 @@ func (n *GoalpostCircular) Detect(hsvFrame *gocv.Mat, grayFrame *gocv.Mat) (resu
 	defer hsvRed.Close()
 
 	gocv.InRangeWithScalar(*hsvFrame, n.lowerRed, n.upperRed, &hsvRed)
-	// gocv.Erode(hsvRed, &hsvRed, n.erodeMat)
+	// if hsvRed.Empty() || n.dilateMat.Empty() {
+	// 	panic("ada empty")
+	// }
+	// gocv.Dilate(hsvRed, &hsvRed, n.dilateMat)
 
 	hierarchyMat := gocv.NewMat()
 	defer hierarchyMat.Close()
@@ -66,9 +67,9 @@ func (n *GoalpostCircular) Detect(hsvFrame *gocv.Mat, grayFrame *gocv.Mat) (resu
 		}
 
 		rect := gocv.BoundingRect(it)
+
 		d := models.NewDetectionObject(rect)
 		dist := models.EucDistance(float64(d.Midpoint.X)-320, float64(d.Midpoint.Y)-320)
-		fmt.Println("dist", dist)
 		if dist < 70 {
 			continue
 		}
@@ -105,9 +106,28 @@ func (n *GoalpostCircular) Detect(hsvFrame *gocv.Mat, grayFrame *gocv.Mat) (resu
 		if offsetsbigger-offsetsmaller < 15 {
 			continue
 		}
-		if offsetsbigger-offsetsmaller > 100 {
+		if offsetsbigger-offsetsmaller > 80 {
 			continue
 		}
+
+		// Filter berdasarkan garis singgung
+		intersected := false // Apakah lingkar pernah intersection dengan bbox
+		for j := sudutPutih[i]; j <= sudutPutih[i+1]; j++ {
+			x := int(n.Radius*math.Cos(j*math.Pi/180.0)) + n.conf.Camera.PostWidth/2
+			y := int(n.Radius*math.Sin(j*math.Pi/180.0)) + n.conf.Camera.PostHeight/2
+
+			gocv.Circle(hsvFrame, image.Point{x, y}, 2, color.RGBA{255, 255, 255, 1}, 10)
+			for _, bbox := range detecteds {
+				p := image.Point{x, y}
+				if p.In(bbox.Bbox) {
+					intersected = true
+				}
+			}
+		}
+		if !intersected {
+			continue
+		}
+		// End filter garis singgung
 
 		for _, v := range detecteds {
 			sudut_merah := v.AsTransform(n.conf)
@@ -116,7 +136,7 @@ func (n *GoalpostCircular) Detect(hsvFrame *gocv.Mat, grayFrame *gocv.Mat) (resu
 			}
 
 			if sudut_merah.RobROT < models.Degree(bigger) && sudut_merah.RobROT > models.Degree(smaller) {
-
+				gocv.PutText(hsvFrame, fmt.Sprint(offsetsbigger-offsetsmaller), v.Midpoint, gocv.FontHersheyComplex, 0.5, color.RGBA{255, 255, 255, 1}, 1)
 				v.BboxArea = float64((v.Bbox.Max.X - v.Bbox.Min.X) * (v.Bbox.Max.Y - v.Bbox.Min.Y))
 				res = append(res, v)
 			}
