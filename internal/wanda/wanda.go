@@ -154,6 +154,9 @@ func worker(w *WandaVision) {
 		wg.Wait()
 
 		if w.conf.Diagnostic.ShowScreen {
+			// Put mid line to forward camera
+			gocv.Line(&forHsvFrame, image.Point{w.conf.Camera.ForMidX, 0}, image.Point{w.conf.Camera.ForMidX, w.conf.Camera.ForPostHeight}, color.RGBA{255, 255, 255, 1}, 1)
+
 			mainthread.Call(func() {
 				rawWin.IMShow(topFrame)
 				if keyPressed := rawWin.WaitKey(1); keyPressed == 'q' {
@@ -361,11 +364,13 @@ func detectForMagenta(w *WandaVision, wg *sync.WaitGroup, forHsvFrame *gocv.Mat)
 				return result[i].ContourArea > result[j].ContourArea
 			})
 
-			// for _, v := range result {
 			v := result[0]
 			gocv.Rectangle(forHsvFrame, v.Bbox, w.warnaNewest, 3)
-			gocv.PutText(forHsvFrame, "XXX", v.Bbox.Min, gocv.FontHersheyPlain, 1.2, color.RGBA{255, 255, 255, 1}, 2)
-			// }
+
+			// Isi error line ke mid
+			errorNotDegree := v.Midpoint.X - w.conf.Camera.ForMidX
+			gocv.PutText(forHsvFrame, fmt.Sprint("Magenta: ", errorNotDegree), v.Midpoint, gocv.FontHersheyPlain, 1, color.RGBA{255, 255, 255, 0}, 1)
+			gocv.Line(forHsvFrame, v.Midpoint, image.Point{w.conf.Camera.ForMidX, v.Midpoint.Y}, color.RGBA{128, 0, 0, 1}, 2)
 		}
 
 	}

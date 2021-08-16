@@ -84,10 +84,9 @@ func (c *ForwardCameraAcquisition) read() {
 	// // Flip vertically
 	// gocv.Flip(resImg, &resImg, 0)
 
-	// Normalize ukuran biar standar di hsv sama dnn
-	// newSize := image.Point{c.conf.Camera.PostWidth, c.conf.Camera.PostHeight}
-	// gocv.Resize(frame, &c.postFrame, newSize, 0, 0, gocv.InterpolationLinear)
-	frame.CopyTo(&c.postFrame)
+	// Normalize ukuran biar standar
+	newSize := image.Point{c.conf.Camera.ForPostWidth, c.conf.Camera.ForPostHeight}
+	gocv.Resize(frame, &c.postFrame, newSize, 0, 0, gocv.InterpolationLinear)
 
 	gocv.CvtColor(c.postFrame, &c.postHsvFrame, gocv.ColorBGRToHSV)
 	gocv.GaussianBlur(c.postHsvFrame, &c.postHsvFrame, image.Point{7, 7}, 0, 0, gocv.BorderDefault)
@@ -106,6 +105,9 @@ func (c *ForwardCameraAcquisition) Read(dst *gocv.Mat) {
 }
 
 func (c *ForwardCameraAcquisition) ReadHSV(dst *gocv.Mat) {
+	fmt.Println("col", c.postFrame.Cols())
+	fmt.Println("row", c.postFrame.Rows())
+
 	if !c.firstFrame {
 		<-time.After(time.Millisecond * 1000)
 	}

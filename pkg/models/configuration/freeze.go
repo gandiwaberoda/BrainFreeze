@@ -37,6 +37,12 @@ type CameraConfig struct {
 	PostHeight        int      `yaml:"postHeight"`
 	RobFrontOffsetDeg int      `yaml:"robFrontOffsetDeg"`
 
+	ForWidth      int `yaml:"forWidth"`
+	ForHeight     int `yaml:"forHeight"`
+	ForPostWidth  int `yaml:"forPostWidth"`
+	ForPostHeight int `yaml:"forPostHeight"`
+	ForMidX       int `yaml:"forMidX"`
+
 	Midpoint image.Point
 }
 
