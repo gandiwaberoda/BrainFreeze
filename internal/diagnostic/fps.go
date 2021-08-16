@@ -29,7 +29,9 @@ func (f *FpsGauge) Start() {
 				return
 			case <-f.ticker.C:
 				elapsed := time.Since(f.lastCheck)
-				f.fps = f.frameCount / int(elapsed.Seconds())
+				if int(elapsed.Seconds()) > 0 {
+					f.fps = f.frameCount / int(elapsed.Seconds())
+				}
 				f.lastCheck = time.Now()
 				f.frameCount = 0
 			}
