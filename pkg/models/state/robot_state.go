@@ -16,47 +16,47 @@ type RobotState struct {
 
 	MyTransform           models.Transform
 	MyTransformLastUpdate time.Time
-	MyTransformExpired    bool
+	MyTransformExpired    bool `default:"true"`
 
 	BallTransform           models.Transform
 	BallTransformLastUpdate time.Time
-	BallTransformExpired    bool
+	BallTransformExpired    bool `default:"true"`
 
 	GutToBrain           gutmodel.GutToBrain
 	GutToBrainLastUpdate time.Time
-	GutToBrainExpired    bool
+	GutToBrainExpired    bool `default:"true"`
 
 	MagentaTransform           models.Transform
 	MagentaTransformLastUpdate time.Time
-	MagentaTransformExpired    bool
+	MagentaTransformExpired    bool `default:"true"`
 
 	CyanTransform           models.Transform
 	CyanTransformLastUpdate time.Time
-	CyanTransformExpired    bool
+	CyanTransformExpired    bool `default:"true"`
 
 	FriendGoalPostTransform           models.Transform
 	FriendGoalPostTransformLastUpdate time.Time
-	FriendGoalPostTransformExpired    bool
+	FriendGoalPostTransformExpired    bool `default:"true"`
 
 	EnemyTransform           []models.Transform
 	EnemyTransformLastUpdate time.Time
-	EnemyTransformExpired    bool
+	EnemyTransformExpired    bool `default:"true"`
 
 	EnemyGoalPostTransform           models.Transform
 	EnemyGoalPostTransformLastUpdate time.Time
-	EnemyGoalPostTransformExpired    bool
+	EnemyGoalPostTransformExpired    bool `default:"true"`
 
 	CircularFieldLine []float64 // Untuk line follower
 
 	Register           registerState // Untuk komunikasi antar robot, dipake untuk Wait fulfillment
 	RegisterLastUpdate time.Time
-	RegisterExpired    bool
+	RegisterExpired    bool `default:"true"`
 
 	gameState           GameState // Private, kalau dibuat public nanti overwhelming telemetry yang dikirim
 	GameStateLastUpdate time.Time
-	GameStateExpired    bool
+	GameStateExpired    bool `default:"true"`
 
 	ObstacleTransform           []models.Transform
 	ObstacleTransformLastUpdate time.Time
-	ObstacleTransformExpired    bool
+	ObstacleTransformExpired    bool `default:"true"`
 }
