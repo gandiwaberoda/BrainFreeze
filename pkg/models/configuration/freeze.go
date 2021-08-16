@@ -25,17 +25,19 @@ type RobotConfig struct {
 }
 
 type CameraConfig struct {
-	Src               []string `yaml:"src"`
-	SrcForward        []string `yaml:"srcForward"`
-	UseDshow          bool     `yaml:"useDshow"`
-	MidpointX         int      `yaml:"midpointX"`
-	MidpointY         int      `yaml:"midpointY"`
-	MidpointRad       int      `yaml:"midpointRad"`
-	RawWidth          int      `yaml:"rawWidth"`
-	RawHeight         int      `yaml:"rawHeight"`
-	PostWidth         int      `yaml:"postWidth"`
-	PostHeight        int      `yaml:"postHeight"`
-	RobFrontOffsetDeg int      `yaml:"robFrontOffsetDeg"`
+	Src        []string `yaml:"src"`
+	SrcForward []string `yaml:"srcForward"`
+	UseDshow   bool     `yaml:"useDshow"`
+
+	MidpointX         int     `yaml:"midpointX"`
+	MidpointY         int     `yaml:"midpointY"`
+	MidpointRad       int     `yaml:"midpointRad"`
+	RawWidth          int     `yaml:"rawWidth"`
+	RawHeight         int     `yaml:"rawHeight"`
+	PostWidth         int     `yaml:"postWidth"`
+	PostHeight        int     `yaml:"postHeight"`
+	RobFrontOffsetDeg int     `yaml:"robFrontOffsetDeg"`
+	TopRobRotPatch    float64 `yaml:"topRobRotPatch"`
 
 	ForWidth      int `yaml:"forWidth"`
 	ForHeight     int `yaml:"forHeight"`

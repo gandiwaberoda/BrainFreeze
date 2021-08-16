@@ -81,6 +81,8 @@ func (d DetectionObject) AsTransform(conf *configuration.FreezeConfig) Transform
 	// Balik
 	robROTDegree = robROTDegree * -1
 	robROTDegree.Rotate(0)
+	// Tambahkan offset degree
+	robROTDegree = robROTDegree + Degree(conf.Camera.TopRobRotPatch)
 
 	rotTopDegree := robROTDegree
 	rotTopDegree.Rotate(Degree(conf.Camera.RobFrontOffsetDeg))

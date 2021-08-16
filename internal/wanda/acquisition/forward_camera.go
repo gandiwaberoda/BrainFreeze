@@ -105,9 +105,6 @@ func (c *ForwardCameraAcquisition) Read(dst *gocv.Mat) {
 }
 
 func (c *ForwardCameraAcquisition) ReadHSV(dst *gocv.Mat) {
-	fmt.Println("col", c.postFrame.Cols())
-	fmt.Println("row", c.postFrame.Rows())
-
 	if !c.firstFrame {
 		<-time.After(time.Millisecond * 1000)
 	}
