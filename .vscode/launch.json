@@ -33,7 +33,7 @@
             "args": [
                 "${workspaceRoot}/config.yaml"
             ]
-        }
+        },
         {
             "name": "Camera Cameraroi",
             "type": "go",
