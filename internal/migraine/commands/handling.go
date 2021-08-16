@@ -1,8 +1,6 @@
 package commands
 
 import (
-	"errors"
-	"fmt"
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
@@ -14,50 +12,50 @@ import (
 
 type HandlingCommand struct {
 	fulfillment fulfillments.FulfillmentInterface
-	shouldClear bool
+	sequence    SequenceCommand
 }
 
 func ParseHandlingCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
-	// if len(cmd) < 8 {
-	// 	return false, nil
-	// }
-
-	// if strings.ToUpper(cmd[:8]) != "HANDLING" {
-	// 	return false, &HandlingCommand{}
-	// }
 	if !strings.EqualFold(cmd.Verb, "HANDLING") {
 		return false, nil, nil
 	}
 
-	var parsedFulfilment fulfillments.FulfillmentInterface
-	if cmd.Fulfilment == "" {
-		parsedFulfilment = fulfillments.DefaultHoldFulfillment()
-	} else {
-		filment, err := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
-		if err != nil {
-			return true, nil, errors.New(fmt.Sprint("non default fulfilment error:", err))
-		}
-		parsedFulfilment = filment
+	seq, err := ParseSequenceCommand("HANDLING", cmd, conf, curstate)
+	parsed := HandlingCommand{
+		sequence:    seq,
+		fulfillment: fulfillments.DefaultComplexFulfillment(),
+	}
+	if err != nil {
+		return true, nil, err
 	}
 
-	parsed := HandlingCommand{
-		fulfillment: parsedFulfilment,
+	// Lakukan cek semua subcmd valid
+	if err := ValidateSubcmds(seq); err != nil {
+		return true, nil, err
 	}
 
 	return true, &parsed, nil
 }
 
 func (i HandlingCommand) GetName() string {
-	return "HANDLING"
+	if i.sequence.current_obj != nil {
+		return "HANDLING [" + i.sequence.current_obj.GetName() + "]"
+	} else {
+		return "HANDLING [initializing]"
+	}
 }
 
 func (i *HandlingCommand) Tick(force *models.Force, state *state.StateAccess) {
 	i.fulfillment.Tick()
+	finished := i.sequence.Tick(force, state)
 	force.EnableHandling()
+	if finished {
+		i.fulfillment.(*fulfillments.ComplexFuilfillment).Fulfilled()
+	}
 }
 
 func (i HandlingCommand) ShouldClear() bool {
-	return i.shouldClear
+	return i.fulfillment.ShouldClear()
 }
 
 func (i HandlingCommand) GetFulfillment() fulfillments.FulfillmentInterface {

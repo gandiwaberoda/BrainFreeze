@@ -20,7 +20,7 @@ func ParsePlannedCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig
 		return false, nil, nil
 	}
 
-	seq, err := ParseSequenceCommand(cmd, conf, curstate)
+	seq, err := ParseSequenceCommand("PLANNED", cmd, conf, curstate)
 	parsed := PlannedCommand{
 		sequence:    seq,
 		fulfillment: fulfillments.DefaultComplexFulfillment(),
@@ -48,7 +48,6 @@ func (i PlannedCommand) GetName() string {
 func (i *PlannedCommand) Tick(force *models.Force, state *state.StateAccess) {
 	i.fulfillment.Tick()
 	finished := i.sequence.Tick(force, state)
-	// force.EnableHandling()
 	if finished {
 		i.fulfillment.(*fulfillments.ComplexFuilfillment).Fulfilled()
 	}

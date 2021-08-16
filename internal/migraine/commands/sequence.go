@@ -16,6 +16,7 @@ type SequenceCommand struct {
 	current_obj     CommandInterface
 	conf            *configuration.FreezeConfig
 	state           *state.StateAccess
+	cmd_name        string // Dipake untuk tampil di CrossRoad
 }
 
 func ValidateSubcmds(copied SequenceCommand) error {
@@ -23,10 +24,10 @@ func ValidateSubcmds(copied SequenceCommand) error {
 	for _, sub := range copied.subcommands_str {
 		_subcmd, _err := WhichCommand(sub, copied.conf, copied.state)
 		if _subcmd == nil {
-			return errors.New(fmt.Sprint("planned subcommand not found:", sub))
+			return errors.New(fmt.Sprint("Sequence subcommand not found:", sub))
 		}
 		if _err != nil {
-			return errors.New(fmt.Sprint("planned subcommand are't valid:", _err))
+			return errors.New(fmt.Sprint("Sequence subcommand are't valid:", _err))
 		}
 	}
 
@@ -34,8 +35,9 @@ func ValidateSubcmds(copied SequenceCommand) error {
 }
 
 // Ini tidak dipakai secara langsung, tapi di implement oleh command lain kayak HANDLING sama PLANNED
-func ParseSequenceCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (SequenceCommand, error) {
+func ParseSequenceCommand(cmd_name string, cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (SequenceCommand, error) {
 	parsed := SequenceCommand{}
+	parsed.cmd_name = cmd_name
 	parsed.conf = conf
 	parsed.state = curstate
 	parsed.subcommands_str = cmd.Parameter
@@ -78,7 +80,7 @@ func (i *SequenceCommand) NextObjective() (finished bool) {
 	}
 
 	i.current_obj = nextcmd
-	str_obj := "PLANNED [" + i.current_obj.GetName() + " -> " + i.current_obj.GetFulfillment().AsString() + "]"
+	str_obj := i.cmd_name + " [" + i.current_obj.GetName() + " -> " + i.current_obj.GetFulfillment().AsString() + "]"
 	i.state.UpdateCurrentObjective(str_obj)
 	return false
 }
@@ -86,15 +88,12 @@ func (i *SequenceCommand) NextObjective() (finished bool) {
 func (i *SequenceCommand) Tick(force *models.Force, state *state.StateAccess) (finished bool) {
 	if i.current_obj == nil {
 		fmt.Println("nilll")
-		if i.NextObjective() {
-			return true
-		}
-		return false
+		return i.NextObjective()
 	}
 
 	i.current_obj.Tick(force, state)
 	if i.current_obj.GetFulfillment().ShouldClear() {
-		fmt.Println("planned next")
+		fmt.Println("seq next")
 		if i.NextObjective() {
 			return true
 		}
