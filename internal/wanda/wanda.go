@@ -23,19 +23,24 @@ import (
 )
 
 type WandaVision struct {
-	isRunning         bool
-	conf              *configuration.FreezeConfig
-	topCamera         *acquisition.TopCameraAcquisition
-	forwardCamera     *acquisition.ForwardCameraAcquisition
-	ballNarrow        *ball.NarrowHaesveBall
-	magentaNarrow     *magenta.NarrowHaesveMagenta
-	dummyNarrow       *dummy.NarrowHaesveDummy
-	goalpostHaesve    *goalpost.HaesveGoalpost
-	cyanNarrow        *cyan.NarrowHaesveCyan
-	state             *state.StateAccess
-	fpsHsv            *diagnostic.FpsGauge
+	isRunning bool
+	conf      *configuration.FreezeConfig
+
+	topCamera     *acquisition.TopCameraAcquisition
+	forwardCamera *acquisition.ForwardCameraAcquisition
+	fpsHsv        *diagnostic.FpsGauge
+	state         *state.StateAccess
+
+	ballNarrow     *ball.NarrowHaesveBall
+	dummyNarrow    *dummy.NarrowHaesveDummy
+	goalpostHaesve *goalpost.HaesveGoalpost
+	cyanNarrow     *cyan.NarrowHaesveCyan
+
 	fieldLineCircular *circular.FieldLineCircular
 	goalpostCircular  *circular.GoalpostCircular
+
+	magentaNarrow *magenta.NarrowHaesveMagenta
+	forMagenta    *magenta.ForwardNarrowHaesveMagenta
 
 	latestKnownBallDetection models.DetectionObject
 	latestKnownBallSet       bool
@@ -107,6 +112,8 @@ func worker(w *WandaVision) {
 		// Magenta
 		wg.Add(1)
 		go detectMagenta(w, &wg, &topFrame, &topHsvFrame)
+		wg.Add(1)
+		go detectForMagenta(w, &wg, &forHsvFrame)
 
 		// Cyan
 		wg.Add(1)
@@ -118,9 +125,9 @@ func worker(w *WandaVision) {
 		wg.Add(1)
 		go detectDummy(w, &wg, &topFrame, &topHsvFrame)
 
-		// Forward Goalpost
-		wg.Add(1)
-		go detectForGoalpost(w, &wg, &forFrame, &forHsvFrame)
+		// // Forward Goalpost
+		// wg.Add(1)
+		// go detectForGoalpost(w, &wg, &forFrame, &forHsvFrame)
 
 		// Circular Line Field
 		wg.Add(1)
@@ -133,7 +140,9 @@ func worker(w *WandaVision) {
 		// Forward Ball
 		if found, result := w.ballNarrow.Detect(&forHsvFrame); found {
 			if len(result) > 0 {
-				gocv.Rectangle(&topFrame, result[0].Bbox, w.warnaNewest, 3)
+				for _, v := range result {
+					gocv.Rectangle(&forFrame, v.Bbox, color.RGBA{255, 0, 0, 1}, 3)
+				}
 			}
 		}
 
@@ -201,6 +210,7 @@ func (w *WandaVision) Start() {
 	w.goalpostHaesve = goalpost.NewHaesveGoalpost(w.conf)
 	w.fieldLineCircular = circular.NewFieldLineCircular(w.conf)
 	w.goalpostCircular = circular.NewGoalpostCircular(w.conf)
+	w.forMagenta = magenta.NewForwardNarrowHaesveMagenta(w.conf)
 
 	w.topCenter = image.Point{
 		w.conf.Camera.MidpointRad,
@@ -337,7 +347,25 @@ func detectForGoalpost(w *WandaVision, wg *sync.WaitGroup, forFrame *gocv.Mat, f
 			})
 
 			gocv.Rectangle(forFrame, result[0].Bbox, w.warnaNewest, 3)
-			gocv.PutText(forFrame, "Gawang", result[0].Bbox.Min, gocv.FontHersheyPlain, 1.2, w.warnaNewest, 2)
+			gocv.PutText(forFrame, "Gawang", result[0].Bbox.Min, gocv.FontHersheyPlain, 1.2, color.RGBA{0, 0, 255, 1}, 2)
+		}
+
+	}
+}
+
+func detectForMagenta(w *WandaVision, wg *sync.WaitGroup, forHsvFrame *gocv.Mat) {
+	defer wg.Done()
+	if found, result := w.forMagenta.Detect(forHsvFrame); found {
+		if len(result) > 0 {
+			sort.Slice(result, func(i, j int) bool {
+				return result[i].ContourArea > result[j].ContourArea
+			})
+
+			// for _, v := range result {
+			v := result[0]
+			gocv.Rectangle(forHsvFrame, v.Bbox, w.warnaNewest, 3)
+			gocv.PutText(forHsvFrame, "XXX", v.Bbox.Min, gocv.FontHersheyPlain, 1.2, color.RGBA{255, 255, 255, 1}, 2)
+			// }
 		}
 
 	}
