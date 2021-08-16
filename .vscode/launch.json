@@ -5,13 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug brainfreeze",
+            "name": "Debug gandiwa brainfreeze",
             "type": "go",
             "request": "launch",
             "mode": "debug",
             "program": "${workspaceRoot}/cmd/brainfreeze/main.go",
             "args": [
                 "${workspaceRoot}/config.yaml"
+            ]
+        },
+        {
+            "name": "Debug mahadwipa brainfreeze",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceRoot}/cmd/brainfreeze/main.go",
+            "args": [
+                "${workspaceRoot}/config2.yaml"
             ]
         },
         {
