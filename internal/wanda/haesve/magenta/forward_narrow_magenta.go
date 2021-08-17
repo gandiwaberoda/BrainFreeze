@@ -44,13 +44,16 @@ func (n *ForwardNarrowHaesveMagenta) Detect(hsvFrame *gocv.Mat) (found bool, res
 
 	gocv.InRangeWithScalar(*hsvFrame, n.lowerHsv, n.upperHsv, &filtered)
 
-	// erodeMat := gocv.Ones(4, 4, gocv.MatTypeCV8UC1)
+	// erodeMat := gocv.Ones(5, 5, gocv.MatTypeCV8UC1)
 	// defer erodeMat.Close()
 	// gocv.Erode(filtered, &filtered, erodeMat)
 
-	// dilateMat := gocv.Ones(17, 17, gocv.MatTypeCV8UC1)
+	nm := gocv.NewMat()
+	defer nm.Close()
+
+	// dilateMat := gocv.Ones(9, 9, gocv.MatTypeCV8UC1)
 	// defer dilateMat.Close()
-	// gocv.Dilate(filtered, &filtered, dilateMat)
+	// gocv.Dilate(filtered, &nm, dilateMat)
 
 	hierarchyMat := gocv.NewMat()
 	defer hierarchyMat.Close()

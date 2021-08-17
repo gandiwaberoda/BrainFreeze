@@ -46,7 +46,7 @@ func main() {
 	} else if strings.ToUpper(config.Serial.Ports[0]) == "IGNORE" {
 		gutTalk = gut.CreateIgnoreConsole()
 	} else {
-		gutTalk = gut.CreateGutSerial(&config)
+		gutTalk = gut.CreateGutSerial(&config, state)
 	}
 	globalWaitGroup.Add(1)
 	gutTalk.RegisterHandler(func(s string) {

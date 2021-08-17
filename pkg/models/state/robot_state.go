@@ -11,6 +11,7 @@ type RobotState struct {
 	MyName           string
 	CurrentObjective string
 	MyColor          string
+	LastToGut        string
 
 	FpsHsv int
 

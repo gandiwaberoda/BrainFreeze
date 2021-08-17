@@ -61,7 +61,7 @@ func main() {
 		t.InjectWorldTransfromFromEncTransform(&config)
 		curstate.UpdateMyTransform(t)
 	} else {
-		gutTalk = gut.CreateGutSerial(&config)
+		gutTalk = gut.CreateGutSerial(&config, curstate)
 	}
 	globalWaitGroup.Add(1)
 	gutTalk.RegisterHandler(func(s string) {

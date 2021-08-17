@@ -99,8 +99,6 @@ func worker(w *WandaVision) {
 		w.forwardCamera.Read(&forFrame)
 		w.forwardCamera.ReadHSV(&forHsvFrame)
 
-		w.fpsHsv.Tick()
-
 		// Ball
 		wg.Add(1)
 		go detectTopBall(w, &wg, &topFrame, &topHsvFrame)
@@ -152,6 +150,7 @@ func worker(w *WandaVision) {
 		w.state.UpdateFpsHsv(w.fpsHsv.Read())
 
 		wg.Wait()
+		w.fpsHsv.Tick()
 
 		if w.conf.Diagnostic.ShowScreen {
 			// Put mid line to forward camera

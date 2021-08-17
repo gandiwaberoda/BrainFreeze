@@ -5,6 +5,7 @@ import (
 	"image/color"
 
 	"gocv.io/x/gocv"
+	"harianugrah.com/brainfreeze/internal/bfconst"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 )
@@ -16,13 +17,10 @@ type NarrowHaesveMagenta struct {
 }
 
 func NewNarrowHaesveMagenta(conf *configuration.FreezeConfig) *NarrowHaesveMagenta {
-	upper := gocv.NewScalar(169, 255, 255, 1)
-	lower := gocv.NewScalar(144, 44, 182, 0)
-
 	return &NarrowHaesveMagenta{
 		conf:     conf,
-		upperHsv: upper,
-		lowerHsv: lower,
+		upperHsv: bfconst.MagentaUpper,
+		lowerHsv: bfconst.MagentaLower,
 	}
 }
 
@@ -52,11 +50,11 @@ func (n *NarrowHaesveMagenta) Detect(hsvFrame *gocv.Mat) (found bool, result []m
 
 	gocv.InRangeWithScalar(*hsvFrame, n.lowerHsv, n.upperHsv, &filtered)
 
-	// erodeMat := gocv.Ones(4, 4, gocv.MatTypeCV8UC1)
+	// erodeMat := gocv.Ones(5, 5, gocv.MatTypeCV8UC1)
 	// defer erodeMat.Close()
 	// gocv.Erode(filtered, &filtered, erodeMat)
 
-	// dilateMat := gocv.Ones(17, 17, gocv.MatTypeCV8UC1)
+	// dilateMat := gocv.Ones(5, 5, gocv.MatTypeCV8UC1)
 	// defer dilateMat.Close()
 	// gocv.Dilate(filtered, &filtered, dilateMat)
 

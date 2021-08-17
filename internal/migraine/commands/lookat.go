@@ -78,12 +78,19 @@ func (i LookatCommand) GetName() string {
 
 func TockLookat(target models.Transform, conf configuration.FreezeConfig, force *models.Force, state *state.StateAccess) {
 	rotForce := target.RobROT
-	if rotForce < models.Degree(-1*conf.Mecha.RotationForceRange) {
-		rotForce = models.Degree(-1 * conf.Mecha.RotationForceRange)
-	}
 
-	if rotForce > models.Degree(conf.Mecha.RotationForceRange) {
-		rotForce = models.Degree(conf.Mecha.RotationForceRange)
+	if math.Abs(float64(rotForce)) < float64(conf.Mecha.RotationForceMinRange) {
+		if rotForce < 0 {
+			rotForce = models.Degree(-1 * conf.Mecha.RotationForceMinRange)
+		} else if rotForce > 0 {
+			rotForce = models.Degree(conf.Mecha.RotationForceMinRange)
+		}
+	} else	if math.Abs(float64(rotForce)) > float64(conf.Mecha.RotationForceMaxRange) {
+		if rotForce < 0 {
+			rotForce = models.Degree(-1 * conf.Mecha.RotationForceMaxRange)
+		} else if rotForce > 0 {
+			rotForce = models.Degree(conf.Mecha.RotationForceMaxRange)
+		}
 	}
 
 	force.AddRot(rotForce)

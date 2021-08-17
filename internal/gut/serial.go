@@ -9,18 +9,21 @@ import (
 
 	"github.com/tarm/serial"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
+	"harianugrah.com/brainfreeze/pkg/models/state"
 )
 
 type GutSerial struct {
 	Gut
-	Port   *serial.Port
-	conf   *configuration.FreezeConfig
-	toSend string
+	Curstate *state.StateAccess
+	Port     *serial.Port
+	conf     *configuration.FreezeConfig
+	toSend   string
 }
 
-func CreateGutSerial(conf *configuration.FreezeConfig) *GutSerial {
+func CreateGutSerial(conf *configuration.FreezeConfig, curstate *state.StateAccess) *GutSerial {
 	return &GutSerial{
-		conf: conf,
+		conf:     conf,
+		Curstate: curstate,
 	}
 }
 
@@ -63,6 +66,7 @@ func workerWriter(gut *GutSerial) {
 		if err != nil {
 			fmt.Println("FAILED SENDING GUT PORT")
 		}
+		gut.Curstate.UpdateToGutCmd(gut.toSend)
 	}
 }
 

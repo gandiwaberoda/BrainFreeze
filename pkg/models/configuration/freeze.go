@@ -75,9 +75,10 @@ type MigraineConfig struct {
 }
 
 type MechanicalConfig struct {
-	HorizontalForceRange int `yaml:"horizontalForceRange"`
-	VerticalForceRange   int `yaml:"verticalForceRange"`
-	RotationForceRange   int `yaml:"rotationForceRange"`
+	HorizontalForceRange  int `yaml:"horizontalForceRange"`
+	VerticalForceRange    int `yaml:"verticalForceRange"`
+	RotationForceMinRange int `yaml:"rotationForceMinRange"`
+	RotationForceMaxRange int `yaml:"rotationForceMaxRange"`
 }
 
 type CommandParameterConfig struct {
