@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strconv"
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
@@ -41,10 +42,19 @@ func ParseLookatCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig,
 	// fmt.Println("zzz", foundParam)
 
 	target := "BALL"
+
+	ms := 0
 	if len(cmd.Parameter) == 1 && cmd.Parameter[0] != "" {
 		target = cmd.Parameter[0]
-	} else if len(cmd.Parameter) > 1 {
-		return true, nil, errors.New("lookat command require either NONE or 1 parameter")
+	} else if len(cmd.Parameter) == 2 {
+		target = cmd.Parameter[0]
+		ms_, err := strconv.Atoi(cmd.Parameter[1])
+		if err != nil {
+			return true, nil, errors.New("lookat command can't parse int of ms to clear")
+		}
+		ms = ms_
+	} else if len(cmd.Parameter) > 2 {
+		return true, nil, errors.New("lookat command require either NONE, 1 or 2 parameter")
 	}
 
 	isKeyAcceptable := state.GetTransformKeyAcceptable(target)
@@ -54,7 +64,7 @@ func ParseLookatCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig,
 
 	var parsedFulfilment fulfillments.FulfillmentInterface
 	if cmd.Fulfilment == "" {
-		parsedFulfilment = fulfillments.DefaultGlancedFulfillment(target, curstate, conf)
+		parsedFulfilment = fulfillments.DefaultGlancedFulfillment(target, ms, curstate, conf)
 	} else {
 		filment, err := fulfillments.WhichFulfillment(cmd.Raw, conf, curstate)
 		if err != nil {
@@ -85,7 +95,7 @@ func TockLookat(target models.Transform, conf configuration.FreezeConfig, force 
 		} else if rotForce > 0 {
 			rotForce = models.Degree(conf.Mecha.RotationForceMinRange)
 		}
-	} else	if math.Abs(float64(rotForce)) > float64(conf.Mecha.RotationForceMaxRange) {
+	} else if math.Abs(float64(rotForce)) > float64(conf.Mecha.RotationForceMaxRange) {
 		if rotForce < 0 {
 			rotForce = models.Degree(-1 * conf.Mecha.RotationForceMaxRange)
 		} else if rotForce > 0 {

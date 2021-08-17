@@ -45,8 +45,10 @@ type WandaVision struct {
 	latestKnownBallDetection models.DetectionObject
 	latestKnownBallSet       bool
 
-	latestKnownCyanDetection models.DetectionObject
-	latestKnownCyanSet       bool
+	latestKnownCyanDetection    models.DetectionObject
+	latestKnownCyanSet          bool
+	latestKnownMagentaDetection models.DetectionObject
+	latestKnownMagentaSet       bool
 
 	topCenter image.Point
 
@@ -289,9 +291,22 @@ func detectMagenta(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHs
 
 	narrowMagentaFound, narrowMagentaRes := w.magentaNarrow.Detect(topHsvFrame)
 	if narrowMagentaFound && len(narrowMagentaRes) > 0 {
-		t := narrowMagentaRes[0].AsTransform(w.conf)
+		if !w.latestKnownMagentaSet {
+			w.latestKnownMagentaDetection = narrowMagentaRes[0]
+			w.latestKnownMagentaSet = true
+		}
+		sortedByDist := models.SortDetectionsObjectByDistanceToPoint(w.latestKnownMagentaDetection.Midpoint, narrowMagentaRes)
+		newer := sortedByDist[0]
+		obj := w.latestKnownMagentaDetection.Lerp(newer, w.conf.Wanda.LerpValue)
+		w.latestKnownMagentaDetection = obj
+
+		t := obj.AsTransform(w.conf)
 		t.InjectWorldTransfromFromRobotTransform(w.state.GetState().MyTransform)
 		w.state.UpdateMagentaTransform(t)
+
+		// t := narrowMagentaRes[0].AsTransform(w.conf)
+		// t.InjectWorldTransfromFromRobotTransform(w.state.GetState().MyTransform)
+		// w.state.UpdateMagentaTransform(t)
 		// gocv.Circle(topFrame, obj.Midpoint, obj.OuterRad, w.warnaNewest, 2)
 	}
 }
