@@ -107,12 +107,14 @@ type WandaConfig struct {
 	DisableMagentaDetection bool `yaml:"disableMagentaDetection"`
 	DisableCyanDetection    bool `yaml:"disableCyanDetection"`
 
-	MinimumHsvArea float64 `yaml:"minimumHsvArea"`
-	MaximumHsvArea float64 `yaml:"maximumHsvArea"`
-	LerpValue      float64 `yaml:"lerpValue"`
-	LfFovMin       int     `yaml:"lfFovMin"`
-	LfFovMax       int     `yaml:"lfFovMax"`
-	WhiteOnGrayVal int     `yaml:"whiteOnGrayVal"`
+	MinimumHsvArea         float64 `yaml:"minimumHsvArea"`
+	MaximumHsvArea         float64 `yaml:"maximumHsvArea"`
+	LerpValue              float64 `yaml:"lerpValue"`
+	LfFovMin               int     `yaml:"lfFovMin"`
+	LfFovMax               int     `yaml:"lfFovMax"`
+	WhiteOnGrayVal         int     `yaml:"whiteOnGrayVal"`
+	RadiusGoalpostCircular int     `yaml:"radiusGoalpostCircular"`
+	DebugShowRadiusLine    bool    `yaml:"debugShowRadiusLine"`
 }
 
 type FreezeConfig struct {

@@ -1,67 +1,39 @@
 robot:
-  name: R1
+  name: Gandiwa
   role: ATTACKER
   # A (Corner kiri gawang sendiri), B (Sisi kiri gawang), C (Tengah lapangan sebelah kiri), D (Tengah lapangan), H (Tengah gawang sendiri)
   # B atau F posisi start waktu lomba
   # WorldPosition (0,0) tu di posisi corner kiri gawang sendiri
   startPos: A
   startRot: 0 # 0 apabila start menghadap ke gawang musuh, 90 apabila menghadap ke kanan (Misal dari corner kiri belakang, menghadap ke gawang sendiri), pake -90 apabila startPos F, pake 90 apabila startPos B
-  color: MAGENTA # CYAN atau MAGENTA
-
+  color: MAGENTA
 
 camera:
   src:
-    - 0
-    - "/Users/hariangr/Documents/MyFiles/Developer/Robotec/Beroda/ng/assets/twocam/1Jul/Movie on 24-06-21 at 14.53.mov"
-    - 2
+    - 1
     - "/Users/hariangr/Documents/MyFiles/Developer/Robotec/Beroda/ng/BrainDead/assets/captured/2021-04-23 14:50:34.157190 x 60.00024.1280.0.720.0.mp4"
     - "C:/Users/root/Documents/hariangr/temp.mp4"
-  srcForward:
-    - "/Users/hariangr/Documents/MyFiles/Developer/Robotec/Beroda/ng/assets/twocam/1Jul/Movie on 01-07-21 at 17.39.mov"
-    - 1
-    - "DISABLE"
-    
-  # Punya kamera 0 Mac
-  # midpointX: 309
-  # midpointY: 232
-  # midpointRad: 213
   
-  # Punya video
-  # midpointX: 583
-  # midpointY: 405
-  # midpointRad: 269
-  # rawWidth: 1280
-  # rawHeight: 720
-  # robFrontOffsetDeg: -90
-
-  # Punya kemera TOP GANDIWA
-  # midpointX: 867
-  # midpointY: 570
-  # midpointRad: 365
-  # rawWidth: 1920
-  # rawHeight: 1080
-  # robFrontOffsetDeg: 90
-
-  # Punya 1Jul Top
-  # midpointX: 777
-  # midpointY: 597
-  # midpointRad: 415
-  # rawWidth: 1616
-  # rawHeight: 1076
-  # robFrontOffsetDeg: 90
-
-  # Punya robot 2019 TOP
-  midpointX: 923
-  midpointY: 563
-  midpointRad: 454
-  rawWidth: 1920
-  rawHeight: 1080
+  # Punya robot 2021
+  midpointX: 284
+  midpointY: 257
+  midpointRad: 189
+  rawWidth: 640
+  rawHeight: 480
   robFrontOffsetDeg: 90
-
   useDshow: true
   postWidth: 640
   postHeight: 640
   lfRadCircle: 230
+  topRobRotPatch: 0
+  
+  srcForward:
+    - 2
+  forWidth: 640
+  forHeight: 480
+  forPostWidth: 640
+  forPostHeight: 480
+  forMidX: 320
 
 # Satuannya nanosecond guys
 expiration:
@@ -69,17 +41,16 @@ expiration:
   my: 1500000000
 
 telepathy:
-  # chitchatHost: "192.168.1.4:6901"
-  chitchatHost: 
+  chitchatHost:
     - "localhost:6901"
-    - "CONSOLE"
-    - "10.211.55.6:6901"
+    - "192.168.1.4:6901"
 
 serial:
   ports:
-    - "CONSOLE"
+    - "COM5"
     - "IGNORE"
-    - "/dev/cu.usbmodem141101"
+    - "CONSOLE"
+    - "/dev/cu.usbmodem14401"
     - "COM10"
   commandHz: 60
 
@@ -88,13 +59,22 @@ diagnostic:
   enableStream: true
   streamHost: "localhost:6910"
   streamTopProcessed: true
-
-  showScreen: false
+  showScreen: true
 
 wanda:
-  minimumHsvArea: 40
+  disableMagentaDetection: true
+  disableCyanDetection: false
+
+  minimumHsvArea: 30
   maximumHsvArea: 10000 # Kadang kadang dia full frame di detek
-  lerpValue: 0.1
+  lerpValue: 0.3
+
+  lfFovMin: -120
+  lfFovMax: 120
+
+  whiteOnGrayVal: 250 # Untuk yang dianggap warna putih, misal goalpost sama line field
+  radiusGoalpostCircular: 290
+  debugShowRadiusLine: false # Untuk debugging, kalau goalpost gak keliatan
 
 migraine:
   migraineHz: 60
@@ -103,21 +83,22 @@ fulfillment:
   defaultDurationMs: 2000
 
 mecha:
-  horizontalForceRange: 100
-  verticalForceRange: 100
-  rotationForceRange: 10
+  horizontalForceRange: 30
+  verticalForceRange: 30
+  rotationForceMaxRange: 7
+  rotationForceMinRange: 5
 
 commandParameter:
-  lookatToleranceDeg: 10
+  lookatToleranceDeg: 2
   positionToleranceCm: 5
 
-  approachDistanceCm: 100
+  approachDistanceCm: 300
 
   handlingOnDist: 290
   # onlyOneDegreeMovement: true # Perlu di split antara Rotasi dan XY
 
   allowXYTogether: true
-  allowXYRotTogether: true
+  allowXYRotTogether: false
 
   rotToMoveDelay: 2000000000 # nanosecond
 

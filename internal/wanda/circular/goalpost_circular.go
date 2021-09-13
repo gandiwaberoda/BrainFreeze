@@ -14,20 +14,22 @@ import (
 )
 
 type GoalpostCircular struct {
-	Threshold uint8
-	Radius    float64
-	conf      *configuration.FreezeConfig
-	upperRed  gocv.Scalar
-	lowerRed  gocv.Scalar
+	// Threshold uint8
+	Radius      float64
+	debugRadius bool
+	conf        *configuration.FreezeConfig
+	upperRed    gocv.Scalar
+	lowerRed    gocv.Scalar
 }
 
 func NewGoalpostCircular(conf *configuration.FreezeConfig) *GoalpostCircular {
 	return &GoalpostCircular{
-		Threshold: 253,
-		Radius:    285,
-		conf:      conf,
-		upperRed:  bfconst.DummyUpper,
-		lowerRed:  bfconst.DummyLower,
+		// Threshold: 253,
+		Radius:      float64(conf.Wanda.RadiusGoalpostCircular),
+		conf:        conf,
+		debugRadius: conf.Wanda.DebugShowRadiusLine,
+		upperRed:    bfconst.DummyUpper,
+		lowerRed:    bfconst.DummyLower,
 	}
 }
 
@@ -85,6 +87,10 @@ func (n *GoalpostCircular) Detect(hsvFrame *gocv.Mat, grayFrame *gocv.Mat) (resu
 		y := int(n.Radius*math.Sin(i*math.Pi/180.0)) + n.conf.Camera.PostHeight/2
 
 		px := grayFrame.GetUCharAt(y, x)
+
+		if n.debugRadius {
+			gocv.Circle(hsvFrame, image.Point{X: x, Y: y}, 5, color.RGBA{0, 255, 0, 0}, -1)
+		}
 		if px > uint8(n.conf.Wanda.WhiteOnGrayVal) {
 			if !lastOneWasWhite {
 				gocv.Circle(hsvFrame, image.Point{X: x, Y: y}, 5, color.RGBA{0, 0, 0, 0}, -1)

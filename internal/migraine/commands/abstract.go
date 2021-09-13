@@ -67,5 +67,5 @@ func WhichCommand(fullbfvid string, conf *configuration.FreezeConfig, state *sta
 		}
 	}
 
-	return nil, errors.New(fmt.Sprint("command not found:", fullbfvid))
+	return nil, errors.New(fmt.Sprint("command not found:", parsed.Verb, "\n", fullbfvid))
 }
