@@ -5,6 +5,7 @@ import (
 	"image/color"
 
 	"gocv.io/x/gocv"
+	"harianugrah.com/brainfreeze/internal/bfconst"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 )
@@ -16,13 +17,10 @@ type NarrowHaesveCyan struct {
 }
 
 func NewNarrowHaesveCyan(conf *configuration.FreezeConfig) *NarrowHaesveCyan {
-	upper := gocv.NewScalar(114, 255, 255, 1)
-	lower := gocv.NewScalar(88, 83, 203, 0)
-
 	return &NarrowHaesveCyan{
 		conf:     conf,
-		upperHsv: upper,
-		lowerHsv: lower,
+		upperHsv: bfconst.CyanUpper,
+		lowerHsv: bfconst.CyanLower,
 	}
 }
 

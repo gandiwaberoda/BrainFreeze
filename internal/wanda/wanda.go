@@ -16,6 +16,7 @@ import (
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/dummy"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/goalpost"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/magenta"
+	"harianugrah.com/brainfreeze/internal/wanda/straight"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
 	"harianugrah.com/brainfreeze/pkg/models/state"
@@ -40,6 +41,7 @@ type WandaVision struct {
 
 	magentaNarrow *magenta.NarrowHaesveMagenta
 	forMagenta    *magenta.ForwardNarrowHaesveMagenta
+	forStraight   *straight.ForwardColorStraight
 
 	latestKnownBallDetection models.DetectionObject
 	latestKnownBallSet       bool
@@ -145,6 +147,9 @@ func worker(w *WandaVision) {
 		// 	}
 		// }
 
+		// zzz
+		w.forStraight.Detect(&forHsvFrame, &forFrame)
+
 		// FPS Gauge
 		fpsText := fmt.Sprint(w.fpsHsv.Read(), "FPS")
 		gocv.PutText(&topFrame, fpsText, image.Point{10, 60}, gocv.FontHersheyPlain, 5, color.RGBA{0, 255, 255, 0}, 3)
@@ -155,8 +160,6 @@ func worker(w *WandaVision) {
 
 		if w.conf.Diagnostic.ShowScreen {
 			// Put mid line to forward camera
-			gocv.Line(&forHsvFrame, image.Point{w.conf.Camera.ForMidX, 0}, image.Point{w.conf.Camera.ForMidX, w.conf.Camera.ForPostHeight}, color.RGBA{255, 255, 255, 1}, 1)
-
 			mainthread.Call(func() {
 				rawWin.IMShow(topFrame)
 				if keyPressed := rawWin.WaitKey(1); keyPressed == 'q' {
@@ -214,6 +217,7 @@ func (w *WandaVision) Start() {
 	w.fieldLineCircular = circular.NewFieldLineCircular(w.conf)
 	w.goalpostCircular = circular.NewGoalpostCircular(w.conf)
 	w.forMagenta = magenta.NewForwardNarrowHaesveMagenta(w.conf)
+	w.forStraight = straight.NewForwardColorStraight(w.conf)
 
 	w.topCenter = image.Point{
 		w.conf.Camera.MidpointRad,

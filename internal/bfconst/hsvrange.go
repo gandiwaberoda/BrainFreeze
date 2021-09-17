@@ -12,6 +12,9 @@ var (
 	MagentaUpper gocv.Scalar = gocv.NewScalar(165, 255, 255, 1)
 	MagentaLower gocv.Scalar = gocv.NewScalar(144, 44, 182, 0)
 
+	CyanUpper gocv.Scalar = gocv.NewScalar(114, 255, 255, 1)
+	CyanLower gocv.Scalar = gocv.NewScalar(88, 83, 203, 0)
+
 	ForwardMagentaUpper gocv.Scalar = gocv.NewScalar(167, 255, 255, 1)
 	ForwardMagentaLower gocv.Scalar = gocv.NewScalar(144, 44, 182, 0)
 )
