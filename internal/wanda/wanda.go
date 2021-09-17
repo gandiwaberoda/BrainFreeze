@@ -72,6 +72,7 @@ func NewWandaVision(conf *configuration.FreezeConfig, state *state.StateAccess) 
 var hsvWin *gocv.Window
 var rawWin *gocv.Window
 var grayWin *gocv.Window
+var tempWin *gocv.Window
 
 var hsvForwardWin *gocv.Window
 var rawForwardWin *gocv.Window
@@ -150,6 +151,11 @@ func worker(w *WandaVision) {
 		// zzz
 		w.forStraight.Detect(&forHsvFrame, &forFrame)
 
+		// gftt(&topGrayFrame)
+		// hl(&topGrayFrame)
+		vvv := gocv.NewMat()
+		whitte(&topFrame, &vvv)
+
 		// FPS Gauge
 		fpsText := fmt.Sprint(w.fpsHsv.Read(), "FPS")
 		gocv.PutText(&topFrame, fpsText, image.Point{10, 60}, gocv.FontHersheyPlain, 5, color.RGBA{0, 255, 255, 0}, 3)
@@ -186,6 +192,11 @@ func worker(w *WandaVision) {
 					return
 				}
 
+				tempWin.IMShow(vvv)
+				if keyPressed := tempWin.WaitKey(1); keyPressed == 'q' {
+					return
+				}
+
 			})
 		}
 	}
@@ -196,6 +207,7 @@ func (w *WandaVision) Start() {
 		hsvWin = gocv.NewWindow("HSV")
 		rawWin = gocv.NewWindow("Post Processed")
 		grayWin = gocv.NewWindow("Gray Win Processed")
+		tempWin = gocv.NewWindow("Entahlah")
 
 		hsvForwardWin = gocv.NewWindow("Forward HSV")
 		rawForwardWin = gocv.NewWindow("Forward Post Processed")
