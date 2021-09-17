@@ -35,6 +35,8 @@ func (n *ForwardColorStraight) Detect(forHsvFrame *gocv.Mat, forPostFrame *gocv.
 
 	// v := pxop.GetVecbAt(*forHsvFrame, n.conf.Camera.ForPostHeight/2, n.conf.Camera.ForMidX)
 	gocv.Circle(forPostFrame, image.Point{n.conf.Camera.ForMidX, n.conf.Camera.ForPostHeight / 2}, 7, color.RGBA{255, 255, 255, 1}, 1)
+	// gocv.GaussianBlur(*forHsvFrame, forHsvFrame, image.Point{21, 21}, 21, 21, gocv.BorderDefault)
+	gocv.Blur(*forHsvFrame, forHsvFrame, image.Point{3, 3})
 
 	for y := 0; y < n.conf.Camera.ForPostHeight; y++ {
 		v := pxop.GetVecbAt(*forHsvFrame, y, n.conf.Camera.ForMidX)

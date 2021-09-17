@@ -2,7 +2,6 @@ package dummy
 
 import (
 	"fmt"
-	"image/color"
 
 	"gocv.io/x/gocv"
 	"harianugrah.com/brainfreeze/internal/bfconst"
@@ -60,7 +59,7 @@ func (n *NarrowHaesveDummy) Detect(hsvFrame *gocv.Mat) (found bool, result []mod
 	// defer dilateMat.Close()
 	// gocv.Dilate(filtered, &filtered, dilateMat)
 
-	c := color.RGBA{75, 100, 0, 0}
+	// c := color.RGBA{75, 100, 0, 0}
 
 	hierarchyMat := gocv.NewMat()
 	defer hierarchyMat.Close()
@@ -82,8 +81,8 @@ func (n *NarrowHaesveDummy) Detect(hsvFrame *gocv.Mat) (found bool, result []mod
 		}
 
 		rect := gocv.BoundingRect(it)
-		gocv.Rectangle(hsvFrame, rect, c, 2)
-		gocv.PutText(hsvFrame, "Dummy", rect.Min, gocv.FontHersheyPlain, 1.2, c, 2)
+		// gocv.Rectangle(hsvFrame, rect, c, 2)
+		// gocv.PutText(hsvFrame, "Dummy", rect.Min, gocv.FontHersheyPlain, 1.2, c, 2)
 
 		d := models.NewDetectionObject(rect)
 		detecteds = append(detecteds, d)
