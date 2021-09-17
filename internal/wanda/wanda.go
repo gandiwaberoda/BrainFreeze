@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"sort"
 	"sync"
 
 	"github.com/faiface/mainthread"
@@ -112,8 +111,8 @@ func worker(w *WandaVision) {
 		// Magenta
 		wg.Add(1)
 		go detectMagenta(w, &wg, &topFrame, &topHsvFrame)
-		wg.Add(1)
-		go detectForMagenta(w, &wg, &forHsvFrame)
+		// wg.Add(1)
+		// go detectForMagenta(w, &wg, &forHsvFrame)
 
 		// Cyan
 		wg.Add(1)
@@ -138,13 +137,13 @@ func worker(w *WandaVision) {
 		go detectGoalpostCircular(w, &wg, &topHsvFrame, &topGrayFrame)
 
 		// Forward Ball
-		if found, result := w.ballNarrow.Detect(&forHsvFrame); found {
-			if len(result) > 0 {
-				for _, v := range result {
-					gocv.Rectangle(&forFrame, v.Bbox, color.RGBA{255, 0, 0, 1}, 3)
-				}
-			}
-		}
+		// if found, result := w.ballNarrow.Detect(&forHsvFrame); found {
+		// 	if len(result) > 0 {
+		// 		for _, v := range result {
+		// 			gocv.Rectangle(&forFrame, v.Bbox, color.RGBA{255, 0, 0, 1}, 3)
+		// 		}
+		// 	}
+		// }
 
 		// FPS Gauge
 		fpsText := fmt.Sprint(w.fpsHsv.Read(), "FPS")
@@ -354,41 +353,41 @@ func detectDummy(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvF
 	w.state.UpdateObstaclesTransform(ts)
 }
 
-func detectForGoalpost(w *WandaVision, wg *sync.WaitGroup, forFrame *gocv.Mat, forHsvFrame *gocv.Mat) {
-	defer wg.Done()
-	if found, result := w.goalpostHaesve.Detect(forHsvFrame); found {
-		if len(result) > 0 {
-			// result[0].
-			sort.Slice(result, func(i, j int) bool {
-				return result[i].BboxArea > result[j].BboxArea
-			})
+// func detectForGoalpost(w *WandaVision, wg *sync.WaitGroup, forFrame *gocv.Mat, forHsvFrame *gocv.Mat) {
+// 	defer wg.Done()
+// 	if found, result := w.goalpostHaesve.Detect(forHsvFrame); found {
+// 		if len(result) > 0 {
+// 			// result[0].
+// 			sort.Slice(result, func(i, j int) bool {
+// 				return result[i].BboxArea > result[j].BboxArea
+// 			})
 
-			gocv.Rectangle(forFrame, result[0].Bbox, w.warnaNewest, 3)
-			gocv.PutText(forFrame, "Gawang", result[0].Bbox.Min, gocv.FontHersheyPlain, 1.2, color.RGBA{0, 0, 255, 1}, 2)
-		}
+// 			gocv.Rectangle(forFrame, result[0].Bbox, w.warnaNewest, 3)
+// 			gocv.PutText(forFrame, "Gawang", result[0].Bbox.Min, gocv.FontHersheyPlain, 1.2, color.RGBA{0, 0, 255, 1}, 2)
+// 		}
 
-	}
-}
+// 	}
+// }
 
-func detectForMagenta(w *WandaVision, wg *sync.WaitGroup, forHsvFrame *gocv.Mat) {
-	defer wg.Done()
-	if found, result := w.forMagenta.Detect(forHsvFrame); found {
-		if len(result) > 0 {
-			sort.Slice(result, func(i, j int) bool {
-				return result[i].ContourArea > result[j].ContourArea
-			})
+// func detectForMagenta(w *WandaVision, wg *sync.WaitGroup, forHsvFrame *gocv.Mat) {
+// 	defer wg.Done()
+// 	if found, result := w.forMagenta.Detect(forHsvFrame); found {
+// 		if len(result) > 0 {
+// 			sort.Slice(result, func(i, j int) bool {
+// 				return result[i].ContourArea > result[j].ContourArea
+// 			})
 
-			v := result[0]
-			gocv.Rectangle(forHsvFrame, v.Bbox, w.warnaNewest, 3)
+// 			v := result[0]
+// 			gocv.Rectangle(forHsvFrame, v.Bbox, w.warnaNewest, 3)
 
-			// Isi error line ke mid
-			errorNotDegree := v.Midpoint.X - w.conf.Camera.ForMidX
-			gocv.PutText(forHsvFrame, fmt.Sprint("Magenta: ", errorNotDegree), v.Midpoint, gocv.FontHersheyPlain, 1, color.RGBA{255, 255, 255, 0}, 1)
-			gocv.Line(forHsvFrame, v.Midpoint, image.Point{w.conf.Camera.ForMidX, v.Midpoint.Y}, color.RGBA{128, 0, 0, 1}, 2)
-		}
+// 			// Isi error line ke mid
+// 			errorNotDegree := v.Midpoint.X - w.conf.Camera.ForMidX
+// 			gocv.PutText(forHsvFrame, fmt.Sprint("Magenta: ", errorNotDegree), v.Midpoint, gocv.FontHersheyPlain, 1, color.RGBA{255, 255, 255, 0}, 1)
+// 			gocv.Line(forHsvFrame, v.Midpoint, image.Point{w.conf.Camera.ForMidX, v.Midpoint.Y}, color.RGBA{128, 0, 0, 1}, 2)
+// 		}
 
-	}
-}
+// 	}
+// }
 
 func detectLineFieldCircular(w *WandaVision, wg *sync.WaitGroup, grayFrame *gocv.Mat) {
 	defer wg.Done()
