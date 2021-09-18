@@ -153,7 +153,8 @@ func worker(w *WandaVision) {
 		// }
 
 		// zzz
-		w.forStraight.Detect(&forHsvFrame, &forFrame)
+		wg.Add(1)
+		go detectStraight(w, &wg, &forHsvFrame, &forFrame)
 
 		// gftt(&topGrayFrame)
 		// hl(&topGrayFrame)

@@ -1,11 +1,13 @@
 package wanda
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"sync"
 
 	"gocv.io/x/gocv"
+	"harianugrah.com/brainfreeze/internal/wanda/straight"
 	"harianugrah.com/brainfreeze/pkg/models"
 )
 
@@ -179,6 +181,37 @@ func detectGoalpostCircular(w *WandaVision, wg *sync.WaitGroup, hsvFrame *gocv.M
 		t.InjectWorldTransfromFromRobotTransform(w.state.GetState().MyTransform)
 		w.state.UpdateFriendGoalpostTransform(t)
 	}
+}
+
+func detectStraight(w *WandaVision, wg *sync.WaitGroup, forHsvFrame *gocv.Mat, forPostFrame *gocv.Mat) {
+	defer wg.Done()
+	detecteds := w.forStraight.Detect(forHsvFrame, forPostFrame)
+
+	usedColorIds := make(map[int]bool)
+
+	onceByClosest2Robot := make([]straight.StraightDetection, 0)
+
+	if len(detecteds) > 0 {
+		for _, v := range detecteds {
+			if _, exist := usedColorIds[v.DetectedColor.Id]; !exist {
+				gocv.PutText(forPostFrame, "Entah", image.Pt(w.conf.Camera.ForMidX+40, v.FurthestPoint), gocv.FontHersheyPlain, 1.3, v.DetectedColor.Visualize, 2)
+				gocv.Line(forPostFrame, image.Pt(w.conf.Camera.ForMidX-20, v.ClosestPoint), image.Pt(w.conf.Camera.ForMidX-20, v.FurthestPoint), v.DetectedColor.Visualize, 5)
+				onceByClosest2Robot = append(onceByClosest2Robot, v)
+
+				usedColorIds[v.DetectedColor.Id] = true
+			}
+		}
+
+		// obj := detecteds[0]
+
+		// gocv.Line(hsvFrame, image.Point{320, 320}, obj.Midpoint, cBlue, 2)
+
+		// t := obj.AsTransform(w.conf)
+		// t.InjectWorldTransfromFromRobotTransform(w.state.GetState().MyTransform)
+		// w.state.UpdateFriendGoalpostTransform(t)
+	}
+
+	fmt.Println(onceByClosest2Robot)
 }
 
 // func detectMagenta(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {

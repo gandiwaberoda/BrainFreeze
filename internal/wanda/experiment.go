@@ -36,7 +36,7 @@ func whitte(mat *gocv.Mat, out *gocv.Mat) {
 
 	gocv.InRangeWithScalar(*mat, lower, upper, out)
 
-	dilateMat := gocv.Ones(3, 3, gocv.MatTypeCV8UC1)
-	gocv.Dilate(*out, out, dilateMat)
-	// mat.CopyTo(out)
+	// dilateMat := gocv.Ones(3, 3, gocv.MatTypeCV8UC1)
+	// gocv.Dilate(*out, out, dilateMat)
+	mat.CopyTo(out)
 }
