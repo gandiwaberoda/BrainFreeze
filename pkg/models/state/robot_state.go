@@ -27,6 +27,10 @@ type RobotState struct {
 	GutToBrainLastUpdate time.Time
 	GutToBrainExpired    bool `default:"true"`
 
+	Araya           gutmodel.Araya
+	ArayaLastUpdate time.Time
+	ArayaExpired    bool `default:"true"`
+
 	MagentaTransform           models.Transform
 	MagentaTransformLastUpdate time.Time
 	MagentaTransformExpired    bool `default:"true"`

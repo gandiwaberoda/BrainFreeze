@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"harianugrah.com/brainfreeze/internal/araya"
 	"harianugrah.com/brainfreeze/internal/diagnostic"
 	"harianugrah.com/brainfreeze/internal/gut"
 	"harianugrah.com/brainfreeze/internal/migraine"
@@ -85,6 +86,9 @@ func main() {
 		log.Panicln("Gut not yet opened:", errGut.Error())
 	}
 	defer gutTalk.Stop()
+
+	sensorarray := araya.NewArayaSerial(&config, curstate)
+	sensorarray.Start()
 
 	// Artificial Intellegence
 	migraine := migraine.CreateMigraine(&config, gutTalk, curstate)

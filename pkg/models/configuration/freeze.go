@@ -54,8 +54,9 @@ type ExpirationConfig struct {
 }
 
 type SerialConfig struct {
-	Ports     []string `yaml:"ports"`
-	CommandHz int      `yaml:"commandHz"`
+	Ports      []string `yaml:"ports"`
+	ArayaPorts []string `yaml:"arayaPort"`
+	CommandHz  int      `yaml:"commandHz"`
 }
 
 type SimulatorConfig struct {

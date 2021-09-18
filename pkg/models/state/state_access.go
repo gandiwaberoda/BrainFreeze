@@ -82,6 +82,15 @@ func (s *StateAccess) StartWatcher(config *configuration.FreezeConfig) {
 				s.myState.MyTransformExpired = true
 			}
 
+			// Cyan
+			if time.Since(s.myState.CyanTransformLastUpdate) > config.Expiration.MyExpiration {
+				s.myState.CyanTransformExpired = true
+			}
+			// Magenta
+			if time.Since(s.myState.MagentaTransformLastUpdate) > config.Expiration.MyExpiration {
+				s.myState.MagentaTransformExpired = true
+			}
+
 			// FGP Expiration
 			if time.Since(s.myState.FriendGoalPostTransformLastUpdate) > config.Expiration.MyExpiration {
 				s.myState.FriendGoalPostTransformExpired = true
@@ -100,6 +109,11 @@ func (s *StateAccess) StartWatcher(config *configuration.FreezeConfig) {
 			// Register Expiration
 			if time.Since(s.myState.RegisterLastUpdate) > config.Expiration.MyExpiration {
 				s.myState.RegisterExpired = true
+			}
+
+			// Araya Expiration
+			if time.Since(s.myState.ArayaLastUpdate) > config.Expiration.MyExpiration {
+				s.myState.ArayaExpired = true
 			}
 
 			// TODO: Friend, Enemy, Obstacle
