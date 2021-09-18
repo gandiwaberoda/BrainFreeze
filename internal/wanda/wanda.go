@@ -86,14 +86,18 @@ func worker(w *WandaVision) {
 	}()
 
 	topFrame := gocv.NewMat()
+	defer topFrame.Close()
 	topHsvFrame := gocv.NewMat()
 	defer topHsvFrame.Close()
 	topGrayFrame := gocv.NewMat()
 	defer topGrayFrame.Close()
 
 	forFrame := gocv.NewMat()
+	defer forFrame.Close()
 	forHsvFrame := gocv.NewMat()
 	defer forHsvFrame.Close()
+	vvv := gocv.NewMat()
+	defer vvv.Close()
 
 	wg := sync.WaitGroup{}
 	for {
@@ -153,8 +157,6 @@ func worker(w *WandaVision) {
 
 		// gftt(&topGrayFrame)
 		// hl(&topGrayFrame)
-		vvv := gocv.NewMat()
-		defer vvv.Close()
 		whitte(&topFrame, &vvv)
 
 		// FPS Gauge

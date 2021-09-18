@@ -1,7 +1,6 @@
 package wanda
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"sync"
@@ -48,7 +47,7 @@ func detectTopBall(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHs
 		}
 	} else {
 		// Pake yang wide ball
-		fmt.Println("loss")
+		// fmt.Println("loss")
 	}
 }
 

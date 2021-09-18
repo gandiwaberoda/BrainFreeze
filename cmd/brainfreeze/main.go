@@ -87,8 +87,10 @@ func main() {
 	}
 	defer gutTalk.Stop()
 
-	sensorarray := araya.NewArayaSerial(&config, curstate)
-	sensorarray.Start()
+	if !strings.EqualFold(config.Serial.ArayaPorts[0], "DISABLED") {
+		sensorarray := araya.NewArayaSerial(&config, curstate)
+		sensorarray.Start()
+	}
 
 	// Artificial Intellegence
 	migraine := migraine.CreateMigraine(&config, gutTalk, curstate)

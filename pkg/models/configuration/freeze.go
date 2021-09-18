@@ -116,6 +116,7 @@ type WandaConfig struct {
 	WhiteOnGrayVal         int     `yaml:"whiteOnGrayVal"`
 	RadiusGoalpostCircular int     `yaml:"radiusGoalpostCircular"`
 	DebugShowRadiusLine    bool    `yaml:"debugShowRadiusLine"`
+	GoalOffset             float64 `yaml:"goalOffset"`
 }
 
 type FreezeConfig struct {

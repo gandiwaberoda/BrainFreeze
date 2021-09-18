@@ -7,7 +7,7 @@ import (
 	"harianugrah.com/brainfreeze/pkg/models"
 )
 
-var ACCEPTABLE_TRANSFORM_KEY = map[string]bool{"EGP": true, "FGP": true, "BALL": true, "MAGENTA": true, "CYAN": true, "CLOBS": true}
+var ACCEPTABLE_TRANSFORM_KEY = map[string]bool{"EGP": true, "FGP": true, "FGPOFF": true, "BALL": true, "MAGENTA": true, "CYAN": true, "CLOBS": true}
 
 func GetTransformKeyAcceptable(key string) bool {
 	_, found := ACCEPTABLE_TRANSFORM_KEY[strings.ToUpper(key)]
@@ -38,6 +38,10 @@ func (s *StateAccess) GetTransformByKey(key string) (bool, models.Transform) {
 		return true, s.myState.EnemyGoalPostTransform
 	case "FGP": // Enemy Goal Post
 		return true, s.myState.FriendGoalPostTransform
+	case "FGPOFF": // Enemy Goal Post
+		z := s.myState.FriendGoalPostTransform
+		z.RobROT += models.Degree(s.config.Wanda.GoalOffset) // Biar pas nendang, gak ke dummynya
+		return true, z
 	case "BALL": // Enemy Goal Post
 		return true, s.myState.BallTransform
 	case "MAGENTA": // Closest Dummy
