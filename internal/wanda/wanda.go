@@ -154,6 +154,7 @@ func worker(w *WandaVision) {
 		// gftt(&topGrayFrame)
 		// hl(&topGrayFrame)
 		vvv := gocv.NewMat()
+		defer vvv.Close()
 		whitte(&topFrame, &vvv)
 
 		// FPS Gauge
