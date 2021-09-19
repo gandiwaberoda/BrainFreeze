@@ -11,7 +11,7 @@ import (
 var (
 	// Dummy
 	DummyUpper gocv.Scalar = gocv.NewScalar(179, 255, 255, 1)
-	DummyLower gocv.Scalar = gocv.NewScalar(169, 88, 181, 0)
+	DummyLower gocv.Scalar = gocv.NewScalar(169, 88, 100, 0)
 
 	// Bola
 	BallUpper        gocv.Scalar = gocv.NewScalar(37, 255, 255, 1)

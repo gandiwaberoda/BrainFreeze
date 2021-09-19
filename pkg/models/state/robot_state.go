@@ -31,6 +31,10 @@ type RobotState struct {
 	ArayaLastUpdate time.Time
 	ArayaExpired    bool `default:"true"`
 
+	Straight           []models.StraightDetectionObj
+	StraightLastUpdate time.Time
+	StraightExpired    bool `default:"true"`
+
 	MagentaTransform           models.Transform
 	MagentaTransformLastUpdate time.Time
 	MagentaTransformExpired    bool `default:"true"`

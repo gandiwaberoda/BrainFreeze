@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"gocv.io/x/gocv"
-	"harianugrah.com/brainfreeze/internal/wanda/straight"
 	"harianugrah.com/brainfreeze/pkg/models"
 )
 
@@ -189,13 +188,13 @@ func detectStraight(w *WandaVision, wg *sync.WaitGroup, forHsvFrame *gocv.Mat, f
 
 	usedColorIds := make(map[int]bool)
 
-	onceByClosest2Robot := make([]straight.StraightDetection, 0)
+	onceByClosest2Robot := make([]models.StraightDetection, 0)
 
 	if len(detecteds) > 0 {
 		for _, v := range detecteds {
 			if _, exist := usedColorIds[v.DetectedColor.Id]; !exist {
-				gocv.PutText(forPostFrame, "Entah", image.Pt(w.conf.Camera.ForMidX+40, v.FurthestPoint), gocv.FontHersheyPlain, 1.3, v.DetectedColor.Visualize, 2)
-				gocv.Line(forPostFrame, image.Pt(w.conf.Camera.ForMidX-20, v.ClosestPoint), image.Pt(w.conf.Camera.ForMidX-20, v.FurthestPoint), v.DetectedColor.Visualize, 5)
+				gocv.PutText(forPostFrame, "Entah", image.Pt(w.conf.Camera.ForMidX+40, v.LowerY), gocv.FontHersheyPlain, 1.3, v.DetectedColor.Visualize, 2)
+				gocv.Line(forPostFrame, image.Pt(w.conf.Camera.ForMidX-20, v.LowerY), image.Pt(w.conf.Camera.ForMidX-20, v.UpperY), v.DetectedColor.Visualize, 5)
 				onceByClosest2Robot = append(onceByClosest2Robot, v)
 
 				usedColorIds[v.DetectedColor.Id] = true
@@ -211,7 +210,22 @@ func detectStraight(w *WandaVision, wg *sync.WaitGroup, forHsvFrame *gocv.Mat, f
 		// w.state.UpdateFriendGoalpostTransform(t)
 	}
 
-	fmt.Println(onceByClosest2Robot)
+	simplified := make([]models.StraightDetectionObj, 0)
+	for _, v := range onceByClosest2Robot {
+		simplified = append(simplified, models.StraightDetectionObj{
+			ClosestDistPx:     w.conf.Camera.PostHeight - v.LowerY,
+			FurthestDistPx:    w.conf.Camera.PostHeight - v.UpperY,
+			DetectedColorName: v.DetectedColor.Name,
+		})
+	}
+
+	// fmt.Println(simplified)
+	w.state.UpdateStraight(simplified)
+
+	gocv.Circle(forPostFrame, image.Point{w.conf.Camera.ForMidX + 15, w.conf.Camera.ForPostHeight / 2}, 7, color.RGBA{255, 255, 255, 1}, 1)
+	dist := fmt.Sprint(w.state.GetState().Araya.Dist0, "cm")
+	gocv.PutText(forPostFrame, dist, image.Point{w.conf.Camera.ForMidX, w.conf.Camera.ForPostHeight / 2}, gocv.FontHersheyComplexSmall, 1.2, color.RGBA{255, 255, 255, 1}, 2)
+
 }
 
 // func detectMagenta(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
