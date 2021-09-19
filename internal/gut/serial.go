@@ -71,7 +71,7 @@ func workerWriter(gut *GutSerial) {
 }
 
 func (g *GutSerial) Start() (bool, error) {
-	c := &serial.Config{Name: g.conf.Serial.Ports[0], Baud: 115200}
+	c := &serial.Config{Name: g.conf.Serial.Ports[0], Baud: 9600}
 
 	ser, err := serial.OpenPort(c)
 	if err != nil {
