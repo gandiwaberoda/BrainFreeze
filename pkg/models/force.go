@@ -10,6 +10,7 @@ type Force struct {
 	rot      float64
 	kick     float64
 	handling float64
+	reset    int
 
 	handlingHaveChanged bool
 }
@@ -48,6 +49,15 @@ func (f *Force) DisableHandling() {
 	f.handlingHaveChanged = true
 	f.handling = 0.0
 }
+
+func (f *Force) DoReset() {
+	f.reset = 1
+}
+
+func (f *Force) UndoReset() {
+	f.reset = 0
+}
+
 func (f *Force) HandlingHaveChanged() bool {
 	return f.handlingHaveChanged
 }
@@ -83,8 +93,9 @@ func (f Force) GetHandling() float64 {
 
 //#region
 func (f Force) AsGutCommandString() string {
-	rotStr := fmt.Sprintf("%.2f", f.GetRot())
-	xStr := fmt.Sprintf("%.2f", f.GetX())
-	yStr := fmt.Sprintf("%.2f", f.GetY())
-	return fmt.Sprint("*", xStr, ",", yStr, ",", rotStr, ",", f.GetKick(), ",", f.GetHandling(), "#")
+	rotStr := fmt.Sprintf("%d", int(f.GetRot()))
+	xStr := fmt.Sprintf("%d", int(f.GetX()))
+	yStr := fmt.Sprintf("%d", int(f.GetY()))
+
+	return fmt.Sprint("*", xStr, ",", yStr, ",", rotStr, ",", f.GetKick(), ",", f.GetHandling(), ",", f.reset, "#")
 }
