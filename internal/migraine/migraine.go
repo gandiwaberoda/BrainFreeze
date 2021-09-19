@@ -93,14 +93,13 @@ func (m *Migraine) AddCommand(fullbfvid string) {
 		}
 	}
 
-	// if len(intercom.Content) >= 3 && strings.EqualFold(intercom.Content[:3], "FWD") {
+	// if strings.EqualFold(parsed.Verb, "FWD") {
 	// 	// TODO: Command khusus untuk mengforward data serial
-
-	// 	re, _ := regexp.Compile(`\((.+)\)`)
-	// 	foundParam := re.FindString(intercom.Content)
-	// 	foundParam = strings.ReplaceAll(foundParam, "(", "")
-	// 	foundParam = strings.ReplaceAll(foundParam, ")", "")
-	// 	m.gut.Send(foundParam)
+	// 	// re, _ := regexp.Compile(`\((.+)\)`)
+	// 	// foundParam := re.FindString(intercom.Content)
+	// 	// foundParam = strings.ReplaceAll(foundParam, "(", "")
+	// 	// foundParam = strings.ReplaceAll(foundParam, ")", "")
+	// 	m.gut.Send(parsed.ParameterStr)
 	// 	m.Idle()
 	// 	return
 	// }

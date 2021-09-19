@@ -36,6 +36,7 @@ func init() {
 		ParsePlaylfCommand,
 		ParseStopCommand,
 		ParsePassingCommand,
+		ParseResposCommand,
 	}
 }
 
