@@ -18,8 +18,8 @@ type ForwardNarrowHaesveMagenta struct {
 func NewForwardNarrowHaesveMagenta(conf *configuration.FreezeConfig) *ForwardNarrowHaesveMagenta {
 	return &ForwardNarrowHaesveMagenta{
 		conf:     conf,
-		upperHsv: bfconst.ForwardMagentaUpper,
-		lowerHsv: bfconst.ForwardMagentaLower,
+		upperHsv: bfconst.MagentaUpper,
+		lowerHsv: bfconst.MagentaLower,
 	}
 }
 

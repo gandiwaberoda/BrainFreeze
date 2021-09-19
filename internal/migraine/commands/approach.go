@@ -71,15 +71,15 @@ func (i ApproachCommand) GetName() string {
 }
 
 func TockApproach(target models.Transform, conf configuration.FreezeConfig, force *models.Force, state *state.StateAccess) {
-	xF := target.RobXcm
+	// xF := target.RobXcm
 	yF := target.RobYcm
 
-	if conf.CommandParameter.AllowXYTogether {
-		force.AddX(float64(xF))
-		force.AddY(float64(yF))
-	} else {
-		force.AddY(float64(yF))
-	}
+	// if conf.CommandParameter.AllowXYTogether {
+	// 	force.AddX(float64(xF))
+	// 	force.AddY(float64(yF))
+	// } else {
+	force.AddY(float64(yF))
+	// }
 }
 
 func (i *ApproachCommand) Tick(force *models.Force, state *state.StateAccess) {
@@ -87,6 +87,7 @@ func (i *ApproachCommand) Tick(force *models.Force, state *state.StateAccess) {
 
 	_, target := state.GetTransformByKey(i.Target)
 
+	TockLookat(target, *i.conf, force, state)
 	TockApproach(target, *i.conf, force, state)
 }
 

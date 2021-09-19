@@ -30,7 +30,7 @@ func (n *ForwardColorStraight) Detect(forHsvFrame *gocv.Mat, forPostFrame *gocv.
 	// gocv.Line(forHsvFrame, image.Point{n.conf.Camera.ForMidX, 0}, image.Point{n.conf.Camera.ForMidX, n.conf.Camera.ForPostHeight}, color.RGBA{255, 255, 255, 1}, 1)
 
 	// v := pxop.GetVecbAt(*forHsvFrame, n.conf.Camera.ForPostHeight/2, n.conf.Camera.ForMidX)// gocv.GaussianBlur(*forHsvFrame, forHsvFrame, image.Point{21, 21}, 21, 21, gocv.BorderDefault)
-	// gocv.Blur(*forHsvFrame, forHsvFrame, image.Point{9, 9})
+	gocv.Blur(*forHsvFrame, forHsvFrame, image.Point{3, 3})
 
 	pxcounter := 0            // Untuk menghitung berapa px dah kedetek
 	lastDetectedColorId := -1 // Untuk tahu apakah px berubah dari sebelumnya
