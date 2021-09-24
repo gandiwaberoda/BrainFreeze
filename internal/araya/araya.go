@@ -2,6 +2,7 @@ package araya
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 
@@ -47,6 +48,7 @@ func workerReader(araya *ArayaSerial) {
 			fmt.Println("Bad format", str)
 		} else {
 			// Update araya state
+			fmt.Println("Nerima ", str)
 			araya.onArayaReceived(str)
 		}
 	}
@@ -59,7 +61,7 @@ func workerReader(araya *ArayaSerial) {
 func (g *ArayaSerial) Start() (bool, error) {
 	fmt.Println("Started")
 
-	c := &serial.Config{Name: g.conf.Serial.ArayaPorts[0], Baud: 115200}
+	c := &serial.Config{Name: g.conf.Serial.ArayaPorts[0], Baud: 9600}
 
 	ser, err := serial.OpenPort(c)
 	if err != nil {
@@ -69,6 +71,14 @@ func (g *ArayaSerial) Start() (bool, error) {
 	g.Port = ser
 	go workerReader(g)
 
+	return true, nil
+}
+
+func (g *ArayaSerial) Send(msg string) (bool, error) {
+	if g.Port == nil {
+		return false, errors.New("port araya is not yet opened")
+	}
+	g.Port.Write([]byte(msg))
 	return true, nil
 }
 

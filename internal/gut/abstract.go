@@ -1,7 +1,12 @@
 package gut
 
+import (
+	"harianugrah.com/brainfreeze/internal/araya"
+)
+
 type Gut struct {
-	handlers []func(string)
+	ArayaSens araya.ArayaSerial
+	handlers  []func(string)
 }
 
 type GutInterface interface {

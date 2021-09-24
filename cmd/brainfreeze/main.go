@@ -89,7 +89,9 @@ func main() {
 
 	if !strings.EqualFold(config.Serial.ArayaPorts[0], "DISABLED") {
 		sensorarray := araya.NewArayaSerial(&config, curstate)
-		sensorarray.Start()
+		if _, err := sensorarray.Start(); err != nil {
+			panic(err)
+		}
 	}
 
 	// Artificial Intellegence

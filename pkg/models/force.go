@@ -5,12 +5,13 @@ import (
 )
 
 type Force struct {
-	x        float64
-	y        float64
-	rot      float64
-	kick     float64
-	handling float64
-	reset    int
+	x                float64
+	y                float64
+	rot              float64
+	kick             float64
+	handling         float64
+	reset            int
+	enableUltrasonic int
 
 	handlingHaveChanged bool
 }
@@ -48,6 +49,13 @@ func (f *Force) EnableHandling() {
 func (f *Force) DisableHandling() {
 	f.handlingHaveChanged = true
 	f.handling = 0.0
+}
+func (f *Force) EnableUltrasonic() {
+	f.enableUltrasonic = 1
+}
+
+func (f *Force) DisableUltrasonic() {
+	f.enableUltrasonic = 0
 }
 
 func (f *Force) DoReset() {
@@ -97,5 +105,5 @@ func (f Force) AsGutCommandString() string {
 	xStr := fmt.Sprintf("%d", int(f.GetX()))
 	yStr := fmt.Sprintf("%d", int(f.GetY()))
 
-	return fmt.Sprint("*", xStr, ",", yStr, ",", rotStr, ",", f.GetKick(), ",", f.GetHandling(), ",", f.reset, "#")
+	return fmt.Sprint("*", xStr, ",", yStr, ",", rotStr, ",", f.GetKick(), ",", f.GetHandling(), ",", f.reset, ",", f.enableUltrasonic, "#")
 }

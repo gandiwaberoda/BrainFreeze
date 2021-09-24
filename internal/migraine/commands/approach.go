@@ -89,6 +89,7 @@ func (i *ApproachCommand) Tick(force *models.Force, state *state.StateAccess) {
 
 	TockLookat(target, *i.conf, force, state)
 	TockApproach(target, *i.conf, force, state)
+	force.EnableUltrasonic()
 }
 
 func (i ApproachCommand) GetFulfillment() fulfillments.FulfillmentInterface {

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/tarm/serial"
@@ -62,9 +63,13 @@ func workerWriter(gut *GutSerial) {
 		// fmt.Println("SEND: ", gut.toSend)
 		// gut.Send(gut.toSend)
 
-		_, err := gut.Port.Write([]byte(gut.toSend))
-		if err != nil {
+		if _, err := gut.Port.Write([]byte(gut.toSend)); err != nil {
 			fmt.Println("FAILED SENDING GUT PORT")
+		}
+		if !strings.EqualFold(gut.conf.Serial.ArayaPorts[0], "DISABLED") {
+			if _, err := gut.ArayaSens.Port.Write([]byte(gut.toSend)); err != nil {
+				fmt.Println("FAILED SENDING ARAYA PORT")
+			}
 		}
 		gut.Curstate.UpdateToGutCmd(gut.toSend)
 	}
