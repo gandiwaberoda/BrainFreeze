@@ -59,7 +59,7 @@ func workerReader(araya *ArayaSerial) {
 func (g *ArayaSerial) Start() (bool, error) {
 	fmt.Println("Started")
 
-	c := &serial.Config{Name: g.conf.Serial.ArayaPorts[0], Baud: 115200}
+	c := &serial.Config{Name: g.conf.Serial.ArayaPorts[0], Baud: 9600}
 
 	ser, err := serial.OpenPort(c)
 	if err != nil {
