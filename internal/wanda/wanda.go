@@ -16,6 +16,7 @@ import (
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/dummy"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/goalpost"
 	"harianugrah.com/brainfreeze/internal/wanda/haesve/magenta"
+	"harianugrah.com/brainfreeze/internal/wanda/radial"
 	"harianugrah.com/brainfreeze/internal/wanda/straight"
 	"harianugrah.com/brainfreeze/pkg/models"
 	"harianugrah.com/brainfreeze/pkg/models/configuration"
@@ -35,6 +36,8 @@ type WandaVision struct {
 	dummyNarrow    *dummy.NarrowHaesveDummy
 	goalpostHaesve *goalpost.HaesveGoalpost
 	cyanNarrow     *cyan.NarrowHaesveCyan
+
+	radialAvoid *radial.TopRadialDummy
 
 	fieldLineCircular *circular.FieldLineCircular
 	goalpostCircular  *circular.GoalpostCircular
@@ -156,6 +159,9 @@ func worker(w *WandaVision) {
 		wg.Add(1)
 		go detectStraight(w, &wg, &forHsvFrame, &forFrame)
 
+		// wg.Add(1)
+		// go detectRadialAvoid(w, &wg, &topHsvFrame)
+
 		// gftt(&topGrayFrame)
 		// hl(&topGrayFrame)
 		whitte(&topFrame, &vvv)
@@ -234,6 +240,7 @@ func (w *WandaVision) Start() {
 	w.goalpostCircular = circular.NewGoalpostCircular(w.conf)
 	w.forMagenta = magenta.NewForwardNarrowHaesveMagenta(w.conf)
 	w.forStraight = straight.NewForwardColorStraight(w.conf)
+	w.radialAvoid = radial.NewRadialDummy(w.conf)
 
 	w.topCenter = image.Point{
 		w.conf.Camera.MidpointRad,

@@ -232,3 +232,10 @@ func detectStraight(w *WandaVision, wg *sync.WaitGroup, forHsvFrame *gocv.Mat, f
 
 // 	wg.Done()
 // }
+
+func detectRadialAvoid(w *WandaVision, wg *sync.WaitGroup, topHsv *gocv.Mat) {
+	defer wg.Done()
+	detecteds := w.radialAvoid.Detect(topHsv)
+	// w.state.UpdateCircularFieldLine(detecteds)
+	_ = detecteds
+}
