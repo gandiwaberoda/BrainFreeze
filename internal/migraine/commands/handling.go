@@ -39,7 +39,7 @@ func ParseHandlingCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfi
 
 func (i HandlingCommand) GetName() string {
 	if i.sequence.current_obj != nil {
-		return "HANDLING [" + i.sequence.current_obj.GetName() + "]"
+		return "HANDLING (" + i.sequence.current_obj.GetName() + ") [" + i.sequence.current_obj.GetName() + "]"
 	} else {
 		return "HANDLING [initializing]"
 	}
