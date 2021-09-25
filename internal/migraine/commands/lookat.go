@@ -104,6 +104,11 @@ func TockLookat(target models.Transform, conf configuration.FreezeConfig, force 
 	}
 
 	force.AddRot(rotForce)
+
+	// Biar gak overshoot
+	if models.Degree(math.Abs(float64(target.RobROT))) < models.Degree(conf.CommandParameter.LookatToleranceDeg) {
+		force.ClearRot()
+	}
 }
 
 func (i *LookatCommand) Tick(force *models.Force, state *state.StateAccess) {
