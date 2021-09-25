@@ -56,6 +56,7 @@ type RobotState struct {
 	EnemyGoalPostTransformExpired    bool `default:"true"`
 
 	CircularFieldLine []float64 // Untuk line follower
+	CircularDummy     []float64 // Untuk avoidance
 
 	Register           registerState // Untuk komunikasi antar robot, dipake untuk Wait fulfillment
 	RegisterLastUpdate time.Time

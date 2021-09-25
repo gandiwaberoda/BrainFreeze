@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"fmt"
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
@@ -13,6 +14,7 @@ import (
 type AvoidanceCommand struct {
 	fulfillment fulfillments.FulfillmentInterface
 	sequence    SequenceCommand
+	conf        *configuration.FreezeConfig
 }
 
 func ParseAvoidanceCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, CommandInterface, error) {
@@ -24,6 +26,7 @@ func ParseAvoidanceCommand(cmd bfvid.CommandSPOK, conf *configuration.FreezeConf
 	parsed := AvoidanceCommand{
 		sequence:    seq,
 		fulfillment: fulfillments.DefaultComplexFulfillment(),
+		conf:        conf,
 	}
 	if err != nil {
 		return true, nil, err
@@ -48,9 +51,23 @@ func (i AvoidanceCommand) GetName() string {
 func (i *AvoidanceCommand) Tick(force *models.Force, state *state.StateAccess) {
 	i.fulfillment.Tick()
 	finished := i.sequence.Tick(force, state)
-	force.EnableHandling()
 	if finished {
 		i.fulfillment.(*fulfillments.ComplexFuilfillment).Fulfilled()
+	}
+
+	for _, v := range state.GetState().ObstacleTransform {
+		if v.TopRpx < models.Centimeter(i.conf.Wanda.IgnoreRadius) {
+			continue
+		}
+
+		if v.TopRpx < models.Centimeter(i.conf.CommandParameter.AvoidanceTopPx) {
+			fmt.Println("terlalu deket ", v.TopRpx)
+			force.Idle()
+			force.AddX(-1 * float64(v.RobXcm))
+			force.AddY(-1 * float64(v.RobYcm))
+			force.ClampMinXY(*i.conf)
+			return
+		}
 	}
 }
 

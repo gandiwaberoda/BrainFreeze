@@ -94,6 +94,8 @@ type CommandParameterConfig struct {
 
 	AllowXYTogether    bool `yaml:"allowXYTogether"`
 	AllowXYRotTogether bool `yaml:"allowXYRotTogether"`
+
+	AvoidanceTopPx int `yaml:"avoidanceTopPx"`
 }
 
 type FulfillmentConfig struct {
@@ -120,6 +122,9 @@ type WandaConfig struct {
 
 	StraightMinLength int `yaml:"straightMinLength"`
 	FrontDistanceCm   int `yaml:"frontDistanceCm"`
+
+	RadiusDummyCircular int `yaml:"radiusDummyCircular"`
+	IgnoreRadius        int `yaml:"ignoreRadius"`
 }
 
 type FreezeConfig struct {

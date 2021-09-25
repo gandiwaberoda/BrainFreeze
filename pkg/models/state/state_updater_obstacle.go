@@ -14,3 +14,9 @@ func (s *StateAccess) UpdateObstaclesTransform(ts []models.Transform) {
 	s.myState.ObstacleTransformLastUpdate = time.Now()
 	s.myState.ObstacleTransformExpired = false
 }
+func (s *StateAccess) UpdateCircularDummy(t []float64) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	s.myState.CircularDummy = t
+}

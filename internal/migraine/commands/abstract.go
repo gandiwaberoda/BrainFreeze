@@ -37,6 +37,7 @@ func init() {
 		ParseStopCommand,
 		ParsePassingCommand,
 		ParseResposCommand,
+		ParseAvoidanceCommand,
 	}
 }
 

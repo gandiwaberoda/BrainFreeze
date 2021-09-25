@@ -41,6 +41,7 @@ type WandaVision struct {
 
 	fieldLineCircular *circular.FieldLineCircular
 	goalpostCircular  *circular.GoalpostCircular
+	dummyCircular     *circular.DummyAvoidCircular
 
 	magentaNarrow *magenta.NarrowHaesveMagenta
 	forMagenta    *magenta.ForwardNarrowHaesveMagenta
@@ -166,6 +167,9 @@ func worker(w *WandaVision) {
 		// hl(&topGrayFrame)
 		whitte(&topFrame, &vvv)
 
+		// wg.Add(1)
+		// go detectDummyCircular(w, &wg, &topHsvFrame)
+
 		// FPS Gauge
 		fpsText := fmt.Sprint(w.fpsHsv.Read(), "FPS")
 		gocv.PutText(&topFrame, fpsText, image.Point{10, 60}, gocv.FontHersheyPlain, 5, color.RGBA{0, 255, 255, 0}, 3)
@@ -241,6 +245,7 @@ func (w *WandaVision) Start() {
 	w.forMagenta = magenta.NewForwardNarrowHaesveMagenta(w.conf)
 	w.forStraight = straight.NewForwardColorStraight(w.conf)
 	w.radialAvoid = radial.NewRadialDummy(w.conf)
+	w.dummyCircular = circular.NewDummyAvoidCircular(w.conf)
 
 	w.topCenter = image.Point{
 		w.conf.Camera.MidpointRad,

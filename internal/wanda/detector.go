@@ -110,6 +110,8 @@ func detectCyan(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFr
 func detectDummy(w *WandaVision, wg *sync.WaitGroup, topFrame *gocv.Mat, topHsvFrame *gocv.Mat) {
 	defer wg.Done()
 	found, res := w.dummyNarrow.Detect(topHsvFrame)
+	res = models.SortDetectionsObjectByDistanceToPoint(image.Point{w.conf.Camera.PostWidth / 2, w.conf.Camera.PostHeight / 2}, res)
+
 	if !found {
 		return
 	}
@@ -164,6 +166,12 @@ func detectLineFieldCircular(w *WandaVision, wg *sync.WaitGroup, grayFrame *gocv
 	defer wg.Done()
 	detecteds := w.fieldLineCircular.Detect(grayFrame)
 	w.state.UpdateCircularFieldLine(detecteds)
+}
+
+func detectDummyCircular(w *WandaVision, wg *sync.WaitGroup, tophsvFrame *gocv.Mat) {
+	defer wg.Done()
+	detecteds := w.dummyCircular.Detect(tophsvFrame)
+	w.state.UpdateCircularDummy(detecteds)
 }
 
 func detectGoalpostCircular(w *WandaVision, wg *sync.WaitGroup, hsvFrame *gocv.Mat, grayFrame *gocv.Mat) {
