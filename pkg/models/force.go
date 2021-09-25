@@ -2,6 +2,9 @@ package models
 
 import (
 	"fmt"
+	"math"
+
+	"harianugrah.com/brainfreeze/pkg/models/configuration"
 )
 
 type Force struct {
@@ -34,6 +37,9 @@ func (f *Force) AddY(_y float64) {
 
 func (f *Force) AddRot(_rot Degree) {
 	f.rot += float64(_rot)
+}
+func (f *Force) ClearRot() {
+	f.rot = 0
 }
 func (f *Force) HandlingReverse() {
 	f.handlingHaveChanged = true
@@ -89,6 +95,24 @@ func (f Force) GetKick() float64 {
 
 func (f Force) GetHandling() float64 {
 	return f.handling
+}
+
+func (f *Force) ClampMinXY(conf configuration.FreezeConfig) {
+	if f.x == 0 {
+		// Skip
+	} else if f.x < 0 {
+		f.x = math.Min(f.x, -float64(conf.Mecha.HorizontalForceRange))
+	} else if f.x > 0 {
+		f.x = math.Max(f.x, float64(conf.Mecha.HorizontalForceRange))
+	}
+
+	if f.y == 0 {
+		// Skip
+	} else if f.y < 0 {
+		f.y = math.Min(f.y, -float64(conf.Mecha.VerticalForceRange))
+	} else if f.y > 0 {
+		f.y = math.Max(f.y, float64(conf.Mecha.VerticalForceRange))
+	}
 }
 
 //#region

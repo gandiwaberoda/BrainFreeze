@@ -12,7 +12,7 @@ var (
 	// Dummy
 	// DummyUpper gocv.Scalar = gocv.NewScalar(179, 255, 255, 1)
 	// DummyLower gocv.Scalar = gocv.NewScalar(169, 88, 100, 0)
-	DummyUpper gocv.Scalar = gocv.NewScalar(179, 197, 237, 1)
+	DummyUpper gocv.Scalar = gocv.NewScalar(179, 197, 255, 1)
 	DummyLower gocv.Scalar = gocv.NewScalar(173, 0, 64, 0)
 
 	// Bola

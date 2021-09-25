@@ -124,6 +124,7 @@ func (i *GotoCommand) Tick(force *models.Force, state *state.StateAccess) {
 	i.fulfillment.Tick()
 
 	TockGoto(i.TargetX, i.TargetY, i.conf, force, state)
+	force.ClampMinXY(*i.conf)
 
 	conf := i.conf
 

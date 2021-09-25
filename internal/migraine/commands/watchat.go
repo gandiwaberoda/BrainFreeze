@@ -3,6 +3,7 @@ package commands
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 
 	"harianugrah.com/brainfreeze/internal/migraine/fulfillments"
@@ -77,6 +78,9 @@ func (i *WatchatCommand) Tick(force *models.Force, state *state.StateAccess) {
 	_, target := state.GetTransformByKey(i.Target)
 
 	TockLookat(target, *i.conf, force, state)
+	if models.Degree(math.Abs(float64(target.RobROT))) < models.Degree(i.conf.CommandParameter.LookatToleranceDeg) {
+		force.ClearRot()
+	}
 }
 
 func (i WatchatCommand) GetFulfillment() fulfillments.FulfillmentInterface {
