@@ -17,6 +17,24 @@ func (r Radian) AsDegree() Degree {
 	return Degree(r * (180.0 / math.Pi))
 }
 
+func (r Degree) AsHalfCircle() Degree {
+	y := int(r) % 360
+	if y >= 0 && y <= 180 {
+		return Degree(y)
+	} else if y > 180 && y < 360 {
+		return Degree(-180 + (y - 180))
+	} else if y <= 0 && y >= -180 {
+		return Degree(y)
+	} else if y < -180 {
+		return Degree(180 - ((-1 * y) - 180))
+	}
+
+	return Degree(r)
+}
+func (r Degree) ShiftRight() Degree {
+	return Degree(float64(r) + 1000)
+}
+
 func (d Degree) AsRadian() Radian {
 	return Radian(d * (math.Pi / 180.0))
 }
@@ -84,7 +102,7 @@ func (t *Transform) InjectWorldTransfromFromRobotTransform(myTransform Transform
 
 func (t *Transform) InjectWorldTransfromFromEncTransform(conf *configuration.FreezeConfig) {
 	startRot := conf.Robot.StartRot
-	t.WorldROT = t.EncROT + Degree(startRot)
+	t.WorldROT = (t.EncROT + Degree(startRot)).AsHalfCircle() // Biar rentangnya dari -179 sampai 180
 
 	startPos := strings.ToUpper(conf.Robot.StartPos)
 
