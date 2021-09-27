@@ -19,12 +19,13 @@ type DeltaposFuilfillment struct {
 	state          *state.StateAccess
 }
 
-// func DefaultDurationFulfillment() FulfillmentInterface {
-// 	return &DurationFuilfillment{
-// 		StartTime: time.Now(),
-// 		Milis:     1000, // 1s
-// 	}
-// }
+func DefaultDeltaposFulfillment(deltaCm models.Centimeter, curstate *state.StateAccess) FulfillmentInterface {
+	return &DeltaposFuilfillment{
+		StartTransform: curstate.GetState().MyTransform,
+		TargetDeltaCm:  deltaCm,
+		state:          curstate,
+	}
+}
 
 func ParseDeltaposFulfillment(fullcmd bfvid.CommandSPOK, conf *configuration.FreezeConfig, curstate *state.StateAccess) (bool, FulfillmentInterface, error) {
 	if !strings.EqualFold(fullcmd.Fulfilment, "DELTAPOS") {

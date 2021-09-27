@@ -39,6 +39,8 @@ func init() {
 		ParseResposCommand,
 		ParseAvoidanceCommand,
 		ParseLookWRotCommandCommand,
+		ParseMoveWYCommand,
+		ParseMoveWXCommand,
 	}
 }
 

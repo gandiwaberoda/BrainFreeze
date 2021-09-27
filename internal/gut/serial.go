@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/tarm/serial"
@@ -28,6 +29,8 @@ func CreateGutSerial(conf *configuration.FreezeConfig, curstate *state.StateAcce
 }
 
 func workerReader(gut *GutSerial) {
+	defer fmt.Println("GUT WORKER READER STOPPED")
+
 	scanner := bufio.NewScanner(gut.Port)
 	for scanner.Scan() {
 		str := scanner.Text()
@@ -35,10 +38,11 @@ func workerReader(gut *GutSerial) {
 		if len(str) < 2 {
 			// Kurang dari dua huruf, salah format
 			fmt.Println("Really bad format", str)
+			continue
 		}
 
-		if str[0] != '*' || str[len(str)-1] != '#' {
-			fmt.Println("Bad format", str)
+		if str[0] != '*' || str[len(str)-1] != '#' || strings.Count(str, ",") != 3 {
+			fmt.Println("Bad format or , is not 3", str)
 		} else {
 			for _, handler := range gut.handlers {
 				handler(str)
@@ -52,6 +56,8 @@ func workerReader(gut *GutSerial) {
 }
 
 func workerWriter(gut *GutSerial) {
+	defer fmt.Println("GUT WORKER WRITER STOPPED")
+
 	msDelay := int(time.Second) / gut.conf.Serial.CommandHz
 	for {
 		<-time.After(time.Duration(msDelay))

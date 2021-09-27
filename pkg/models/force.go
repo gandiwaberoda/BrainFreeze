@@ -115,6 +115,25 @@ func (f *Force) ClampMinXY(conf configuration.FreezeConfig) {
 	}
 }
 
+// // Buat minimum force 100, kecuali force 0, bolehin lebih dari 100
+// func (f *Force) OvercomeInertia(conf configuration.FreezeConfig) {
+// 	if f.x == 0 {
+// 		// Skip
+// 	} else if f.x < 0 {
+// 		f.x = math.Min(f.x, -float64(conf.Mecha.HorizontalForceRange))
+// 	} else if f.x > 0 {
+// 		f.x = math.Max(f.x, float64(conf.Mecha.HorizontalForceRange))
+// 	}
+
+// 	if f.y == 0 {
+// 		// Skip
+// 	} else if f.y < 0 {
+// 		f.y = math.Min(f.y, -float64(conf.Mecha.VerticalForceRange))
+// 	} else if f.y > 0 {
+// 		f.y = math.Max(f.y, float64(conf.Mecha.VerticalForceRange))
+// 	}
+// }
+
 //#region
 func (f Force) AsGutCommandString() string {
 	rotStr := fmt.Sprintf("%d", int(f.GetRot()))
