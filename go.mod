@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/hybridgroup/mjpeg v0.0.0-20140228234708-4680f319790e
 	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07
-	gocv.io/x/gocv v0.27.0
+	gocv.io/x/gocv v0.29.0
 	golang.org/x/exp v0.0.0-20210712160552-8235cf48b5f6 // indirect
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	golang.org/x/tools v0.1.4 // indirect
